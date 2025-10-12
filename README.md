@@ -30,12 +30,12 @@ Dự án **Sakae Japanese Education - Thủ Đức (Clone)** là bản mô phỏ
 
 ### 🚀 Cách chạy dự án
 
-````bash
+```bash
 git clone https://github.com/your-username/Sakae-Japanese-Education-Thu-Duc-Clone.git
 cd Sakae-Japanese-Education-Thu-Duc-Clone
 npm install
 npm run dev
-
+```
 
 ## 🇬🇧 English Version
 
@@ -43,26 +43,29 @@ npm run dev
 Built with **React**, **Vite**, and **Tailwind CSS**, it is designed to showcase a clean, elegant, and easy-to-customize UI suitable for any language center or education institute.
 
 ### 🔹 Features
-- Beautiful homepage with introduction section
-- Course list & course detail pages
-- News and events section
-- Online registration form
-- Fully responsive design for all devices
-- Smooth animations with Framer Motion
+
+-   Beautiful homepage with introduction section
+-   Course list & course detail pages
+-   News and events section
+-   Online registration form
+-   Fully responsive design for all devices
+-   Smooth animations with Framer Motion
 
 ### ⚙️ Tech Stack
-- ⚛️ React + Vite
-- 🎨 Tailwind CSS
-- ✨ Framer Motion
-- 🔄 React Router
+
+-   ⚛️ React + Vite
+-   🎨 Tailwind CSS
+-   ✨ Framer Motion
+-   🔄 React Router
 
 ### 🚀 How to Run
+
 ```bash
 git clone https://github.com/your-username/Sakae-Japanese-Education-Thu-Duc-Clone.git
 cd Sakae-Japanese-Education-Thu-Duc-Clone
 npm install
 npm run dev
-````
+```
 
 ## 🇯🇵 日本語バージョン
 
