@@ -60,14 +60,14 @@ function Navbar() {
                     </a>
                 </nav>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-4">
                     {/* Nút đăng ký */}
                     <button className="cursor-pointer bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-250 ease-in-out">
                         Đăng ký học
                     </button>
 
                     {/* Language selection */}
-                    <div className="relative text-sm">
+                    <div className="relative text-sm z-10">
                         <button
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                             className="flex items-center gap-2 cursor-pointer rounded border border-gray-300 py-2 pl-3 pr-3 bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
