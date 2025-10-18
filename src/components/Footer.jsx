@@ -4,7 +4,7 @@ import { SiZalo } from 'react-icons/si';
 function Footer() {
     return (
         <footer className="bg-gray-900 text-gray-300 pt-10 pb-4 mt-10">
-            <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8 text-center md:text-left">
                 <div>
                     <h3 className="relative pb-2 text-xl font-bold text-white mb-5 after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-[3px] after:bg-red-500 after:rounded-lg">
                         Bản đồ
@@ -46,7 +46,7 @@ function Footer() {
                     <h3 className="relative pb-2 text-xl font-bold text-white mb-5 after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-[3px] after:bg-red-500 after:rounded-lg">
                         Theo dõi chúng tôi
                     </h3>
-                    <div className="flex gap-6 text-[22px]">
+                    <div className="flex gap-6 text-[22px] justify-center md:justify-start">
                         <a
                             href="https://www.facebook.com/people/Ti%E1%BA%BFng-Nh%E1%BA%ADt-Sakae-Th%E1%BB%A7-%C4%90%E1%BB%A9c/100093308666371/"
                             className="hover:text-blue-500 transform hover:scale-130 transition-all duration-300"
@@ -69,7 +69,7 @@ function Footer() {
                 </div>
             </div>
             <div className="max-w-7xl border-t-2 border-gray-700 mx-auto mt-8 pt-4 pb-1">
-                <p className="text-center text-gray-500 mt-1 text-sm">
+                <p className="text-center text-gray-500 mt-1 md:text-sm text-[12px]">
                     © 2025 NHẬT NGỮ SAKAE THỦ ĐỨC. Được làm bởi PurePeter
                 </p>
             </div>

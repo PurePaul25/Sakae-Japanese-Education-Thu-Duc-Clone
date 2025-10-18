@@ -43,7 +43,7 @@ export default function HeroSection() {
         >
             <div className="absolute inset-0 bg-black/45 flex flex-col items-center justify-center text-center text-white px-4">
                 <h2 className="text-3xl md:text-5xl font-bold mb-4">Trung tâm Nhật Ngữ SAKAE</h2>
-                <p className="text-lg md:text-xl mb-6">
+                <p className="text-lg md:text-xl mb-6 mx-14">
                     Chất lượng đào tạo đến từ Nhật Bản. Trang thiết bị hiện đại. Môi trường học tập thoải mái. Trải
                     nghiệm văn hóa, tác phong Nhật Bản.
                 </p>
