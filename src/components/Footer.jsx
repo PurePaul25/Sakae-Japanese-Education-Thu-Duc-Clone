@@ -46,22 +46,22 @@ function Footer() {
                     <h3 className="relative pb-2 text-xl font-bold text-white mb-5 after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-[3px] after:bg-red-500 after:rounded-lg">
                         Theo dõi chúng tôi
                     </h3>
-                    <div className="flex gap-6 text-xl">
+                    <div className="flex gap-6 text-[22px]">
                         <a
                             href="https://www.facebook.com/people/Ti%E1%BA%BFng-Nh%E1%BA%ADt-Sakae-Th%E1%BB%A7-%C4%90%E1%BB%A9c/100093308666371/"
-                            className="hover:text-red-500 transform hover:scale-130 transition-all duration-300"
+                            className="hover:text-blue-500 transform hover:scale-130 transition-all duration-300"
                         >
                             <FaFacebookF />
                         </a>
                         <a
                             href="https://www.tiktok.com/@nhatngusakaethuduc?is_from_webapp=1&sender_device=pc"
-                            className="hover:text-red-500 transform hover:scale-130 transition-all duration-300"
+                            className="hover:text-pink-600 transform hover:scale-130 transition-all duration-300"
                         >
                             <FaTiktok />
                         </a>
                         <a
                             href="https://zalo.me/0945716530"
-                            className="hover:text-red-500 transform hover:scale-130 transition-all duration-300"
+                            className="hover:text-blue-500 transform hover:scale-130 transition-all duration-300"
                         >
                             <SiZalo />
                         </a>

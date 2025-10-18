@@ -23,11 +23,13 @@ function Navbar() {
             <div className="max-w-7xl mx-auto flex items-center justify-between px-4">
                 {/* Logo */}
                 <div className="flex items-center gap-2">
-                    <img src={logo} alt="Sakae Logo" className="h-18" />
+                    <a href="/">
+                        <img src={logo} alt="Sakae Logo" className="h-[70px]" />
+                    </a>
                 </div>
 
                 {/* Menu */}
-                <nav className="hidden md:flex text-gray-700 font-medium h-18">
+                <nav className="hidden md:flex text-gray-700 font-medium h-[70px]">
                     <a
                         href="/"
                         className="hover:bg-red-600 hover:text-white h-full w-30 flex items-center justify-center transition duration-250 ease-in-out"
