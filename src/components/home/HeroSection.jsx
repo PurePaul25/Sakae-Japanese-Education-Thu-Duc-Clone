@@ -39,7 +39,7 @@ export default function HeroSection() {
     return (
         <section
             style={{ backgroundImage: `url(${banners[currentBannerIndex]})` }}
-            className="relative bg-cover bg-center h-[530px] transition-all duration-500 ease-in-out group"
+            className="relative bg-cover bg-center h-[600px] transition-all duration-500 ease-in-out group"
         >
             <div className="absolute inset-0 bg-black/45 flex flex-col items-center justify-center text-center text-white px-4">
                 <h2 className="text-3xl md:text-5xl font-bold mb-4">Trung tâm Nhật Ngữ SAKAE</h2>
