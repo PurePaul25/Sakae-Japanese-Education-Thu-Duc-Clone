@@ -47,9 +47,6 @@ export default function HeroSection() {
                     Chất lượng đào tạo đến từ Nhật Bản. Trang thiết bị hiện đại. Môi trường học tập thoải mái. Trải
                     nghiệm văn hóa, tác phong Nhật Bản.
                 </p>
-                <button className="bg-red-600 px-6 py-3 rounded-lg text-white font-semibold hover:bg-red-700 transition cursor-pointer">
-                    Tìm hiểu thêm
-                </button>
             </div>
 
             {/* Nút chuyển banner Trái */}

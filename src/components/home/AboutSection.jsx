@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import aboutBanner from '../../assets/aboutBanner.jpg';
 
 export default function AboutSection() {
@@ -17,9 +18,12 @@ export default function AboutSection() {
                         chinh phục giấc mơ du học và làm việc tại Nhật Bản. Với đội ngũ giáo viên tận tâm và chương
                         trình học chuẩn Nhật, Sakae là điểm đến lý tưởng cho người học tiếng Nhật mọi trình độ.
                     </p>
-                    <button className="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition cursor-pointer transform hover:translate-y-[-4px] duration-300 ease-in-outhover:shadow-lg">
+                    <Link
+                        to="/gioi-thieu"
+                        className="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition cursor-pointer transform hover:translate-y-[-4px] duration-300 ease-in-outhover:shadow-lg"
+                    >
                         Xem thêm
-                    </button>
+                    </Link>
                 </div>
             </div>
         </section>
