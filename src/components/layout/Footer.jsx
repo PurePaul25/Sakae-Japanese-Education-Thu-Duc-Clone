@@ -3,7 +3,7 @@ import { SiZalo } from 'react-icons/si';
 
 function Footer() {
     return (
-        <footer className="bg-gray-900 text-gray-300 pt-10 pb-4 mt-10">
+        <footer className="bg-gray-900 text-gray-300 pt-10 pb-4">
             <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 sm:grid-cols-2 gap-8 text-center lg:text-left">
                 <div>
                     <h3 className="relative pb-2 text-xl font-bold text-white mb-5 after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-[3px] after:bg-red-500 after:rounded-lg">

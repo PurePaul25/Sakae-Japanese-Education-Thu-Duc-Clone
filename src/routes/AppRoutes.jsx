@@ -13,12 +13,12 @@ function AppRoutes() {
     return (
         <Suspense
             fallback={
-                <div className="text-center p-10 flex flex-col items-center justify-center space-y-4 mt-30">
+                <div className="text-center p-10 flex flex-col items-center justify-center space-y-4 my-30">
                     {/* Spinner Màu Đỏ và Thiết Kế Tinh Tế hơn */}
                     <div className="w-18 h-18 border-6 border-solid border-gray-300 border-t-transparent border-l-transparent rounded-full animate-spin"></div>
 
                     {/* Văn bản tải động và thu hút hơn */}
-                    <p className="text-2xl font-extrabold text-red-600 animate-pulse tracking-wider">ĐANG TẢI...</p>
+                    <p className="text-2xl font-semibold text-red-600 animate-pulse tracking-wider">ĐANG TẢI...</p>
                 </div>
             }
         >

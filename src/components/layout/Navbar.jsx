@@ -150,7 +150,7 @@ function Navbar() {
                     ].map((item) => (
                         <Link
                             key={item.label}
-                            to={item.href}
+                            href={item.href}
                             className="hover:bg-gray-800/20 hover:text-red-600 h-full w-full py-2 flex items-center justify-center transition-all duration-200 ease-in-out"
                         >
                             {item.label}
