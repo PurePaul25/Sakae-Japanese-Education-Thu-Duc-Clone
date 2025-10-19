@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import logo from '../../assets/logo_Sakae.webp';
 import vietnamIcon from '../../assets/vietnam.png';
 import japanIcon from '../../assets/japan.png';
@@ -42,9 +43,9 @@ function Navbar() {
             <div className="max-w-7xl mx-auto flex items-center justify-between px-4">
                 {/* Logo */}
                 <div className="flex items-center gap-2">
-                    <a href="/">
+                    <Link to="/">
                         <img src={logo} alt="Sakae Logo" className="h-[70px]" />
-                    </a>
+                    </Link>
                 </div>
 
                 {/* Menu */}
@@ -56,13 +57,13 @@ function Navbar() {
                         { label: 'Tin tức', href: '/tin-tuc' },
                         { label: 'Liên hệ', href: '/lien-he' },
                     ].map((item) => (
-                        <a
+                        <Link
                             key={item.label}
-                            href={item.href}
+                            to={item.href}
                             className="hover:bg-red-600 hover:text-white h-full px-4 flex items-center justify-center transition duration-200 ease-in-out"
                         >
                             {item.label}
-                        </a>
+                        </Link>
                     ))}
                 </nav>
 
@@ -147,13 +148,13 @@ function Navbar() {
                         { label: 'Tin tức', href: '/tin-tuc' },
                         { label: 'Liên hệ', href: '/lien-he' },
                     ].map((item) => (
-                        <a
+                        <Link
                             key={item.label}
-                            href={item.href}
+                            to={item.href}
                             className="hover:bg-gray-800/20 hover:text-red-600 h-full w-full py-2 flex items-center justify-center transition-all duration-200 ease-in-out"
                         >
                             {item.label}
-                        </a>
+                        </Link>
                     ))}
                     <div className="flex flex-col items-center w-full mt-4 pt-4 border-t-2 border-gray-800/20  md:hidden">
                         <div className="block sm:hidden mb-4">
