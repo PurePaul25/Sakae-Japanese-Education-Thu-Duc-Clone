@@ -4,6 +4,7 @@ import vietnamIcon from '../../assets/vietnam.png';
 import japanIcon from '../../assets/japan.png';
 
 import { FiMenu, FiX } from 'react-icons/fi';
+import SearchBar from './SearchBar';
 
 function Navbar() {
     const languages = [
@@ -47,7 +48,7 @@ function Navbar() {
                 </div>
 
                 {/* Menu */}
-                <nav className="hidden md:flex text-gray-700 font-medium h-[70px]">
+                <nav className="hidden lg:flex text-gray-700 font-medium h-[70px]">
                     {[
                         { label: 'Trang chủ', href: '/' },
                         { label: 'Giới thiệu', href: '/gioi-thieu' },
@@ -66,7 +67,9 @@ function Navbar() {
                 </nav>
 
                 {/* Tìm kiếm */}
-                {/* <SearchBar /> */}
+                <div className="hidden sm:block">
+                    <SearchBar />
+                </div>
 
                 {/* Nút đăng ký + ngôn ngữ + hamburger */}
                 <div className="flex items-center gap-4">
@@ -123,7 +126,7 @@ function Navbar() {
                     {/* Icon menu mobile */}
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className="md:hidden text-gray-700 hover:text-red-600 transition duration-300 cursor-pointer"
+                        className="lg:hidden text-gray-700 hover:text-red-600 transition duration-300 cursor-pointer"
                     >
                         {isMenuOpen ? <FiX size={28} /> : <FiMenu size={28} />}
                     </button>
@@ -132,7 +135,7 @@ function Navbar() {
 
             {/* Menu Mobile */}
             <div
-                className={`md:hidden transition-all duration-500 overflow-hidden ${
+                className={`lg:hidden transition-all duration-500 overflow-hidden ${
                     isMenuOpen ? 'max-h-96' : 'max-h-0'
                 }`}
             >
@@ -152,7 +155,10 @@ function Navbar() {
                             {item.label}
                         </a>
                     ))}
-                    <div className="flex flex-col items-center w-full mt-4 pt-4 border-t-2 border-gray-800/20">
+                    <div className="flex flex-col items-center w-full mt-4 pt-4 border-t-2 border-gray-800/20  md:hidden">
+                        <div className="block sm:hidden mb-4">
+                            <SearchBar />
+                        </div>
                         <button className=" bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200 cursor-pointer">
                             Đăng ký học
                         </button>

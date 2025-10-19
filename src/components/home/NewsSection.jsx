@@ -6,7 +6,7 @@ export default function NewsSection() {
                     Tin tức & Sự kiện Nổi bật
                 </h2>
 
-                <div className="grid md:grid-cols-3 gap-8">
+                <div className="grid lg:grid-cols-3 sm:grid-cols-2 gap-8">
                     {/* Tin tức 1 */}
                     <div
                         className="flex flex-col bg-white p-6 rounded-2xl shadow-lg border border-gray-100/50 

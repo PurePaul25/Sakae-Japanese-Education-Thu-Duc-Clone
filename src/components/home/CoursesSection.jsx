@@ -4,7 +4,7 @@ export default function CoursesSection() {
             <div className="max-w-7xl mx-auto px-4 text-center">
                 <h2 className="text-4xl font-extrabold text-gray-800 mb-10">Khóa học nổi bật tại Sakae</h2>
 
-                <div className="grid md:grid-cols-4 gap-6">
+                <div className="grid lg:grid-cols-4 sm:grid-cols-2 gap-6">
                     {/* Khóa học 1 */}
                     <div className="cursor-pointer flex flex-col bg-gray-100 p-4 rounded-xl shadow hover:shadow-xl transition transform hover:translate-y-[-4px] ease-in-out duration-300">
                         <img
