@@ -103,7 +103,7 @@ const Classes = () => {
             {/* Tiêu đề */}
             <section className="text-center mb-10 px-4">
                 <h1 className="text-3xl sm:text-5xl font-extrabold text-gray-800 mb-3">Các khóa học tại Sakae</h1>
-                <p className="text-gray-600 max-w-2xl mx-auto">
+                <p className="text-gray-600 max-w-5xl mx-auto sm:text-lg">
                     Trung tâm Sakae cung cấp nhiều khóa học tiếng Nhật phù hợp với từng trình độ, từ cơ bản đến nâng
                     cao, giúp học viên đạt được mục tiêu học tập nhanh nhất.
                 </p>
