@@ -41,6 +41,7 @@ function Footer() {
                     >
                         📧 tuvan@sakae.edu.vn
                     </a>
+                    <p>🕒 Thời gian làm việc: 7h - 21h (Thứ 2 - Thứ 7)</p>
                 </div>
                 <div>
                     <h3 className="relative pb-2 text-xl font-bold text-white mb-5 after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-[3px] after:bg-red-500 after:rounded-lg">

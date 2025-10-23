@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState, useRef } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import logo from '../../assets/logo_Sakae.webp';
 import vietnamIcon from '../../assets/vietnam.png';
 import japanIcon from '../../assets/japan.png';
@@ -13,10 +13,39 @@ function Navbar() {
         { code: 'ja', label: '日本語', icon: japanIcon },
     ];
 
+    const menuItems = [
+        { label: 'Trang chủ', href: '/' },
+        { label: 'Giới thiệu', href: '/gioi-thieu' },
+        { label: 'Thông tin lớp học', href: '/thong-tin-lop-hoc' },
+        { label: 'Tin tức', href: '/tin-tuc' },
+        { label: 'Liên hệ', href: '/lien-he' },
+    ];
+
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedLang, setSelectedLang] = useState(languages[0]);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    // State và Ref cho hiệu ứng gạch chân di chuyển
+    const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0, opacity: 0 });
+    const navRef = useRef(null);
+    const location = useLocation();
+
+    // Cập nhật gạch chân khi location thay đổi
+    useEffect(() => {
+        const activeItem = navRef.current?.querySelector(`a[href='${location.pathname}']`);
+
+        if (activeItem) {
+            setUnderlineStyle({
+                left: activeItem.offsetLeft,
+                width: activeItem.offsetWidth,
+                opacity: 1,
+            });
+        } else {
+            // Ẩn gạch chân nếu không có mục nào khớp (ví dụ: trang 404)
+            setUnderlineStyle({ left: 0, width: 0, opacity: 0 });
+        }
+    }, [location.pathname]);
 
     // Hiệu ứng scroll
     useEffect(() => {
@@ -49,22 +78,25 @@ function Navbar() {
                 </div>
 
                 {/* Menu */}
-                <nav className="hidden lg:flex text-gray-700 font-medium h-[70px]">
-                    {[
-                        { label: 'Trang chủ', href: '/' },
-                        { label: 'Giới thiệu', href: '/gioi-thieu' },
-                        { label: 'Thông tin lớp học', href: '/thong-tin-lop-hoc' },
-                        { label: 'Tin tức', href: '/tin-tuc' },
-                        { label: 'Liên hệ', href: '/lien-he' },
-                    ].map((item) => (
+                <nav ref={navRef} className="hidden lg:flex relative text-gray-700 font-medium h-[70px]">
+                    {menuItems.map((item) => (
                         <Link
                             key={item.label}
                             to={item.href}
-                            className="hover:bg-red-600 hover:text-white h-full px-4 flex items-center justify-center transition duration-200 ease-in-out"
+                            className={`h-full px-5 flex items-center justify-center transition-colors duration-300 ease-in-out ${
+                                location.pathname === item.href ? 'text-red-600' : 'hover:bg-gray-200'
+                            }`}
                         >
                             {item.label}
                         </Link>
                     ))}
+                    {/* Gạch chân di chuyển */}
+                    <span
+                        className="absolute bottom-0 h-1 bg-red-600 rounded-full transition-all duration-300 ease-in-out"
+                        style={{
+                            ...underlineStyle,
+                        }}
+                    />
                 </nav>
 
                 {/* Tìm kiếm */}
@@ -141,17 +173,16 @@ function Navbar() {
                 }`}
             >
                 <div className="flex flex-col items-center py-4 bg-white shadow-md border-t-2 border-gray-800/20">
-                    {[
-                        { label: 'Trang chủ', href: '/' },
-                        { label: 'Giới thiệu', href: '/gioi-thieu' },
-                        { label: 'Thông tin lớp học', href: '/thong-tin-lop-hoc' },
-                        { label: 'Tin tức', href: '/tin-tuc' },
-                        { label: 'Liên hệ', href: '/lien-he' },
-                    ].map((item) => (
+                    {menuItems.map((item) => (
                         <Link
                             key={item.label}
                             to={item.href}
-                            className="hover:bg-gray-800/20 hover:text-red-600 h-full w-full py-2 flex items-center justify-center transition-all duration-200 ease-in-out"
+                            onClick={() => setIsMenuOpen(false)} // Đóng menu khi chọn
+                            className={`h-full w-full py-3 flex items-center justify-center transition-colors duration-200 ease-in-out ${
+                                location.pathname === item.href
+                                    ? 'bg-red-100 text-red-700 font-semibold'
+                                    : 'hover:bg-gray-100'
+                            }`}
                         >
                             {item.label}
                         </Link>
