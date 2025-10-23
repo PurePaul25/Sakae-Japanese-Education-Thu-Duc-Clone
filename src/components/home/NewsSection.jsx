@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export default function NewsSection() {
     return (
         <section className="py-20 bg-gray-100">
@@ -102,7 +104,7 @@ export default function NewsSection() {
                         </div>
 
                         <a
-                            href="#"
+                            href="/tin-tuc"
                             className="mt-auto inline-flex items-center justify-start text-red-600 font-semibold hover:text-red-700 transition duration-150 group"
                         >
                             Xem chi tiết
@@ -115,13 +117,13 @@ export default function NewsSection() {
 
                 {/* Nút xem tất cả */}
                 <div className="mt-12">
-                    <a
-                        href="/tin-tuc-su-kien"
+                    <Link
+                        to="/tin-tuc"
                         className="bg-red-600 text-white font-bold py-3 px-8 rounded-full 
                            hover:bg-red-700 shadow-xl transition duration-300 transform hover:-translate-y-0.5"
                     >
                         Xem tất cả Tin tức
-                    </a>
+                    </Link>
                 </div>
             </div>
         </section>

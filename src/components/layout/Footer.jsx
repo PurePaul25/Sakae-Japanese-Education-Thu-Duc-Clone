@@ -46,7 +46,7 @@ function Footer() {
                     <h3 className="relative pb-2 text-xl font-bold text-white mb-5 after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-[3px] after:bg-red-500 after:rounded-lg">
                         Theo dõi chúng tôi
                     </h3>
-                    <div className="flex gap-6 text-[22px] justify-center md:justify-start">
+                    <div className="flex gap-6 text-[22px] justify-center lg:justify-start">
                         <a
                             href="https://www.facebook.com/people/Ti%E1%BA%BFng-Nh%E1%BA%ADt-Sakae-Th%E1%BB%A7-%C4%90%E1%BB%A9c/100093308666371/"
                             className="hover:text-white transform hover:bg-blue-600 hover:rounded-[50%] hover:p-1 hover:scale-130 transition-all duration-300"
