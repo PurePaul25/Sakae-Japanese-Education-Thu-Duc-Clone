@@ -1,5 +1,5 @@
-import { Routes, Route } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
+import { lazy, Suspense, useEffect } from 'react';
 
 // Lazy load các trang
 const HomeLazy = lazy(() => import('../pages/Home'));
@@ -8,6 +8,19 @@ const ClassesLazy = lazy(() => import('../pages/Classes'));
 const NewsLazy = lazy(() => import('../pages/News'));
 const ContactLazy = lazy(() => import('../pages/Contact'));
 const NotFoundLazy = lazy(() => import('../pages/NotFound'));
+
+// Component xử lý chuyển hướng từ sessionStorage
+const RedirectHandler = () => {
+    const navigate = useNavigate();
+    useEffect(() => {
+        const redirectPath = sessionStorage.redirect;
+        if (redirectPath) {
+            sessionStorage.removeItem('redirect');
+            navigate(redirectPath, { replace: true });
+        }
+    }, [navigate]);
+    return null;
+};
 
 function AppRoutes() {
     return (
@@ -22,6 +35,7 @@ function AppRoutes() {
                 </div>
             }
         >
+            <RedirectHandler />
             <Routes>
                 <Route path="/" element={<HomeLazy />} />
                 <Route path="/gioi-thieu" element={<AboutLazy />} />

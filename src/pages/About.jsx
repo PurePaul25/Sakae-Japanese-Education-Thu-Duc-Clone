@@ -160,7 +160,7 @@ function About() {
                     ].map((item, i) => (
                         <div
                             key={i}
-                            className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg shadow-sm border border-gray-200 transform hover:scale-105 transition duration-200"
+                            className="flex items-start space-x-4 p-4 bg-white rounded-lg shadow-sm border border-gray-200 transform hover:scale-105 transition duration-200"
                         >
                             <div className="text-3xl pt-1 text-blue-600">{item.icon}</div>
                             <div>

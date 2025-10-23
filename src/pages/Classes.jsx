@@ -99,7 +99,7 @@ const Classes = () => {
     });
 
     return (
-        <div className="pt-28 pb-16 bg-gray-100 text-gray-800">
+        <div className="pt-28 pb-10 bg-gray-100 text-gray-800">
             {/* Tiêu đề */}
             <section className="text-center mb-10 px-4">
                 <h1 className="text-3xl sm:text-5xl font-extrabold text-gray-800 mb-3">Các khóa học tại Sakae</h1>
