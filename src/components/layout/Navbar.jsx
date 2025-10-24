@@ -16,7 +16,7 @@ function Navbar() {
     const menuItems = [
         { label: 'Trang chủ', href: '/' },
         { label: 'Giới thiệu', href: '/gioi-thieu' },
-        { label: 'Thông tin lớp học', href: '/thong-tin-lop-hoc' },
+        { label: 'Khóa học', href: '/khoa-hoc' },
         { label: 'Tin tức', href: '/tin-tuc' },
         { label: 'Liên hệ', href: '/lien-he' },
     ];

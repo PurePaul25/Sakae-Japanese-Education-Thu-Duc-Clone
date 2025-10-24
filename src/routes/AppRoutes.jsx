@@ -39,7 +39,7 @@ function AppRoutes() {
             <Routes>
                 <Route path="/" element={<HomeLazy />} />
                 <Route path="/gioi-thieu" element={<AboutLazy />} />
-                <Route path="/thong-tin-lop-hoc" element={<ClassesLazy />} />
+                <Route path="/khoa-hoc" element={<ClassesLazy />} />
                 <Route path="/tin-tuc" element={<NewsLazy />} />
                 <Route path="/lien-he" element={<ContactLazy />} />
                 <Route path="*" element={<NotFoundLazy />} />
