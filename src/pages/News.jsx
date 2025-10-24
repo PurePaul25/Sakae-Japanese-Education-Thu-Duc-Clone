@@ -133,8 +133,8 @@ const News = () => {
             <section className="max-w-4xl mx-auto mb-10 px-4">
                 <div className="bg-white/90 backdrop-blur-sm p-4 rounded-xl shadow-sm border border-gray-200">
                     {/* Giao diện cho desktop (md trở lên): các nút bấm */}
-                    <div className="hidden md:flex items-center gap-3 flex-wrap justify-center">
-                        <p className="font-bold text-gray-700">Lọc theo danh mục</p>
+                    <div className="hidden md:flex items-center gap-3 flex-wrap justify-evenly">
+                        <p className="font-bold text-gray-700">Lọc theo danh mục:</p>
                         {categories.map((category) => (
                             <FilterButton
                                 key={category}

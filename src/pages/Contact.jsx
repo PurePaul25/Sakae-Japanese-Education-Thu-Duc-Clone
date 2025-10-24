@@ -62,10 +62,17 @@ const Contact = () => {
 
                         <ul className="space-y-6">
                             {[
-                                { icon: '📍', text: '11 Đường số 2, Khu phố 3 P.Linh Tây, Q.Thủ Đức' },
+                                {
+                                    icon: '📍',
+                                    text: '11 Đường số 2, Khu phố 3 P.Linh Tây, Q.Thủ Đức',
+                                    href: 'https://maps.app.goo.gl/VmtnDphVKqbr3pa6A',
+                                },
                                 { icon: '📞', text: '028 3720 1830', href: 'tel:02837201830' },
                                 { icon: '📧', text: 'tuvan@sakae.edu.vn', href: 'mailto:tuvan@sakae.edu.vn' },
-                                { icon: '🕒', text: 'Thời gian làm việc: 7h - 21h (Thứ 2 - Thứ 7)' },
+                                {
+                                    icon: '🕒',
+                                    text: 'Thời gian làm việc: Sáng : 8h30 - 20h50 (Thứ 2 - Thứ 7)',
+                                },
                             ].map((item) => (
                                 <li key={item.icon} className="flex items-start">
                                     <span className="text-lg mr-2">{item.icon}</span>
