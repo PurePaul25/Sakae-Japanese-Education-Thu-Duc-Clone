@@ -86,7 +86,7 @@ export default function CoursesSection() {
                 {/* Nút xem tất cả */}
                 <div className="mt-12">
                     <Link
-                        to="/thong-tin-lop-hoc"
+                        to="/khoa-hoc"
                         className="bg-red-600 text-white font-bold py-3 px-8 rounded-full 
                            hover:bg-red-700 shadow-xl transition duration-300 transform hover:-translate-y-0.5"
                     >
