@@ -28,7 +28,13 @@ function Footer() {
                     <h3 className="relative pb-2 text-xl font-bold text-white mb-5 after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-[3px] after:bg-red-500 after:rounded-lg">
                         Chi nhánh và Liên hệ
                     </h3>
-                    <p>📍 11 Đường số 2, Khu phố 3 P.Linh Tây, Q.Thủ Đức</p>
+                    <a
+                        href="https://maps.app.goo.gl/VmtnDphVKqbr3pa6A"
+                        className="block transition-all duration-300 hover:translate-x-2 hover:text-red-500"
+                        target="_blank"
+                    >
+                        📍 11 Đường số 2, Khu phố 3 P.Linh Tây, Q.Thủ Đức
+                    </a>
                     <a
                         href="tel:02837201830"
                         className="block transition-all duration-300 hover:translate-x-2 hover:text-red-500"
@@ -74,7 +80,7 @@ function Footer() {
             </div>
             <div className="max-w-7xl border-t-2 border-gray-700 mx-auto mt-8 pt-4 pb-1">
                 <p className="text-center text-gray-500 mt-1 md:text-sm text-[12px]">
-                    © 2025 NHẬT NGỮ SAKAE THỦ ĐỨC. Được làm bởi PurePeter
+                    © 2025 NHẬT NGỮ SAKAE THỦ ĐỨC. Được làm bởi PurePaul
                 </p>
             </div>
         </footer>
