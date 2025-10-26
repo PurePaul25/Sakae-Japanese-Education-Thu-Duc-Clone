@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import logo from '../../assets/logo_Sakae.webp';
+import logo from '../../assets/logo_Sakae.png';
 import vietnamIcon from '../../assets/vietnam.png';
 import japanIcon from '../../assets/japan.png';
 

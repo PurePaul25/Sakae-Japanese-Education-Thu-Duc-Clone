@@ -4,6 +4,7 @@ import AboutSection from '../components/home/AboutSection.jsx';
 import CoursesSection from '../components/home/CoursesSection.jsx';
 import NewsSection from '../components/home/NewsSection.jsx';
 import TestimonialsSection from '../components/home/TestimonialsSection.jsx';
+import ScrollToTopButton from '../components/layout/ScrollToTopButton.jsx';
 
 function Home() {
     return (
@@ -13,6 +14,7 @@ function Home() {
             <CoursesSection />
             <NewsSection />
             <TestimonialsSection />
+            <ScrollToTopButton />
         </main>
     );
 }

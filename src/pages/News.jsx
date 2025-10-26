@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import ScrollToTopButton from '../components/layout/ScrollToTopButton';
 
 const newsData = [
     {
@@ -180,6 +181,7 @@ const News = () => {
                     )}
                 </div>
             </section>
+            <ScrollToTopButton />
         </div>
     );
 };

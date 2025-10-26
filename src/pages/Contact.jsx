@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ScrollToTopButton from '../components/layout/ScrollToTopButton';
 
 const Contact = () => {
     const [formData, setFormData] = useState({
@@ -13,10 +14,10 @@ const Contact = () => {
     // ✅ Validate dữ liệu
     const validate = () => {
         const newErrors = {};
-        if (!formData.name.trim()) newErrors.name = 'Vui lòng nhập họ tên';
-        if (!formData.email.trim()) newErrors.email = 'Vui lòng nhập email';
-        else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email không hợp lệ';
-        if (!formData.message.trim()) newErrors.message = 'Vui lòng nhập nội dung liên hệ';
+        if (!formData.name.trim()) newErrors.name = 'Vui lòng nhập họ tên!';
+        if (!formData.email.trim()) newErrors.email = 'Vui lòng nhập email!';
+        else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email không hợp lệ!';
+        if (!formData.message.trim()) newErrors.message = 'Vui lòng nhập nội dung liên hệ!';
         return newErrors;
     };
 
@@ -29,15 +30,58 @@ const Contact = () => {
             console.log('Form submitted:', formData);
             setSubmitted(true);
             setFormData({ name: '', email: '', message: '' });
+
             setErrors({});
+            // Tự động ẩn thông báo sau 4.5 giây (4s cho animation + 0.5s cho hiệu ứng ẩn)
+            setTimeout(() => {
+                setSubmitted(false);
+            }, 4500);
         } else {
             setErrors(newErrors);
             setSubmitted(false);
         }
     };
 
+    // Hàm đóng thông báo
+    const handleClose = () => {
+        setSubmitted(false);
+    };
     return (
         <div className="pt-28 pb-14 bg-gray-100 text-gray-800">
+            {/* Toast Notification - Thông báo nổi */}
+            <div
+                className={`fixed top-24 right-5 z-50 transition-all duration-500 ease-in-out ${
+                    submitted ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
+                }`}
+            >
+                <div
+                    className="bg-green-200 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-lg relative"
+                    role="alert"
+                >
+                    <button
+                        onClick={handleClose}
+                        className="absolute top-2 right-2 text-gray-700 hover:text-gray-900 cursor-pointer"
+                    >
+                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                fillRule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clipRule="evenodd"
+                            />
+                        </svg>
+                    </button>
+                    <p className="font-bold">Gửi thành công!</p>
+                    <p>Cảm ơn bạn đã liên hệ. Chúng tôi sẽ phản hồi sớm nhất có thể.</p>
+                    <div className="absolute bottom-0 left-0 w-full h-1 bg-green-500">
+                        <div
+                            className={`bg-green-700 h-1 rounded-lg ${
+                                submitted ? 'w-0 transition-all duration-[4000ms] ease-linear' : 'w-full'
+                            }`}
+                        ></div>
+                    </div>
+                </div>
+            </div>
+
             {/* Tiêu đề trang */}
             <section className="text-center mb-12 px-4">
                 <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4">
@@ -90,16 +134,6 @@ const Contact = () => {
                     {/* Cột phải - Form liên hệ */}
                     <form onSubmit={handleSubmit} className="p-8 lg:p-12">
                         <h2 className="text-3xl font-bold text-gray-800 mb-6">Gửi tin nhắn cho chúng tôi</h2>
-
-                        {submitted && (
-                            <div
-                                className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded-md"
-                                role="alert"
-                            >
-                                <p className="font-bold">Gửi thành công!</p>
-                                <p>Cảm ơn bạn đã liên hệ. Chúng tôi sẽ phản hồi sớm nhất có thể.</p>
-                            </div>
-                        )}
 
                         <div className="space-y-4">
                             <div>
@@ -160,6 +194,7 @@ const Contact = () => {
                     </form>
                 </div>
             </section>
+            <ScrollToTopButton />
         </div>
     );
 };

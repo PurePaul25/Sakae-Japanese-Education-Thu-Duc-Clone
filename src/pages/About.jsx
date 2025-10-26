@@ -1,4 +1,5 @@
 import React from 'react';
+import ScrollToTopButton from '../components/layout/ScrollToTopButton';
 
 function About() {
     return (
@@ -171,6 +172,7 @@ function About() {
                     ))}
                 </div>
             </section>
+            <ScrollToTopButton />
         </div>
     );
 }

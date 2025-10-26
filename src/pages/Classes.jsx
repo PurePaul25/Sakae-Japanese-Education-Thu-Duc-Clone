@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ScrollToTopButton from '../components/layout/ScrollToTopButton';
 
 const classesData = [
     {
@@ -199,6 +200,7 @@ const Classes = () => {
                     </div>
                 )}
             </section>
+            <ScrollToTopButton />
         </div>
     );
 };
