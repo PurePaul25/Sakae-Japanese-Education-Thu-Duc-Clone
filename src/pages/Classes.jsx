@@ -9,16 +9,16 @@ const classesData = [
         type: 'Thường',
         image: 'https://bizweb.dktcdn.net/thumb/grande/100/059/929/products/z4597684243362-15d5a906850cb4f06c5cdfbac8ed5003-compressed.jpg?v=1691981651677',
         desc: 'Dành cho người mới bắt đầu học tiếng Nhật. Học viên được làm quen với bảng chữ cái, ngữ pháp và mẫu câu cơ bản.',
-        schedule: 'Thứ 2 - 4 - 6 | 18:00 - 20:00',
+        schedule: 'Tối Thứ 2 - 4 - 6 | 18:00 - 21:00',
     },
     {
         id: 2,
         name: 'Lớp tiếng Nhật N4',
         level: 'N4',
-        type: 'Cấp tốc',
+        type: 'Siêu tốc',
         image: 'https://bizweb.dktcdn.net/thumb/grande/100/059/929/products/330597059-254731006984670-4954584067931549400-n-compressed.jpg?v=1683690172157',
         desc: 'Nâng cao kiến thức từ N5, tập trung vào các mẫu ngữ pháp phức tạp hơn và luyện đọc hiểu sơ cấp.',
-        schedule: 'Thứ 3 - 5 - 7 | 18:00 - 20:00',
+        schedule: 'Chiều Thứ 2 - 3 - 4 - 5 - 6 | 13:30 - 16:30',
     },
     {
         id: 3,
@@ -27,7 +27,7 @@ const classesData = [
         type: 'Cấp tốc',
         image: 'https://bizweb.dktcdn.net/thumb/grande/100/059/929/products/brown-and-yellow-modern-family-collage-photo-collage-4-3-template-compressed.jpg?v=1723878715377',
         desc: 'Tập trung củng cố ngữ pháp, luyện nghe - đọc, giúp học viên tự tin giao tiếp và thi JLPT N3.',
-        schedule: 'Thứ 3 - 5 - 7 | 18:00 - 20:00',
+        schedule: 'Tối Thứ 3 - 5 - 7 | 18:00 - 21:00',
     },
     {
         id: 4,
@@ -36,16 +36,16 @@ const classesData = [
         type: 'Cấp tốc',
         image: 'https://bizweb.dktcdn.net/thumb/grande/100/059/929/products/476160146-509377935515824-4799331393811144878-n.jpg?v=1750060533540',
         desc: 'Khóa học chuyên sâu ôn thi JLPT N2, bao gồm chiến lược làm bài, luyện đề và cải thiện kỹ năng đọc - nghe nâng cao.',
-        schedule: 'Thứ 2 - 4 - 6 | 18:00 - 20:00',
+        schedule: 'Tối Thứ 2 - 4 - 6 | 18:00 - 21:00',
     },
     {
         id: 5,
         name: 'Lớp N5 Cấp tốc',
         level: 'N5',
-        type: 'Cấp tốc',
+        type: 'Siêu tốc',
         image: 'https://bizweb.dktcdn.net/thumb/grande/100/059/929/products/n5246-t4-compressed.jpg?v=1681181600203',
         desc: 'Hoàn thành chương trình N5 trong thời gian ngắn, phù hợp cho người cần chứng chỉ gấp để du học hoặc làm việc.',
-        schedule: 'Thứ 2 đến Thứ 6 | 18:00 - 20:30',
+        schedule: 'Tối Thứ 2 - 3 - 4 - 5 - 6 | 18:00 - 21:00',
     },
     {
         id: 6,
@@ -54,16 +54,16 @@ const classesData = [
         type: 'Online',
         image: 'https://bizweb.dktcdn.net/thumb/grande/100/059/929/products/8011face-compressed.jpg?v=1594181526853',
         desc: 'Học trực tuyến với giáo viên qua Zoom, linh hoạt về thời gian và địa điểm, chương trình học không đổi.',
-        schedule: 'Tối Thứ 3 - 5 - 7 | 20:00 - 22:00',
+        schedule: 'Tối Thứ 3 - 5 - 7 | 18:00 - 21:00',
     },
     {
         id: 7,
         name: 'Lớp N4 Cấp tốc',
         level: 'N4',
-        type: 'Cấp tốc',
+        type: 'Siêu tốc',
         image: 'https://bizweb.dktcdn.net/thumb/grande/100/059/929/files/315712878-5624748057608095-2146620662772535775-n.png?v=1748232115899',
         desc: 'Đẩy nhanh tiến độ học N4, tập trung luyện giải đề và các kỹ năng cần thiết để thi đạt trong thời gian ngắn.',
-        schedule: 'Thứ 2 đến Thứ 6 | 18:00 - 20:30',
+        schedule: 'Tối Thứ 2 đến Thứ 6 | 18:00 - 21:00',
     },
     {
         id: 8,
@@ -72,14 +72,50 @@ const classesData = [
         type: 'Online',
         image: 'https://bizweb.dktcdn.net/thumb/grande/100/059/929/products/n5-onl.jpg?v=1719284018860',
         desc: 'Khóa học N5 trực tuyến cho người ở xa hoặc không có thời gian đến trung tâm, đảm bảo chất lượng tương đương lớp offline.',
-        schedule: 'Tối Thứ 2 - 4 - 6 | 20:00 - 22:00',
+        schedule: 'Tối Thứ 2 - 4 - 6 | 18:00 - 21:00',
+    },
+    {
+        id: 9,
+        name: 'KHÓA HỌC TIẾNG NHẬT THIẾU NHI Ở THỦ ĐỨC',
+        level: 'Thiếu nhi',
+        type: 'Cấp tốc',
+        image: 'https://bizweb.dktcdn.net/thumb/grande/100/059/929/products/a6e5a99ac9e434ba6df5-compressed.jpg?v=1591672420887',
+        desc: 'Khóa tiếng Nhật thiếu nhi được biên soạn bởi giáo viên Nhật, thông qua giáo trình các em ngoài việc học được ngôn ngữ tiếng Nhật còn được học và tìm hiểu thêm về văn hóa Nhật Bản.',
+        schedule: 'Sáng Thứ 2 - 4 - 6 | 8:30 - 10:30',
+    },
+    {
+        id: 10,
+        name: 'LỚP TIẾNG NHẬT KÈM (CÁ NHÂN) 1 KÈM 1 CHẤT LƯỢNG CAO THỦ ĐỨC HỒ CHÍ MINH',
+        level: 'Kèm 1:1',
+        type: 'Cấp tốc',
+        image: 'https://bizweb.dktcdn.net/thumb/grande/100/059/929/products/z3545609258404-be1d0a209873c199716aac1109df7c3c.jpg?v=1662605925647',
+        desc: 'Lớp kèm cá nhân khóa học 1 (học viên) - 1 giáo viên chất lượng cao, đảm bảo chất lượng đầu ra ở Thủ Đức.',
+        schedule: 'Tối Thứ 2 - 4 - 6 | 18:00 - 21:00',
+    },
+    {
+        id: 11,
+        name: 'KHÓA LUYỆN THI JLPT N2 HỒ CHÍ MINH - CAM KẾT ĐỖ JLPT',
+        level: 'Kaiwa & Luyện thi',
+        type: 'Cấp tốc',
+        image: 'https://bizweb.dktcdn.net/thumb/grande/100/059/929/products/245957676-3743723885852060-3677878218532570884-n.jpg?v=1664356822127',
+        desc: 'Nhằm đáp ứng nhu cầu ôn luyện, tổng hợp kiến thức, những mẹo bài làm để có thể hoàn thành tốt bài thi mang lại kết quả cao cho kỳ thi JLPT, Sakae đã mở lớp chuyên luyện đề JLPT trong 2 tháng,',
+        schedule: 'Tối Thứ 3 - 5 - 7 | 18:00 - 21:00',
+    },
+    {
+        id: 12,
+        name: 'KHÓA TIẾNG NHẬT KAIWA N3 TẠI THỦ ĐỨC- HỒ CHÍ MINH',
+        level: 'Kaiwa & Luyện thi',
+        type: 'Online',
+        image: 'https://bizweb.dktcdn.net/thumb/grande/100/059/929/products/298508836-5336036393145931-1655278263282521905-n.jpg?v=1747710837137',
+        desc: 'Khóa GIAO TIẾP N3 ONLINE dành cho các bạn muốn cải thiện và nâng cao kỹ năng giao tiếp, nói chuyện tiếng Nhật một cách lưu loát nhất, ngữ điệu tự nhiên nhất.',
+        schedule: 'Tối Thứ 5 - 7 | 19:30 - 21:00',
     },
 ];
 
 const FilterButton = ({ label, active, onClick }) => (
     <button
         onClick={onClick}
-        className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
+        className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 whitespace-nowrap ${
             active
                 ? 'bg-red-600 text-white shadow-md'
                 : 'bg-white text-gray-700 hover:bg-red-100 hover:text-red-700 cursor-pointer'
@@ -112,25 +148,43 @@ const Classes = () => {
 
             {/* Bộ lọc */}
             <section className="max-w-4xl mx-auto mb-12 px-4">
-                <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl shadow-sm border border-gray-200 space-y-4">
-                    {/* Lọc theo cấp độ */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-gray-700 w-24">Cấp độ:</span>
-                        <div className="flex gap-2 flex-wrap">
-                            {['Tất cả', 'N5', 'N4', 'N3', 'N2'].map((level) => (
-                                <FilterButton
-                                    key={level}
-                                    label={level}
-                                    active={levelFilter === level}
-                                    onClick={() => setLevelFilter(level)}
-                                />
-                            ))}
+                <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl shadow-sm border border-gray-200 space-y-3">
+                    {/* Lọc theo khóa tiếng Nhật */}
+                    <div className="md:flex md:items-center md:gap-3">
+                        <span className="font-bold text-gray-700 w-24 flex-shrink-0 block mb-2 md:mb-4">Khóa học:</span>
+                        {/* Container cuộn cho các nút */}
+                        <div
+                            className="flex gap-2 overflow-x-auto md:flex-wrap pb-4 
+                                       [&::-webkit-scrollbar]:h-2
+                                       [&::-webkit-scrollbar-track]:bg-gray-100
+                                       [&::-webkit-scrollbar-thumb]:bg-red-600 [&::-webkit-scrollbar-thumb]:rounded-full
+                                       [&::-webkit-scrollbar-thumb:hover]:bg-red-700"
+                        >
+                            {['Tất cả', 'N5', 'N4', 'N3', 'N2', 'Thiếu nhi', 'Kèm 1:1', 'Kaiwa & Luyện thi'].map(
+                                (level) => (
+                                    <FilterButton
+                                        key={level}
+                                        label={level}
+                                        active={levelFilter === level}
+                                        onClick={() => setLevelFilter(level)}
+                                    />
+                                ),
+                            )}
                         </div>
                     </div>
                     {/* Lọc theo loại hình */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-gray-700 w-24">Loại hình:</span>
-                        <div className="flex gap-2 flex-wrap">
+                    <div className="md:flex md:items-center md:gap-3">
+                        <span className="font-bold text-gray-700 w-24 flex-shrink-0 block mb-2 md:mb-4">
+                            Loại hình:
+                        </span>
+                        {/* Container cuộn cho các nút */}
+                        <div
+                            className="flex gap-2 overflow-x-auto md:flex-wrap pb-4 
+                                       [&::-webkit-scrollbar]:h-2
+                                       [&::-webkit-scrollbar-track]:bg-gray-100
+                                       [&::-webkit-scrollbar-thumb]:bg-red-600 [&::-webkit-scrollbar-thumb]:rounded-full
+                                       [&::-webkit-scrollbar-thumb:hover]:bg-red-700"
+                        >
                             {['Tất cả', 'Cấp tốc', 'Siêu tốc', 'Online'].map((type) => (
                                 <FilterButton
                                     key={type}

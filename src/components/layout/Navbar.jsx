@@ -172,7 +172,7 @@ function Navbar() {
                     isMenuOpen ? 'max-h-96' : 'max-h-0'
                 }`}
             >
-                <div className="flex flex-col items-center py-4 bg-white shadow-md border-t-2 border-gray-800/20">
+                <div className="flex flex-col items-center pb-4 bg-white shadow-md border-t-2 border-gray-800/20">
                     {menuItems.map((item) => (
                         <Link
                             key={item.label}
@@ -187,7 +187,7 @@ function Navbar() {
                             {item.label}
                         </Link>
                     ))}
-                    <div className="flex flex-col items-center w-full mt-4 pt-4 border-t-2 border-gray-800/20  md:hidden">
+                    <div className="flex flex-col items-center w-full pt-4 border-t-2 border-gray-800/20  md:hidden">
                         <div className="block sm:hidden mb-4">
                             <SearchBar />
                         </div>

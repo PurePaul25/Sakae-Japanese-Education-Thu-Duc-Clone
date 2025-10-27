@@ -50,7 +50,7 @@ const Contact = () => {
         <div className="pt-28 pb-14 bg-gray-100 text-gray-800">
             {/* Toast Notification - Thông báo nổi */}
             <div
-                className={`fixed top-24 right-5 z-50 transition-all duration-500 ease-in-out ${
+                className={`fixed top-24 sm:right-5 right-0 z-50 transition-all duration-500 ease-in-out ${
                     submitted ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
                 }`}
             >
