@@ -6,7 +6,7 @@ const classesData = [
         id: 1,
         name: 'Lớp tiếng Nhật sơ cấp (N5)',
         level: 'N5',
-        type: 'Thường',
+        type: 'Cấp tốc',
         image: 'https://bizweb.dktcdn.net/thumb/grande/100/059/929/products/z4597684243362-15d5a906850cb4f06c5cdfbac8ed5003-compressed.jpg?v=1691981651677',
         desc: 'Dành cho người mới bắt đầu học tiếng Nhật. Học viên được làm quen với bảng chữ cái, ngữ pháp và mẫu câu cơ bản.',
         schedule: 'Tối Thứ 2 - 4 - 6 | 18:00 - 21:00',
@@ -63,7 +63,7 @@ const classesData = [
         type: 'Siêu tốc',
         image: 'https://bizweb.dktcdn.net/thumb/grande/100/059/929/files/315712878-5624748057608095-2146620662772535775-n.png?v=1748232115899',
         desc: 'Đẩy nhanh tiến độ học N4, tập trung luyện giải đề và các kỹ năng cần thiết để thi đạt trong thời gian ngắn.',
-        schedule: 'Tối Thứ 2 đến Thứ 6 | 18:00 - 21:00',
+        schedule: 'Tối Thứ 2 - 3 - 4 - 5 - 6 | 18:00 - 21:00',
     },
     {
         id: 8,
