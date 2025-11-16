@@ -2,6 +2,8 @@ import { FaFacebookF, FaTiktok } from 'react-icons/fa';
 import { SiZalo } from 'react-icons/si';
 
 function Footer() {
+    const yearCurrent = new Date().getFullYear();
+
     return (
         <footer className="bg-gray-900 text-gray-300 pt-10 pb-4">
             <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 sm:grid-cols-2 gap-8 text-center lg:text-left">
@@ -80,7 +82,7 @@ function Footer() {
             </div>
             <div className="max-w-7xl border-t-2 border-gray-700 mx-auto mt-8 pt-4 pb-1">
                 <p className="text-center text-gray-500 mt-1 md:text-sm text-[12px]">
-                    © 2025 NHẬT NGỮ SAKAE THỦ ĐỨC. Được làm bởi PurePaul
+                    © {yearCurrent} NHẬT NGỮ SAKAE THỦ ĐỨC. Được làm bởi PurePaul
                 </p>
             </div>
         </footer>
