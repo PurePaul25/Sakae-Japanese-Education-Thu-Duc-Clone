@@ -81,8 +81,8 @@ function Footer() {
                 </div>
             </div>
             <div className="max-w-7xl border-t-2 border-gray-700 mx-auto mt-8 pt-4 pb-1">
-                <p className="text-center text-gray-500 mt-1 md:text-sm text-[12px]">
-                    © {yearCurrent} NHẬT NGỮ SAKAE THỦ ĐỨC. Được làm bởi PurePaul
+                <p className="text-center text-gray-400 mt-1 md:text-sm text-[12px]">
+                    © 2015 - {yearCurrent} NHẬT NGỮ SAKAE THỦ ĐỨC. Được làm bởi PurePaul
                 </p>
             </div>
         </footer>
