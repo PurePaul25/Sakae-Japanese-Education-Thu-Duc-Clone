@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
 
 const classesData = [
@@ -199,7 +200,7 @@ const Classes = () => {
             </section>
 
             {/* Danh sách các lớp học */}
-            <section className="max-w-6xl mx-auto grid sm:grid-cols-2 lg:grid-cols-3 gap-8 py-6 px-4 sm:px-6 bg-white rounded-xl shadow-md">
+            <section className="max-w-[1200px] mx-auto grid sm:grid-cols-2 lg:grid-cols-3 gap-8 py-6 px-4 sm:px-6 bg-white rounded-xl shadow-md">
                 {filteredClasses.length > 0 ? (
                     filteredClasses.map((cls) => (
                         <div
@@ -233,12 +234,18 @@ const Classes = () => {
                                 </a>
                                 <p className="text-gray-600 mb-4 text-sm flex-grow">{cls.desc}</p>
                                 <div className="flex gap-2 justify-between mb-4 mt-1">
-                                    <button className="w-38 text-red-600 border text-sm py-2 rounded transition duration-300 transform hover:-translate-y-1.5 cursor-pointer">
+                                    <Link
+                                        to={`/chi-tiet-khoa-hoc/${cls.id}`}
+                                        className="w-38 text-red-600 border text-sm py-2 rounded transition hover:bg-gray-100 duration-300 cursor-pointer flex items-center justify-center"
+                                    >
                                         Xem thêm
-                                    </button>
-                                    <button className="w-38 bg-red-600 text-white text-sm py-2 rounded hover:bg-red-700 transition duration-300 transform hover:-translate-y-1.5 cursor-pointer">
+                                    </Link>
+                                    <Link
+                                        to="/lien-he"
+                                        className="w-38 bg-red-600 text-white text-sm py-2 rounded hover:bg-red-700 transition duration-300 cursor-pointer flex items-center justify-center"
+                                    >
                                         Đăng ký
-                                    </button>
+                                    </Link>
                                 </div>
                                 <div className="mt-auto pt-3 border-t border-gray-200">
                                     <p className="text-sm text-gray-500 font-medium">

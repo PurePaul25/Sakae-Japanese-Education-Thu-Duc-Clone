@@ -4,8 +4,23 @@ import logo from '../../assets/logo_Sakae.png';
 import vietnamIcon from '../../assets/vietnam.png';
 import japanIcon from '../../assets/japan.png';
 
-import { FiMenu, FiX } from 'react-icons/fi';
+import { FiMenu, FiX, FiChevronDown } from 'react-icons/fi';
 import SearchBar from './SearchBar';
+
+const menuItems = [
+    { label: 'Trang chủ', href: '/' },
+    { label: 'Giới thiệu', href: '/gioi-thieu' },
+    { label: 'Khóa học', href: '/khoa-hoc' },
+    { label: 'Tin tức', href: '/tin-tuc' },
+    {
+        label: 'Khác',
+        children: [
+            { label: 'Tất cả sản phẩm', href: '/thu-vien-anh' },
+            { label: 'Lịch khai giảng', href: '/lich-khai-giang' },
+            { label: 'Liên hệ', href: '/lien-he' },
+        ],
+    },
+];
 
 function Navbar() {
     const languages = [
@@ -13,29 +28,29 @@ function Navbar() {
         { code: 'ja', label: '日本語', icon: japanIcon },
     ];
 
-    const menuItems = [
-        { label: 'Trang chủ', href: '/' },
-        { label: 'Giới thiệu', href: '/gioi-thieu' },
-        { label: 'Khóa học', href: '/khoa-hoc' },
-        { label: 'Tin tức', href: '/tin-tuc' },
-        { label: 'Liên hệ', href: '/lien-he' },
-    ];
-
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedLang, setSelectedLang] = useState(languages[0]);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [mobileSubmenuOpen, setMobileSubmenuOpen] = useState(false);
 
     // State và Ref cho hiệu ứng gạch chân di chuyển
     const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0, opacity: 0 });
-    const navRef = useRef(null);
+    const navItemsRef = useRef([]);
     const location = useLocation();
 
     // Cập nhật gạch chân khi location thay đổi
     useEffect(() => {
-        const activeItem = navRef.current?.querySelector(`a[href='${location.pathname}']`);
+        const index = menuItems.findIndex((item) => {
+            if (item.href === location.pathname) return true;
+            if (item.children) {
+                return item.children.some((child) => child.href === location.pathname);
+            }
+            return false;
+        });
 
-        if (activeItem) {
+        if (index !== -1 && navItemsRef.current[index]) {
+            const activeItem = navItemsRef.current[index];
             setUnderlineStyle({
                 left: activeItem.offsetLeft,
                 width: activeItem.offsetWidth,
@@ -78,18 +93,50 @@ function Navbar() {
                 </div>
 
                 {/* Menu */}
-                <nav ref={navRef} className="hidden lg:flex relative text-gray-700 font-medium h-[70px]">
-                    {menuItems.map((item) => (
-                        <Link
-                            key={item.label}
-                            to={item.href}
-                            className={`h-full px-5 flex items-center justify-center transition-colors duration-300 ease-in-out ${
-                                location.pathname === item.href ? 'text-red-600' : 'hover:bg-gray-200'
-                            }`}
-                        >
-                            {item.label}
-                        </Link>
-                    ))}
+                <nav className="hidden lg:flex relative text-gray-700 font-medium h-[70px]">
+                    {menuItems.map((item, index) =>
+                        item.children ? (
+                            <div
+                                key={item.label}
+                                ref={(el) => (navItemsRef.current[index] = el)}
+                                className="relative h-full flex items-center group cursor-pointer px-5"
+                            >
+                                <span
+                                    className={`flex items-center gap-1 transition-colors duration-300 ease-in-out group-hover:text-red-600 ${
+                                        item.children.some((child) => child.href === location.pathname)
+                                            ? 'text-red-600'
+                                            : ''
+                                    }`}
+                                >
+                                    {item.label}
+                                    <FiChevronDown className="transition-transform duration-300 group-hover:rotate-180" />
+                                </span>
+                                {/* Dropdown */}
+                                <div className="absolute top-full left-0 w-48 bg-white shadow-lg rounded-md overflow-hidden transition-all duration-300 opacity-0 invisible group-hover:opacity-100 group-hover:visible transform origin-top scale-75 -translate-y-2 group-hover:translate-y-0 group-hover:scale-100 border-1 border-gray-200">
+                                    {item.children.map((child) => (
+                                        <Link
+                                            key={child.label}
+                                            to={child.href}
+                                            className="block px-4 py-3 hover:bg-red-50 hover:text-red-700 hover:font-semibold transition-all text-gray-700 text-sm"
+                                        >
+                                            {child.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <Link
+                                key={item.label}
+                                to={item.href}
+                                ref={(el) => (navItemsRef.current[index] = el)}
+                                className={`h-full px-5 flex items-center justify-center transition-colors duration-300 ease-in-out ${
+                                    location.pathname === item.href ? 'text-red-600' : 'hover:bg-gray-200'
+                                }`}
+                            >
+                                {item.label}
+                            </Link>
+                        ),
+                    )}
                     {/* Gạch chân di chuyển */}
                     <span
                         className="absolute bottom-0 h-1 bg-red-600 rounded-full transition-all duration-300 ease-in-out"
@@ -173,20 +220,58 @@ function Navbar() {
                 }`}
             >
                 <div className="flex flex-col items-center pb-4 bg-white shadow-md border-t-2 border-gray-800/20">
-                    {menuItems.map((item) => (
-                        <Link
-                            key={item.label}
-                            to={item.href}
-                            onClick={() => setIsMenuOpen(false)} // Đóng menu khi chọn
-                            className={`h-full w-full py-3 flex items-center justify-center transition-colors duration-200 ease-in-out ${
-                                location.pathname === item.href
-                                    ? 'bg-red-100 text-red-700 font-semibold'
-                                    : 'hover:bg-gray-100'
-                            }`}
-                        >
-                            {item.label}
-                        </Link>
-                    ))}
+                    {menuItems.map((item) =>
+                        item.children ? (
+                            <div key={item.label} className="w-full flex flex-col items-center">
+                                <button
+                                    onClick={() => setMobileSubmenuOpen(!mobileSubmenuOpen)}
+                                    className={`w-full py-3 flex items-center justify-center gap-2 transition-colors duration-200 ease-in-out ${
+                                        item.children.some((c) => c.href === location.pathname)
+                                            ? 'bg-red-50 text-red-700 font-semibold'
+                                            : 'hover:bg-gray-100'
+                                    }`}
+                                >
+                                    {item.label}
+                                    <FiChevronDown
+                                        className={`transition-transform duration-300 ${
+                                            mobileSubmenuOpen ? 'rotate-180' : ''
+                                        }`}
+                                    />
+                                </button>
+                                <div
+                                    className={`w-full bg-gray-50 overflow-hidden transition-all duration-300 ease-in-out ${
+                                        mobileSubmenuOpen ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'
+                                    }`}
+                                >
+                                    {item.children.map((child) => (
+                                        <Link
+                                            key={child.label}
+                                            to={child.href}
+                                            onClick={() => setIsMenuOpen(false)}
+                                            className={`block w-full py-2 text-center text-sm text-gray-600 hover:text-red-600 ${
+                                                location.pathname === child.href ? 'text-red-600 font-medium' : ''
+                                            }`}
+                                        >
+                                            {child.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <Link
+                                key={item.label}
+                                to={item.href}
+                                onClick={() => setIsMenuOpen(false)} // Đóng menu khi chọn
+                                className={`h-full w-full py-3 flex items-center justify-center transition-colors duration-200 ease-in-out ${
+                                    location.pathname === item.href
+                                        ? 'bg-red-100 text-red-700 font-semibold'
+                                        : 'hover:bg-gray-100'
+                                }`}
+                            >
+                                {item.label}
+                            </Link>
+                        ),
+                    )}
                     <div className="flex flex-col items-center w-full pt-4 border-t-2 border-gray-800/20  md:hidden">
                         <div className="block sm:hidden mb-4">
                             <SearchBar />

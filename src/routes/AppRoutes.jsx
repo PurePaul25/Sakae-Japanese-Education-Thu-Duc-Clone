@@ -7,6 +7,9 @@ const AboutLazy = lazy(() => import('../pages/About'));
 const ClassesLazy = lazy(() => import('../pages/Classes'));
 const NewsLazy = lazy(() => import('../pages/News'));
 const ContactLazy = lazy(() => import('../pages/Contact'));
+const OpeningScheduleLazy = lazy(() => import('../pages/OpeningSchedule'));
+const CourseDetailLazy = lazy(() => import('../pages/CourseDetail'));
+const LibrarysLazy = lazy(() => import('../pages/Librarys'));
 const NotFoundLazy = lazy(() => import('../pages/NotFound'));
 
 // Component xử lý chuyển hướng từ sessionStorage
@@ -42,6 +45,9 @@ function AppRoutes() {
                 <Route path="/khoa-hoc" element={<ClassesLazy />} />
                 <Route path="/tin-tuc" element={<NewsLazy />} />
                 <Route path="/lien-he" element={<ContactLazy />} />
+                <Route path="/lich-khai-giang" element={<OpeningScheduleLazy />} />
+                <Route path="/chi-tiet-khoa-hoc/:id" element={<CourseDetailLazy />} />
+                <Route path="/thu-vien-anh" element={<LibrarysLazy />} />
                 <Route path="*" element={<NotFoundLazy />} />
             </Routes>
         </Suspense>
