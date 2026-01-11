@@ -15,7 +15,7 @@ const menuItems = [
     {
         label: 'Khác',
         children: [
-            { label: 'Tất cả sản phẩm', href: '/thu-vien-anh' },
+            { label: 'Thư viện ảnh', href: '/thu-vien-anh' },
             { label: 'Lịch khai giảng', href: '/lich-khai-giang' },
             { label: 'Liên hệ', href: '/lien-he' },
         ],
@@ -216,7 +216,7 @@ function Navbar() {
             {/* Menu Mobile */}
             <div
                 className={`lg:hidden transition-all duration-500 overflow-hidden ${
-                    isMenuOpen ? 'max-h-96' : 'max-h-0'
+                    isMenuOpen ? 'max-h-[100vh]' : 'max-h-0'
                 }`}
             >
                 <div className="flex flex-col items-center pb-4 bg-white shadow-md border-t-2 border-gray-800/20">
@@ -248,7 +248,7 @@ function Navbar() {
                                             key={child.label}
                                             to={child.href}
                                             onClick={() => setIsMenuOpen(false)}
-                                            className={`block w-full py-2 text-center text-sm text-gray-600 hover:text-red-600 ${
+                                            className={`block w-full py-3 text-center text-sm text-gray-600 hover:text-red-600 ${
                                                 location.pathname === child.href ? 'text-red-600 font-medium' : ''
                                             }`}
                                         >
