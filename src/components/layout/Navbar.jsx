@@ -15,8 +15,9 @@ const menuItems = [
     {
         label: 'Khác',
         children: [
-            { label: 'Thư viện ảnh', href: '/thu-vien-anh' },
+            { label: 'Thư viện ảnh', href: '/bo-suu-tap' },
             { label: 'Lịch khai giảng', href: '/lich-khai-giang' },
+            { label: 'Thi thử JLPT', href: '/thi-thu-JLPT' },
             { label: 'Liên hệ', href: '/lien-he' },
         ],
     },
@@ -80,7 +81,7 @@ function Navbar() {
 
     return (
         <header
-            className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+            className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b-1 border-gray-200 ${
                 isScrolled ? 'bg-white shadow-md' : 'bg-white/70'
             }`}
         >
@@ -154,9 +155,12 @@ function Navbar() {
                 {/* Nút đăng ký + ngôn ngữ + hamburger */}
                 <div className="flex items-center gap-4">
                     {/* Nút đăng ký */}
-                    <button className="hidden md:block cursor-pointer bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-250 ease-in-out">
+                    <Link
+                        to="/khoa-hoc"
+                        className="hidden md:block cursor-pointer bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-250 ease-in-out"
+                    >
                         Đăng ký học
-                    </button>
+                    </Link>
 
                     {/* Chọn ngôn ngữ */}
                     <div className="relative text-sm z-10">
@@ -276,9 +280,13 @@ function Navbar() {
                         <div className="block sm:hidden mb-4">
                             <SearchBar />
                         </div>
-                        <button className=" bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200 cursor-pointer">
+                        <Link
+                            to="/khoa-hoc"
+                            className=" bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200 cursor-pointer"
+                            onClick={() => setIsMenuOpen(false)}
+                        >
                             Đăng ký học
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </div>

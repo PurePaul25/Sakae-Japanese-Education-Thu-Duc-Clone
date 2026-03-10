@@ -16,7 +16,14 @@ export default function TestimonialsSection() {
                     <div className="hidden lg:block absolute inset-y-0 left-0 w-12 z-10 pointer-events-none bg-gradient-to-r from-gray-50 to-transparent"></div>
                     <div className="hidden lg:block absolute inset-y-0 right-0 w-12 z-10 pointer-events-none bg-gradient-to-l from-gray-50 to-transparent"></div>
 
-                    <div className="mt-4 px-6 flex overflow-x-auto space-x-6 md:space-x-10 lg:space-x-8 snap-x snap-mandatory pb-8 custom-testimonial-scrollbar">
+                    <div
+                        className="mt-4 px-6 flex overflow-x-auto space-x-6 md:space-x-10 lg:space-x-8 snap-x snap-mandatory pb-8 cursor-grab
+                                   [&::-webkit-scrollbar]:h-2.5
+                                   [&::-webkit-scrollbar-track]:bg-gray-200
+                                   [&::-webkit-scrollbar-thumb]:bg-red-500
+                                   [&::-webkit-scrollbar-thumb]:rounded-full
+                                   [&::-webkit-scrollbar-thumb:hover]:bg-red-500"
+                    >
                         {/* Học viên 1 */}
                         <div className="snap-center flex-shrink-0 w-11/12 sm:w-2/3 md:w-[350px] lg:w-[380px] bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transition duration-300 border border-red-200 flex flex-col min-h-[320px]">
                             <svg

@@ -78,7 +78,7 @@ const galleryData = [
 
 const categories = ['Tất cả', 'Lễ hội', 'Lớp học', 'Giao lưu', 'Thiếu nhi', 'Sự kiện'];
 
-const Products = () => {
+const Gallerys = () => {
     const [activeCategory, setActiveCategory] = useState('Tất cả');
     const [sortOrder, setSortOrder] = useState('newest');
     const [selectedImage, setSelectedImage] = useState(null);
@@ -578,4 +578,4 @@ const Products = () => {
     );
 };
 
-export default Products;
+export default Gallerys;

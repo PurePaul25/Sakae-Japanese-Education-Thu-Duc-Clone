@@ -1,11 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { schedules } from '../dataTest/schedules';
+import { schedules } from '../../dataTest/schedules';
 import { FaCalendarAlt, FaClock, FaUserTie, FaMoneyBillWave, FaBookOpen, FaCheckCircle } from 'react-icons/fa';
+import RegistrationModal from '../../components/ui/RegistrationModal';
 
 const CourseDetail = () => {
     const { id } = useParams();
     const course = schedules.find((item) => item.id === parseInt(id));
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleRegisterClick = () => {
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
 
     if (!course) {
         return (
@@ -62,8 +72,8 @@ const CourseDetail = () => {
                                         course.status === 'Sắp khai giảng'
                                             ? 'bg-green-100 text-green-700'
                                             : course.status === 'Đang nhận học viên'
-                                            ? 'bg-blue-100 text-blue-700'
-                                            : 'bg-gray-200 text-gray-600'
+                                              ? 'bg-blue-100 text-blue-700'
+                                              : 'bg-gray-200 text-gray-600'
                                     }`}
                                 >
                                     {course.status}
@@ -138,12 +148,12 @@ const CourseDetail = () => {
                                 </div>
                             </div>
 
-                            <Link
-                                to="/lien-he"
-                                className="block w-full py-3 bg-red-600 text-white text-center font-bold rounded-xl hover:bg-red-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                            <button
+                                onClick={handleRegisterClick}
+                                className="block w-full py-3 cursor-pointer bg-red-600 text-white text-center font-bold rounded-xl hover:bg-red-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                             >
                                 Đăng ký ngay
-                            </Link>
+                            </button>
                             <p className="text-xs text-center text-gray-500 mt-4">
                                 * Vui lòng liên hệ để được tư vấn chi tiết về ưu đãi.
                             </p>
@@ -151,6 +161,14 @@ const CourseDetail = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Registration Modal */}
+            <RegistrationModal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                courseName={course.course}
+                courseId={course.id}
+            />
         </div>
     );
 };

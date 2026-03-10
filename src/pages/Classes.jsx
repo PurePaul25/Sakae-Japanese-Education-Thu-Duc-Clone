@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
+import RegistrationModal from '../components/ui/RegistrationModal';
 
 const classesData = [
     {
@@ -129,6 +130,18 @@ const FilterButton = ({ label, active, onClick }) => (
 const Classes = () => {
     const [levelFilter, setLevelFilter] = useState('Tất cả');
     const [typeFilter, setTypeFilter] = useState('Tất cả');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedClass, setSelectedClass] = useState(null);
+
+    const handleRegisterClick = (cls) => {
+        setSelectedClass(cls);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedClass(null);
+    };
 
     const filteredClasses = classesData.filter((cls) => {
         const levelMatch = levelFilter === 'Tất cả' || cls.level === levelFilter;
@@ -240,12 +253,12 @@ const Classes = () => {
                                     >
                                         Xem thêm
                                     </Link>
-                                    <Link
-                                        to="/lien-he"
-                                        className="w-38 bg-red-600 text-white text-sm py-2 rounded hover:bg-red-700 transition duration-300 cursor-pointer flex items-center justify-center"
+                                    <button
+                                        onClick={() => handleRegisterClick(cls)}
+                                        className="w-38 bg-red-600 text-white text-sm py-2 rounded hover:bg-red-700 transition duration-300 cursor-pointer flex items-center justify-center font-semibold"
                                     >
                                         Đăng ký
-                                    </Link>
+                                    </button>
                                 </div>
                                 <div className="mt-auto pt-3 border-t border-gray-200">
                                     <p className="text-sm text-gray-500 font-medium">
@@ -261,6 +274,15 @@ const Classes = () => {
                     </div>
                 )}
             </section>
+
+            {/* Registration Modal */}
+            <RegistrationModal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                courseName={selectedClass?.name || ''}
+                courseId={selectedClass?.id || ''}
+            />
+
             <ScrollToTopButton />
         </div>
     );
