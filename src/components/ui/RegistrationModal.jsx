@@ -81,41 +81,49 @@ const RegistrationModal = ({ isOpen, onClose, courseName, courseId }) => {
         }, 500);
     };
 
-    // Quản lý body overflow
+    const [show, setShow] = useState(false);
+
+    // Quản lý body overflow và hiệu ứng show/hide
     useEffect(() => {
-        if (isOpen && !isClosing) {
+        if (isOpen) {
             document.body.style.overflow = 'hidden';
+            // Trigger animation sau khi mount
+            const timer = setTimeout(() => setShow(true), 10);
+            return () => clearTimeout(timer);
         } else {
+            setShow(false);
             document.body.style.overflow = 'auto';
         }
 
         return () => {
             document.body.style.overflow = 'auto';
         };
-    }, [isOpen, isClosing]);
+    }, [isOpen]);
 
-    // Luôn render modal để transition animation hoạt động
+    // Render logic: Giữ modal trong DOM khi đang đóng để thấy transition
     if (!isOpen && !isClosing) return null;
 
     return (
         <div
-            className={`fixed inset-0 z-50 flex items-center justify-center pointer-events-auto transition-all duration-500 ${
-                isOpen && !isClosing ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+            className={`fixed inset-0 z-[60] flex items-center justify-center transition-opacity duration-500 ${
+                show && !isClosing ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
             }`}
         >
-            {/* Backdrop - hiệu ứng tối dần/sáng dần */}
+            {/* Backdrop - hiệu ứng tối dần có transition */}
             <div
-                className={`fixed inset-0 bg-black transition-opacity duration-500 ease-in-out ${
-                    isOpen && !isClosing ? 'opacity-50 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                className={`fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-500 ease-in-out ${
+                    show && !isClosing ? 'opacity-100' : 'opacity-0'
                 }`}
                 onClick={handleClose}
             />
 
-            {/* Modal Container - chỉ modal được scroll, trang không ảnh hưởng */}
+            {/* Modal Container */}
             <div
-                className={`relative z-50 bg-white rounded-2xl shadow-2xl max-w-md md:max-w-xl w-full mx-4 max-h-[85vh] transform transition-all duration-500 ease-out overflow-hidden pointer-events-auto flex flex-col ${
-                    isOpen && !isClosing ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 -translate-y-20'
-                } `}
+                className={`relative z-[70] bg-white rounded-2xl shadow-2xl max-w-md md:max-w-xl w-full mx-4 max-h-[90vh] transform transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden pointer-events-auto flex flex-col ${
+                    show && !isClosing 
+                        ? 'opacity-100 scale-100 translate-y-0' 
+                        : 'opacity-0 scale-95 translate-y-8'
+                }`}
             >
                 {/* Header with Gradient - cố định */}
                 <div className="flex-shrink-0 bg-gradient-to-r from-red-600 via-red-500 to-orange-600 text-white p-6 flex justify-between items-center">
@@ -147,7 +155,7 @@ const RegistrationModal = ({ isOpen, onClose, courseName, courseId }) => {
                         </div>
                     ) : (
                         /* Form */
-                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
                             {/* Full Name */}
                             <div className="space-y-2">
                                 <label className="block text-gray-700 font-semibold text-sm">
@@ -159,7 +167,7 @@ const RegistrationModal = ({ isOpen, onClose, courseName, courseId }) => {
                                     value={formData.fullName}
                                     onChange={handleChange}
                                     autoComplete="on"
-                                    className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-all duration-200 text-sm focus:shadow-lg ${
+                                    className={`w-full px-3 py-2 rounded-lg border-2 focus:outline-none transition-all duration-200 focus:shadow-lg ${
                                         errors.fullName
                                             ? 'border-red-500 focus:border-red-600 bg-red-50'
                                             : 'border-gray-300 focus:border-red-600'
@@ -182,7 +190,7 @@ const RegistrationModal = ({ isOpen, onClose, courseName, courseId }) => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     autoComplete="on"
-                                    className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-all duration-200 text-sm focus:shadow-lg ${
+                                    className={`w-full px-3 py-2 rounded-lg border-2 focus:outline-none transition-all duration-200 focus:shadow-lg ${
                                         errors.email
                                             ? 'border-red-500 focus:border-red-600 bg-red-50'
                                             : 'border-gray-300 focus:border-red-600'
@@ -203,7 +211,7 @@ const RegistrationModal = ({ isOpen, onClose, courseName, courseId }) => {
                                     value={formData.phone}
                                     onChange={handleChange}
                                     autoComplete="on"
-                                    className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-all duration-200 text-sm focus:shadow-lg ${
+                                    className={`w-full px-3 py-2 rounded-lg border-2 focus:outline-none transition-all duration-200 focus:shadow-lg ${
                                         errors.phone
                                             ? 'border-red-500 focus:border-red-600 bg-red-50'
                                             : 'border-gray-300 focus:border-red-600'
@@ -224,7 +232,7 @@ const RegistrationModal = ({ isOpen, onClose, courseName, courseId }) => {
                                     value={formData.address}
                                     onChange={handleChange}
                                     autoComplete="on"
-                                    className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-all duration-200 text-sm focus:shadow-lg ${
+                                    className={`w-full px-3 py-2 rounded-lg border-2 focus:outline-none transition-all duration-200 focus:shadow-lg ${
                                         errors.address
                                             ? 'border-red-500 focus:border-red-600 bg-red-50'
                                             : 'border-gray-300 focus:border-red-600'
@@ -245,14 +253,14 @@ const RegistrationModal = ({ isOpen, onClose, courseName, courseId }) => {
                                     name="notes"
                                     value={formData.notes}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-red-600 focus:outline-none transition-all duration-200 focus:shadow-lg resize-none text-sm"
+                                    className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-red-600 focus:outline-none transition-all duration-200 focus:shadow-lg resize-none"
                                     rows="3"
                                     placeholder="Bạn có câu hỏi hoặc yêu cầu đặc biệt không?"
                                 />
                             </div>
 
                             {/* Buttons */}
-                            <div className="flex gap-3 pt-6 border-t border-gray-200">
+                            <div className="flex gap-4 pt-6 border-t border-gray-200">
                                 <button
                                     type="button"
                                     onClick={handleClose}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import RegistrationModal from '../../components/ui/RegistrationModal';
 
 // Fake API data từ Classes
 const classesData = [
@@ -85,6 +86,20 @@ const getRandomItems = (array, count = 4) => {
 
 export default function CoursesSection() {
     const [courses, setCourses] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedCourse, setSelectedCourse] = useState(null);
+
+    const handleRegisterClick = (e, course) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setSelectedCourse(course);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedCourse(null);
+    };
 
     useEffect(() => {
         // Lấy 4 items ngẫu nhiên từ classesData
@@ -112,15 +127,31 @@ export default function CoursesSection() {
                                     <span className="font-semibold text-gray-700">Lịch:</span> {course.schedule}
                                 </p>
                             </div>
-                            <Link
-                                to={`/chi-tiet-khoa-hoc/${course.id}`}
-                                className="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-300 cursor-pointer transform hover:translate-y-[-4px] ease-in-out hover:shadow-lg font-semibold text-center"
-                            >
-                                Xem chi tiết
-                            </Link>
+                            <div className="flex gap-2 mt-4">
+                                <Link
+                                    to={`/chi-tiet-khoa-hoc/${course.id}`}
+                                    className="flex-1 bg-white text-red-600 border border-red-600 px-3 py-2 rounded-lg hover:bg-red-50 transition duration-300 cursor-pointer font-semibold text-center text-sm"
+                                >
+                                    Chi tiết
+                                </Link>
+                                <button
+                                    onClick={(e) => handleRegisterClick(e, course)}
+                                    className="flex-1 bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 transition duration-300 cursor-pointer shadow-md hover:shadow-lg font-semibold text-center text-sm"
+                                >
+                                    Đăng ký
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>
+
+                {/* Registration Modal */}
+                <RegistrationModal
+                    isOpen={isModalOpen}
+                    onClose={closeModal}
+                    courseName={selectedCourse?.name || ''}
+                    courseId={selectedCourse?.id || ''}
+                />
 
                 {/* Nút xem tất cả */}
                 <div className="mt-12">

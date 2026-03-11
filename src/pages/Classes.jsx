@@ -229,12 +229,14 @@ const Classes = () => {
                                 />
                                 {/* Lớp phủ mờ khi hover */}
                                 <div className="absolute inset-0 bg-white/80 bg-opacity-0 group-hover:bg-opacity-60 transition-all duration-300 ease-in-out flex items-center justify-center p-4 transform translate-y-full group-hover:translate-y-0">
-                                    <span className="text-red-600 text-lg font-semibold flex items-center">
-                                        Xem thêm
-                                        <span className="ml-1 transform transition-transform duration-300 group-hover:translate-x-1">
-                                            →
+                                    <Link to={`/chi-tiet-khoa-hoc/${cls.id}`} className="group-hover:translate-y-0">
+                                        <span className="text-red-600 text-lg font-semibold flex items-center">
+                                            Xem thêm
+                                            <span className="ml-1 transform transition-transform duration-300 group-hover:translate-x-1">
+                                                →
+                                            </span>
                                         </span>
-                                    </span>
+                                    </Link>
                                 </div>
                             </div>
                             {/* Nội dung thẻ */}
@@ -262,7 +264,7 @@ const Classes = () => {
                                 </div>
                                 <div className="mt-auto pt-3 border-t border-gray-200">
                                     <p className="text-sm text-gray-500 font-medium">
-                                        <span className="font-semibold">Lịch học:</span> {cls.schedule}
+                                        <span className="font-bold">Lịch học:</span> {cls.schedule}
                                     </p>
                                 </div>
                             </div>

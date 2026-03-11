@@ -77,7 +77,7 @@ function ExtracurricularSection() {
 
                 <div className="text-center mt-10">
                     <Link
-                        to="/thu-vien-anh"
+                        to="/bo-suu-tap"
                         className="inline-block px-8 py-3 bg-red-600 text-white font-semibold rounded-full shadow-md hover:bg-red-700 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
                     >
                         Xem tất cả hình ảnh
