@@ -9,7 +9,7 @@ function About() {
                 <h1 className="text-5xl font-extrabold text-red-600 mb-6 border-b-4 border-red-100 inline-block px-4 pb-1">
                     Về Trung tâm Nhật ngữ Sakae
                 </h1>
-                <p className="text-xl font-medium text-gray-700 leading-relaxed max-w-5xl mx-auto mb-4">
+                <p className="text-lg md:text-xl font-medium text-gray-700 leading-relaxed max-w-5xl mx-auto mb-4">
                     Trung tâm Nhật ngữ Sakae là nơi đào tạo tiếng Nhật chuyên sâu với đội ngũ giảng viên tận tâm và
                     chương trình học chất lượng, giúp học viên đạt được mục tiêu du học, làm việc và phát triển bản
                     thân.

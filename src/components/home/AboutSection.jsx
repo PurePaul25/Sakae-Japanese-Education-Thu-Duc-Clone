@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import aboutBanner from '../../assets/aboutBanner.jpg';
+import aboutBanner from '../../assets/img/aboutBanner.jpg';
 
 export default function AboutSection() {
     return (

@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import logo from '../../assets/logo_Sakae.png';
-import vietnamIcon from '../../assets/vietnam.png';
-import japanIcon from '../../assets/japan.png';
+import logo from '../../assets/img/logo_Sakae.png';
+import vietnamIcon from '../../assets/img/vietnam.png';
+import japanIcon from '../../assets/img/japan.png';
 
 import { FiMenu, FiX, FiChevronDown } from 'react-icons/fi';
 import SearchBar from './SearchBar';
@@ -157,7 +157,7 @@ function Navbar() {
                     {/* Nút đăng ký */}
                     <Link
                         to="/khoa-hoc"
-                        className="hidden md:block cursor-pointer bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-250 ease-in-out"
+                        className="hidden md:block cursor-pointer bg-red-600 text-white py-2 px-3 rounded-md hover:bg-red-700 transition duration-250 ease-in-out"
                     >
                         Đăng ký học
                     </Link>
@@ -223,7 +223,7 @@ function Navbar() {
                     isMenuOpen ? 'max-h-[100vh]' : 'max-h-0'
                 }`}
             >
-                <div className="flex flex-col items-center pb-4 bg-white shadow-md border-t-2 border-gray-800/20">
+                <div className="flex flex-col items-center pb-4 bg-white shadow-md border-t-2 border-b-1 border-gray-800/20">
                     {menuItems.map((item) =>
                         item.children ? (
                             <div key={item.label} className="w-full flex flex-col items-center">

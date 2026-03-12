@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 
 import { BsChevronCompactLeft, BsChevronCompactRight } from 'react-icons/bs';
 import { RxDotFilled } from 'react-icons/rx';
-import bannerBg1 from '../../assets/banner-bg-1.webp';
-import bannerBg2 from '../../assets/banner-bg-2.webp';
-import bannerBg3 from '../../assets/banner-bg-3.jpg';
+import bannerBg1 from '../../assets/img/banner-bg-1.webp';
+import bannerBg2 from '../../assets/img/banner-bg-2.webp';
+import bannerBg3 from '../../assets/img/banner-bg-3.jpg';
 
 const banners = [bannerBg1, bannerBg2, bannerBg3];
 export default function HeroSection() {

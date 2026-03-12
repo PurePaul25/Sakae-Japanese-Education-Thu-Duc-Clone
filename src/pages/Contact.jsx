@@ -97,7 +97,7 @@ const Contact = () => {
             <section className="max-w-6xl mx-auto px-4">
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden grid md:grid-cols-2">
                     {/* Cột trái - Thông tin liên hệ */}
-                    <div className="p-8 lg:p-12 bg-red-50/50">
+                    <div className="p-8 bg-red-50/50">
                         <h2 className="text-3xl font-bold text-red-600 mb-4">Thông tin liên hệ</h2>
                         <p className="text-gray-600 mb-8 leading-relaxed">
                             Bạn có thể liên hệ trực tiếp với chúng tôi qua các thông tin dưới đây hoặc điền vào biểu mẫu
@@ -132,7 +132,7 @@ const Contact = () => {
                     </div>
 
                     {/* Cột phải - Form liên hệ */}
-                    <form onSubmit={handleSubmit} className="p-8 lg:p-12">
+                    <form onSubmit={handleSubmit} className="p-8">
                         <h2 className="text-3xl font-bold text-gray-800 mb-6">Gửi tin nhắn cho chúng tôi</h2>
 
                         <div className="space-y-4">

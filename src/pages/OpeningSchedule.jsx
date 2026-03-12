@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { schedules } from '../dataTest/schedules';
+import ScrollToTopButton from '../components/layout/ScrollToTopButton';
 
 function OpeningSchedule() {
     const [filterMonth, setFilterMonth] = useState('Tất cả');
@@ -195,8 +196,8 @@ function OpeningSchedule() {
                                                         item.status === 'Sắp khai giảng'
                                                             ? 'bg-green-100 text-green-700'
                                                             : item.status === 'Đang nhận học viên'
-                                                            ? 'bg-blue-100 text-blue-700'
-                                                            : 'bg-gray-200 text-gray-600'
+                                                              ? 'bg-blue-100 text-blue-700'
+                                                              : 'bg-gray-200 text-gray-600'
                                                     }`}
                                                 >
                                                     {item.status}
@@ -276,6 +277,7 @@ function OpeningSchedule() {
                     </div>
                 </div>
             </div>
+            <ScrollToTopButton />
         </div>
     );
 }

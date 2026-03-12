@@ -119,17 +119,15 @@ const RegistrationModal = ({ isOpen, onClose, courseName, courseId }) => {
 
             {/* Modal Container */}
             <div
-                className={`relative z-[70] bg-white rounded-2xl shadow-2xl max-w-md md:max-w-xl w-full mx-4 max-h-[90vh] transform transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden pointer-events-auto flex flex-col ${
-                    show && !isClosing 
-                        ? 'opacity-100 scale-100 translate-y-0' 
-                        : 'opacity-0 scale-95 translate-y-8'
+                className={`relative z-[70] bg-white rounded-2xl shadow-2xl max-w-md md:max-w-xl w-full mx-4 max-h-[85vh] transform transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden pointer-events-auto flex flex-col ${
+                    show && !isClosing ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-8'
                 }`}
             >
                 {/* Header with Gradient - cố định */}
-                <div className="flex-shrink-0 bg-gradient-to-r from-red-600 via-red-500 to-orange-600 text-white p-6 flex justify-between items-center">
+                <div className="flex-shrink-0 bg-gradient-to-r from-red-600 via-red-500 to-orange-600 text-white p-4 md:px-6 flex justify-between items-center">
                     <div className="flex-1">
-                        <h2 className="text-2xl font-bold">🎓 Đăng ký khóa học</h2>
-                        <p className="text-red-100 text-sm mt-2 font-medium line-clamp-2">{courseName}</p>
+                        <h2 className="text-2xl font-bold text-left">🎓 Đăng ký khóa học</h2>
+                        <p className="text-red-100 text-sm mt-2 font-medium line-clamp-2 text-left">{courseName}</p>
                     </div>
                     <button
                         type="button"
@@ -155,9 +153,9 @@ const RegistrationModal = ({ isOpen, onClose, courseName, courseId }) => {
                         </div>
                     ) : (
                         /* Form */
-                        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
+                        <form onSubmit={handleSubmit} className="px-4 md:px-6 py-4 space-y-4">
                             {/* Full Name */}
-                            <div className="space-y-2">
+                            <div className="space-y-2 text-left">
                                 <label className="block text-gray-700 font-semibold text-sm">
                                     Họ và tên <span className="text-red-600">*</span>
                                 </label>
@@ -180,7 +178,7 @@ const RegistrationModal = ({ isOpen, onClose, courseName, courseId }) => {
                             </div>
 
                             {/* Email */}
-                            <div className="space-y-2">
+                            <div className="space-y-2 text-left">
                                 <label className="block text-gray-700 font-semibold text-sm">
                                     Email <span className="text-red-600">*</span>
                                 </label>
@@ -201,7 +199,7 @@ const RegistrationModal = ({ isOpen, onClose, courseName, courseId }) => {
                             </div>
 
                             {/* Phone */}
-                            <div className="space-y-2">
+                            <div className="space-y-2 text-left">
                                 <label className="block text-gray-700 font-semibold text-sm">
                                     Số điện thoại <span className="text-red-600">*</span>
                                 </label>
@@ -222,7 +220,7 @@ const RegistrationModal = ({ isOpen, onClose, courseName, courseId }) => {
                             </div>
 
                             {/* Address */}
-                            <div className="space-y-2">
+                            <div className="space-y-2 text-left">
                                 <label className="block text-gray-700 font-semibold text-sm">
                                     Địa chỉ <span className="text-red-600">*</span>
                                 </label>
@@ -245,7 +243,7 @@ const RegistrationModal = ({ isOpen, onClose, courseName, courseId }) => {
                             </div>
 
                             {/* Notes */}
-                            <div className="space-y-2">
+                            <div className="space-y-2 text-left">
                                 <label className="block text-gray-700 font-semibold text-sm">
                                     Ghi chú thêm (tùy chọn)
                                 </label>
