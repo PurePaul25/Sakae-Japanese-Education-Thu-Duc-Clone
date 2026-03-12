@@ -49,7 +49,7 @@ function AppRoutes() {
                 <Route path="/lich-khai-giang" element={<OpeningScheduleLazy />} />
                 <Route path="/chi-tiet-khoa-hoc/:id" element={<CourseDetailLazy />} />
                 <Route path="/bo-suu-tap" element={<GalleryLazy />} />
-                <Route path="/thi-thu-JLPT" element={<JLPTMockTestLazy />} />
+                <Route path="/thi-thu-JLPT/*" element={<JLPTMockTestLazy />} />
                 <Route path="*" element={<NotFoundLazy />} />
             </Routes>
         </Suspense>

@@ -5,9 +5,10 @@ function ScrollToTop() {
     const { pathname } = useLocation();
 
     useEffect(() => {
+        const isExamPage = pathname.includes('/thi-thu-JLPT/exam');
         window.scrollTo({
             top: 0,
-            behavior: 'smooth',
+            behavior: isExamPage ? 'auto' : 'smooth',
         });
     }, [pathname]);
 
