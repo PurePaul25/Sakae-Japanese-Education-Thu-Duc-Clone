@@ -36,7 +36,7 @@ export const jlptTests = [
             {
                 id: 'n5-s2',
                 name: 'Reading',
-                duration: 35,
+                duration: 40,
                 readings: [
                     {
                         id: 'n5-reading-1',
@@ -88,7 +88,7 @@ export const jlptTests = [
             {
                 id: 'n5-s3',
                 name: 'Listening',
-                duration: 25,
+                duration: 30,
                 listenings: [
                     {
                         id: 'n5-listening-1',
@@ -117,12 +117,12 @@ export const jlptTests = [
         id: 'n4-t1',
         level: 'N4',
         title: 'Đề thi thử N4 - Đề số 1',
-        totalDuration: 125,
+        totalDuration: 115,
         sections: [
             {
                 id: 'n4-s1',
                 name: 'Từ vựng',
-                duration: 30,
+                duration: 25,
                 questions: [
                     {
                         id: 'n4-q1',
@@ -150,7 +150,7 @@ export const jlptTests = [
             {
                 id: 'n4-s3',
                 name: 'Nghe hiểu',
-                duration: 40,
+                duration: 35,
                 questions: [
                     {
                         id: 'n4-q3',

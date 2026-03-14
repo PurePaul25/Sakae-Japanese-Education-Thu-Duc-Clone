@@ -16,8 +16,8 @@ import {
     FaHome,
     FaPlay,
     FaPause,
-    FaStepBackward,
-    FaStepForward,
+    FaAngleDoubleLeft,
+    FaAngleDoubleRight,
     FaVolumeUp,
 } from 'react-icons/fa';
 import { Routes, Route, useNavigate, useParams, Link } from 'react-router-dom';
@@ -25,11 +25,51 @@ import { jlptTests } from '../dataTest/jlptTests';
 
 // Shared Constants
 const levels = [
-    { id: 'N1', name: 'JLPT N1', desc: 'Cao cấp nhất', duration: '170 phút', accent: 'border-purple-500' },
-    { id: 'N2', name: 'JLPT N2', desc: 'Cao cấp', duration: '155 phút', accent: 'border-blue-600' },
-    { id: 'N3', name: 'JLPT N3', desc: 'Trung cấp', duration: '140 phút', accent: 'border-green-500' },
-    { id: 'N4', name: 'JLPT N4', desc: 'Sơ cấp', duration: '125 phút', accent: 'border-orange-500' },
-    { id: 'N5', name: 'JLPT N5', desc: 'Cơ bản', duration: '90 phút', accent: 'border-red-600' },
+    {
+        id: 'N1',
+        name: 'JLPT N1',
+        desc: 'Cao cấp nhất',
+        duration: '170 phút',
+        passingScore: 100,
+        maxScore: 180,
+        accent: 'border-purple-500',
+    },
+    {
+        id: 'N2',
+        name: 'JLPT N2',
+        desc: 'Cao cấp',
+        duration: '155 phút',
+        passingScore: 90,
+        maxScore: 180,
+        accent: 'border-blue-600',
+    },
+    {
+        id: 'N3',
+        name: 'JLPT N3',
+        desc: 'Trung cấp',
+        duration: '140 phút',
+        passingScore: 95,
+        maxScore: 180,
+        accent: 'border-green-500',
+    },
+    {
+        id: 'N4',
+        name: 'JLPT N4',
+        desc: 'Sơ cấp',
+        duration: '125 phút',
+        passingScore: 90,
+        maxScore: 180,
+        accent: 'border-orange-500',
+    },
+    {
+        id: 'N5',
+        name: 'JLPT N5',
+        desc: 'Cơ bản',
+        duration: '105 phút',
+        passingScore: 80,
+        maxScore: 180,
+        accent: 'border-red-600',
+    },
 ];
 
 const formatTime = (seconds) => {
@@ -42,12 +82,12 @@ const formatTime = (seconds) => {
 
 const getTranslatedSectionName = (name, index) => {
     const sectionNames = {
-        'Vocabulary': 'Từ vựng',
-        'Reading': 'Đọc hiểu',
-        'Listening': 'Nghe hiểu',
+        Vocabulary: 'Từ vựng',
+        Reading: 'Đọc hiểu',
+        Listening: 'Nghe hiểu',
         'Từ vựng': 'Từ vựng',
         'Ngữ pháp & Đọc hiểu': 'Ngữ pháp & Đọc hiểu',
-        'Nghe hiểu': 'Nghe hiểu'
+        'Nghe hiểu': 'Nghe hiểu',
     };
     const displayName = sectionNames[name] || name;
     return `Phần ${index + 1}: ${displayName}`;
@@ -58,7 +98,7 @@ const getTranslatedSectionName = (name, index) => {
 const LevelSelection = () => {
     const navigate = useNavigate();
     return (
-        <div className="pt-28 pb-16 bg-gray-50 min-h-screen">
+        <div className="pt-26 pb-14 bg-gray-50 min-h-screen">
             <div className="max-w-6xl mx-auto px-4">
                 <div className="text-center mb-10">
                     <span className="inline-block px-4 py-1 bg-red-100 text-red-600 rounded-full font-bold mb-4 uppercase tracking-widest">
@@ -141,6 +181,10 @@ const TestSelection = () => {
         const left = (window.screen.width - popupWidth) / 2;
         const top = (window.screen.height - popupHeight) / 2;
 
+        // Clear previous state for a fresh start
+        localStorage.removeItem(`jlpt_exam_state_${testId}`);
+        localStorage.removeItem(`jlpt_result_${testId}`);
+
         window.open(
             `/thi-thu-JLPT/exam/${testId}`,
             `ExamWindow_${testId}`,
@@ -187,23 +231,8 @@ const TestSelection = () => {
                                             <FaClock className="text-red-500" /> {test.totalDuration} phút
                                         </span>
                                         <span className="flex items-center gap-2">
-                                            <FaQuestionCircle className="text-orange-500" />{' '}
-                                            {test.sections.reduce((a, section) => {
-                                                let count = section.questions?.length || 0;
-                                                if (section.readings)
-                                                    count += section.readings.reduce(
-                                                        (rCount, reading) => rCount + (reading.questions?.length || 0),
-                                                        0,
-                                                    );
-                                                if (section.listenings)
-                                                    count += section.listenings.reduce(
-                                                        (lCount, listening) =>
-                                                            lCount + (listening.questions?.length || 0),
-                                                        0,
-                                                    );
-                                                return a + count;
-                                            }, 0)}{' '}
-                                            câu hỏi
+                                            <FaTrophy className="text-yellow-500" /> Điểm:{' '}
+                                            {levels.find((l) => l.id === test.level)?.passingScore || 0}
                                         </span>
                                     </div>
                                     <button
@@ -234,8 +263,34 @@ const ExamView = () => {
     const { testId, qIndex } = useParams();
     const navigate = useNavigate();
 
+    // Clear old result when starting new exam to prevent redirect to result page
+    // Clear old result/state only if we are forced to (e.g. initial mount with no state)
+    // Actually, state clearing is handled by the buttons that open this view to support resumes.
+
     const currentTest = useMemo(() => jlptTests.find((t) => t.id === testId), [testId]);
-    const [selectedSectionId, setSelectedSectionId] = useState(null);
+
+    const [selectedSectionId, setSelectedSectionId] = useState(() => {
+        const storageKeyLocal = `jlpt_exam_state_${testId}`;
+        const saved = localStorage.getItem(storageKeyLocal);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed.selectedSectionId) return parsed.selectedSectionId;
+        }
+        // Default to first section if no saved state
+        if (currentTest && currentTest.sections.length > 0) {
+            return currentTest.sections[0].id;
+        }
+        return null;
+    });
+    const [completedSections, setCompletedSections] = useState(() => {
+        const storageKeyLocal = `jlpt_exam_state_${testId}`;
+        const saved = localStorage.getItem(storageKeyLocal);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            return parsed.completedSections || [];
+        }
+        return [];
+    });
     const [audioStates, setAudioStates] = useState({});
 
     // Flatten all questions from sections, readings, and listenings
@@ -296,9 +351,9 @@ const ExamView = () => {
     // Get unique sections
     const sections = useMemo(() => {
         if (!currentTest) return [];
-        return currentTest.sections.map((s, idx) => ({ 
-            id: s.id, 
-            name: getTranslatedSectionName(s.name, idx) 
+        return currentTest.sections.map((s, idx) => ({
+            id: s.id,
+            name: getTranslatedSectionName(s.name, idx),
         }));
     }, [currentTest]);
 
@@ -311,6 +366,16 @@ const ExamView = () => {
     const currentQuestionIndex = parseInt(qIndex || '0', 10);
     const currentQuestion = filteredQuestions[currentQuestionIndex];
 
+    // Get current section and its duration
+    const currentSection = useMemo(() => {
+        if (!currentTest || !selectedSectionId) return null;
+        return currentTest.sections.find((s) => s.id === selectedSectionId);
+    }, [currentTest, selectedSectionId]);
+
+    const currentSectionDuration = useMemo(() => {
+        return currentSection?.duration || 0;
+    }, [currentSection]);
+
     const storageKey = `jlpt_exam_state_${testId}`;
     const [answers, setAnswers] = useState(() => {
         const saved = localStorage.getItem(storageKey);
@@ -322,10 +387,19 @@ const ExamView = () => {
     });
     const [timeLeft, setTimeLeft] = useState(() => {
         const saved = localStorage.getItem(storageKey);
-        if (saved) return JSON.parse(saved).timeLeft;
-        return currentTest ? currentTest.totalDuration * 60 : 0;
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed.timeLeftPerSection && parsed.selectedSectionId) {
+                return parsed.timeLeftPerSection[parsed.selectedSectionId] || currentSectionDuration * 60;
+            }
+            return parsed.timeLeft;
+        }
+        return currentSectionDuration ? currentSectionDuration * 60 : 0;
     });
     const [showSubmitModal, setShowSubmitModal] = useState(false);
+    const [showSectionChangeModal, setShowSectionChangeModal] = useState(false);
+    const [showTimeoutModal, setShowTimeoutModal] = useState(false);
+    const [nextSectionId, setNextSectionId] = useState(null);
 
     const submitTest = React.useCallback(() => {
         let correctCount = 0;
@@ -345,18 +419,59 @@ const ExamView = () => {
     }, [allQuestions, answers, testId, storageKey, navigate]);
 
     useEffect(() => {
+        if (currentTest && currentTest.sections.length > 0 && !selectedSectionId) {
+            setSelectedSectionId(currentTest.sections[0].id);
+        }
+    }, [currentTest]);
+
+    // Reset timeLeft if it's 0 or invalid when section changes
+    useEffect(() => {
+        if (selectedSectionId && currentSectionDuration) {
+            const saved = localStorage.getItem(storageKey);
+            const existingData = saved ? JSON.parse(saved) : {};
+
+            // If no saved timeLeftPerSection for this section or if timeLeft is 0 (timeout), reset it
+            if (!existingData.timeLeftPerSection || !existingData.timeLeftPerSection[selectedSectionId]) {
+                setTimeLeft(currentSectionDuration * 60);
+            }
+        }
+    }, [selectedSectionId, currentSectionDuration, storageKey]);
+
+    useEffect(() => {
         if (currentTest) {
+            // Build timeLeftPerSection from current section
+            const saved = localStorage.getItem(storageKey);
+            const existingData = saved ? JSON.parse(saved) : {};
+            const timeLeftPerSection = existingData.timeLeftPerSection || {};
+
+            if (selectedSectionId) {
+                timeLeftPerSection[selectedSectionId] = timeLeft;
+            }
+
             localStorage.setItem(
                 storageKey,
                 JSON.stringify({
                     answers,
                     flagged: flaggedQuestions,
                     timeLeft,
+                    timeLeftPerSection,
                     lastIndex: currentQuestionIndex,
+                    selectedSectionId,
+                    completedSections,
                 }),
             );
         }
-    }, [answers, flaggedQuestions, timeLeft, currentQuestionIndex, testId, currentTest, storageKey]);
+    }, [
+        answers,
+        flaggedQuestions,
+        timeLeft,
+        currentQuestionIndex,
+        testId,
+        currentTest,
+        storageKey,
+        selectedSectionId,
+        completedSections,
+    ]);
 
     useEffect(() => {
         let timer;
@@ -364,11 +479,12 @@ const ExamView = () => {
             timer = setInterval(() => {
                 setTimeLeft((prev) => prev - 1);
             }, 1000);
-        } else if (timeLeft === 0) {
-            submitTest();
+        } else if (timeLeft === 0 && currentTest && selectedSectionId) {
+            // Only show timeout if we have a valid test and section
+            setShowTimeoutModal(true);
         }
         return () => clearInterval(timer);
-    }, [timeLeft, submitTest]);
+    }, [timeLeft, currentTest, selectedSectionId]);
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'auto' });
@@ -385,8 +501,61 @@ const ExamView = () => {
     };
 
     const handleSectionChange = (sectionId) => {
-        setSelectedSectionId(selectedSectionId === sectionId ? null : sectionId);
-        navigate(`/thi-thu-JLPT/exam/${testId}/0`, { replace: true });
+        // Check if trying to go back to a completed section
+        if (completedSections.includes(sectionId)) {
+            alert('Phần này đã hoàn thành. Bạn không thể quay lại để chỉnh sửa!');
+            return;
+        }
+
+        if (sectionId !== selectedSectionId) {
+            setNextSectionId(sectionId);
+            setShowSectionChangeModal(true);
+        }
+    };
+
+    const confirmSectionChange = () => {
+        if (nextSectionId && currentTest) {
+            // Mark current section as completed
+            setCompletedSections((prev) => [...prev, selectedSectionId]);
+
+            // Get duration of next section
+            const nextSection = currentTest.sections.find((s) => s.id === nextSectionId);
+            const nextSectionDuration = nextSection?.duration || 0;
+
+            setSelectedSectionId(nextSectionId);
+            navigate(`/thi-thu-JLPT/exam/${testId}/0`, { replace: true });
+
+            // Reset timer for new section
+            setTimeLeft(nextSectionDuration * 60);
+
+            setShowSectionChangeModal(false);
+            setNextSectionId(null);
+        }
+    };
+
+    const handleTimeoutContinue = () => {
+        if (!currentTest) return;
+
+        // Find current section index
+        const currentSectionIndex = currentTest.sections.findIndex((s) => s.id === selectedSectionId);
+
+        // Check if there's a next section
+        if (currentSectionIndex < currentTest.sections.length - 1) {
+            const nextSection = currentTest.sections[currentSectionIndex + 1];
+            const nextSectionDuration = nextSection?.duration || 0;
+
+            // Mark current section as completed
+            setCompletedSections((prev) => [...prev, selectedSectionId]);
+
+            setSelectedSectionId(nextSection.id);
+            navigate(`/thi-thu-JLPT/exam/${testId}/0`, { replace: true });
+            setTimeLeft(nextSectionDuration * 60);
+        } else {
+            // Last section - submit test
+            submitTest();
+        }
+
+        setShowTimeoutModal(false);
     };
 
     if (!currentTest) return <div className="p-10 text-center">Đề thi không tồn tại.</div>;
@@ -429,23 +598,31 @@ const ExamView = () => {
                 <div className="flex-1 lg:max-w-3xl xl:max-w-4xl mx-auto w-full">
                     {/* Section Selector Buttons */}
                     <div className="mb-4 flex flex-nowrap overflow-x-auto gap-3 pb-2 custom-scrollbar no-scrollbar-mobile">
-                        {sections.map((section) => (
-                            <button
-                                key={section.id}
-                                onClick={() => handleSectionChange(section.id)}
-                                className={`px-4 py-2 rounded-2xl font-bold transition-all cursor-pointer whitespace-nowrap ${
-                                    selectedSectionId === section.id
-                                        ? 'bg-red-600 text-white shadow-lg shadow-red-100'
-                                        : 'bg-white text-gray-600 border border-gray-200 hover:border-red-300'
-                                }`}
-                            >
-                                {section.name}
-                            </button>
-                        ))}
+                        {sections.map((section) => {
+                            const isCompleted = completedSections.includes(section.id);
+                            return (
+                                <button
+                                    key={section.id}
+                                    onClick={() => handleSectionChange(section.id)}
+                                    disabled={isCompleted}
+                                    className={`px-4 py-2 rounded-2xl font-bold transition-all whitespace-nowrap ${
+                                        selectedSectionId === section.id
+                                            ? 'bg-red-600 text-white shadow-lg shadow-red-100 cursor-pointer'
+                                            : isCompleted
+                                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
+                                              : 'bg-white text-gray-600 border border-gray-200 hover:border-red-300 cursor-pointer'
+                                    }`}
+                                    title={isCompleted ? 'Phần này đã hoàn thành' : ''}
+                                >
+                                    {section.name}
+                                    {isCompleted && ' ✓'}
+                                </button>
+                            );
+                        })}
                     </div>
 
                     {/* Reading Passage Display */}
-                    {currentQuestion?.sectionType === 'reading' && currentQuestion?.isFirstQuestionOfReading && (
+                    {currentQuestion?.sectionType === 'reading' && (
                         <div className="bg-white rounded-[1rem] px-5 pt-5 pb-2 shadow-sm border border-gray-100 mb-6">
                             {currentQuestion?.contentImage && (
                                 <div className="mb-4 flex justify-center">
@@ -475,18 +652,20 @@ const ExamView = () => {
                     {currentQuestion?.sectionType === 'listening' &&
                         currentQuestion?.isFirstQuestionOfListening &&
                         currentQuestion?.audio && (
-                            <div className="bg-white rounded-[2rem] p-5 shadow-xl border border-gray-100 mb-6 border-l-8 border-l-blue-600 overflow-hidden relative">
+                            <div className="bg-white rounded-[1.5rem] p-4 shadow-xl border border-gray-100 mb-6 border-l-8 border-l-red-600 overflow-hidden relative">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50"></div>
-                                
+
                                 <div className="relative z-10">
                                     <div className="flex items-center justify-between mb-6">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-100">
+                                            <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-100">
                                                 <FaVolumeUp size={20} />
                                             </div>
                                             <div>
                                                 <h3 className="font-black text-xl text-gray-800">Phần Nghe Hiểu</h3>
-                                                <p className="text-sm text-gray-500 font-bold uppercase tracking-wider">聴解</p>
+                                                <p className="text-sm text-gray-500 font-bold uppercase tracking-wider">
+                                                    聴解
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -495,9 +674,17 @@ const ExamView = () => {
                                         <div className="flex flex-col gap-4">
                                             {/* Progress Bar and Time */}
                                             <div className="space-y-2">
-                                                <div className="flex justify-between text-xs font-black text-blue-600">
-                                                    <span>{formatTime(audioStates[currentQuestion.listeningId]?.currentTime || 0)}</span>
-                                                    <span>{formatTime(audioStates[currentQuestion.listeningId]?.duration || 0)}</span>
+                                                <div className="flex justify-between text-xs font-black text-red-600">
+                                                    <span>
+                                                        {formatTime(
+                                                            audioStates[currentQuestion.listeningId]?.currentTime || 0,
+                                                        )}
+                                                    </span>
+                                                    <span>
+                                                        {formatTime(
+                                                            audioStates[currentQuestion.listeningId]?.duration || 0,
+                                                        )}
+                                                    </span>
                                                 </div>
                                                 <div className="relative h-2 bg-gray-200 rounded-full group">
                                                     <input
@@ -505,25 +692,34 @@ const ExamView = () => {
                                                         id={`audio-range-${currentQuestion.listeningId}`}
                                                         min="0"
                                                         max={audioStates[currentQuestion.listeningId]?.duration || 100}
-                                                        value={audioStates[currentQuestion.listeningId]?.currentTime || 0}
+                                                        value={
+                                                            audioStates[currentQuestion.listeningId]?.currentTime || 0
+                                                        }
                                                         onChange={(e) => {
-                                                            const audio = document.getElementById(`audio-${currentQuestion.listeningId}`);
+                                                            const audio = document.getElementById(
+                                                                `audio-${currentQuestion.listeningId}`,
+                                                            );
                                                             if (audio) {
                                                                 const time = parseFloat(e.target.value);
                                                                 audio.currentTime = time;
-                                                                setAudioStates(prev => ({
+                                                                setAudioStates((prev) => ({
                                                                     ...prev,
-                                                                    [currentQuestion.listeningId]: { ...prev[currentQuestion.listeningId], currentTime: time }
+                                                                    [currentQuestion.listeningId]: {
+                                                                        ...prev[currentQuestion.listeningId],
+                                                                        currentTime: time,
+                                                                    },
                                                                 }));
                                                             }
                                                         }}
                                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                                     />
-                                                    <div 
-                                                        className="absolute top-0 left-0 h-full bg-blue-600 rounded-full transition-all duration-100" 
-                                                        style={{ width: `${((audioStates[currentQuestion.listeningId]?.currentTime || 0) / (audioStates[currentQuestion.listeningId]?.duration || 1)) * 100}%` }}
+                                                    <div
+                                                        className="absolute top-0 left-0 h-full bg-red-600 rounded-full transition-all duration-100"
+                                                        style={{
+                                                            width: `${((audioStates[currentQuestion.listeningId]?.currentTime || 0) / (audioStates[currentQuestion.listeningId]?.duration || 1)) * 100}%`,
+                                                        }}
                                                     >
-                                                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-blue-600 rounded-full shadow-md scale-0 group-hover:scale-100 transition-transform"></div>
+                                                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-red-600 rounded-full shadow-md scale-0 group-hover:scale-100 transition-transform"></div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -532,24 +728,29 @@ const ExamView = () => {
                                             <div className="flex items-center justify-center gap-6">
                                                 <button
                                                     onClick={() => {
-                                                        const audio = document.getElementById(`audio-${currentQuestion.listeningId}`);
-                                                        if (audio) audio.currentTime = Math.max(0, audio.currentTime - 10);
+                                                        const audio = document.getElementById(
+                                                            `audio-${currentQuestion.listeningId}`,
+                                                        );
+                                                        if (audio)
+                                                            audio.currentTime = Math.max(0, audio.currentTime - 10);
                                                     }}
-                                                    className="p-3 text-gray-400 hover:text-blue-600 hover:bg-white rounded-xl transition-all cursor-pointer"
+                                                    className="p-3 text-gray-400 hover:text-red-600 hover:bg-white rounded-xl transition-all cursor-pointer"
                                                     title="Lùi 10s"
                                                 >
-                                                    <FaStepBackward size={18} />
+                                                    <FaAngleDoubleLeft size={18} />
                                                 </button>
 
                                                 <button
                                                     onClick={() => {
-                                                        const audio = document.getElementById(`audio-${currentQuestion.listeningId}`);
+                                                        const audio = document.getElementById(
+                                                            `audio-${currentQuestion.listeningId}`,
+                                                        );
                                                         if (audio) {
                                                             if (audio.paused) audio.play();
                                                             else audio.pause();
                                                         }
                                                     }}
-                                                    className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-200 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                                                    className="w-16 h-16 bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-200 hover:scale-105 active:scale-95 transition-all cursor-pointer"
                                                 >
                                                     {audioStates[currentQuestion.listeningId]?.playing ? (
                                                         <FaPause size={24} />
@@ -560,13 +761,19 @@ const ExamView = () => {
 
                                                 <button
                                                     onClick={() => {
-                                                        const audio = document.getElementById(`audio-${currentQuestion.listeningId}`);
-                                                        if (audio) audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
+                                                        const audio = document.getElementById(
+                                                            `audio-${currentQuestion.listeningId}`,
+                                                        );
+                                                        if (audio)
+                                                            audio.currentTime = Math.min(
+                                                                audio.duration,
+                                                                audio.currentTime + 10,
+                                                            );
                                                     }}
-                                                    className="p-3 text-gray-400 hover:text-blue-600 hover:bg-white rounded-xl transition-all cursor-pointer"
+                                                    className="p-3 text-gray-400 hover:text-red-600 hover:bg-white rounded-xl transition-all cursor-pointer"
                                                     title="Tiến 10s"
                                                 >
-                                                    <FaStepForward size={18} />
+                                                    <FaAngleDoubleRight size={18} />
                                                 </button>
                                             </div>
                                         </div>
@@ -579,31 +786,37 @@ const ExamView = () => {
                                     onLoadedMetadata={(e) => {
                                         setAudioStates((prev) => ({
                                             ...prev,
-                                            [currentQuestion.listeningId]: { 
-                                                ...prev[currentQuestion.listeningId], 
+                                            [currentQuestion.listeningId]: {
+                                                ...prev[currentQuestion.listeningId],
                                                 duration: e.target.duration,
-                                                currentTime: 0
+                                                currentTime: 0,
                                             },
                                         }));
                                     }}
                                     onPlay={() =>
                                         setAudioStates((prev) => ({
                                             ...prev,
-                                            [currentQuestion.listeningId]: { ...prev[currentQuestion.listeningId], playing: true },
+                                            [currentQuestion.listeningId]: {
+                                                ...prev[currentQuestion.listeningId],
+                                                playing: true,
+                                            },
                                         }))
                                     }
                                     onPause={() =>
                                         setAudioStates((prev) => ({
                                             ...prev,
-                                            [currentQuestion.listeningId]: { ...prev[currentQuestion.listeningId], playing: false },
+                                            [currentQuestion.listeningId]: {
+                                                ...prev[currentQuestion.listeningId],
+                                                playing: false,
+                                            },
                                         }))
                                     }
                                     onTimeUpdate={(e) => {
                                         setAudioStates((prev) => ({
                                             ...prev,
-                                            [currentQuestion.listeningId]: { 
-                                                ...prev[currentQuestion.listeningId], 
-                                                currentTime: e.target.currentTime 
+                                            [currentQuestion.listeningId]: {
+                                                ...prev[currentQuestion.listeningId],
+                                                currentTime: e.target.currentTime,
                                             },
                                         }));
                                     }}
@@ -758,8 +971,8 @@ const ExamView = () => {
                         className="absolute inset-0 bg-gray-900/60 backdrop-blur-md"
                         onClick={() => setShowSubmitModal(false)}
                     ></div>
-                    <div className="bg-white rounded-[2.5rem] p-8 max-w-md w-full relative z-[110] text-center shadow-2xl animate-in zoom-in duration-300">
-                        <div className="w-20 h-20 bg-orange-100 text-orange-600 rounded-3xl flex items-center justify-center mx-auto mb-8 rotate-12 transition-transform hover:rotate-0">
+                    <div className="bg-white rounded-[1.5rem] p-8 max-w-lg w-full relative z-[110] text-center shadow-2xl animate-in zoom-in duration-300">
+                        <div className="w-20 h-20 bg-orange-100 text-orange-600 rounded-3xl flex items-center justify-center mx-auto mb-8">
                             <FaQuestionCircle size={40} />
                         </div>
                         <h2 className="text-3xl font-black text-gray-900 mb-4">Bạn chắc chứ?</h2>
@@ -769,7 +982,7 @@ const ExamView = () => {
                         <div className="flex flex-col gap-3">
                             <button
                                 onClick={submitTest}
-                                className="w-full py-2.5 bg-red-600 cursor-pointer text-white font-black rounded-2xl hover:bg-red-700 transition-all active:scale-95"
+                                className="w-full py-2.5 bg-red-500 cursor-pointer text-white font-black rounded-2xl hover:bg-red-600 transition-all active:scale-95"
                             >
                                 Chắc, nộp bài ngay
                             </button>
@@ -778,6 +991,70 @@ const ExamView = () => {
                                 className="w-full py-2.5 bg-gray-100 cursor-pointer text-gray-500 font-bold rounded-2xl hover:bg-gray-200 transition-all"
                             >
                                 Hủy để làm tiếp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Section Change Confirmation Modal */}
+            {showSectionChangeModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-gray-900/60 backdrop-blur-md"
+                        onClick={() => setShowSectionChangeModal(false)}
+                    ></div>
+                    <div className="bg-white rounded-[1.5rem] p-8 max-w-lg w-full relative z-[110] text-center shadow-2xl animate-in zoom-in duration-300">
+                        <div className="w-20 h-20 bg-orange-100 text-orange-600 rounded-3xl flex items-center justify-center mx-auto mb-8">
+                            <FaInfoCircle size={40} />
+                        </div>
+                        <h2 className="text-3xl font-black text-gray-900 mb-4">Chuyển sang phần tiếp theo?</h2>
+                        <p className="text-gray-500 mb-8 md:text-lg">
+                            Khi bạn chuyển sang phần tiếp theo, bạn sẽ không thể quay lại phần này để chỉnh sửa bài làm
+                            nữa!
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={confirmSectionChange}
+                                className="w-full py-2.5 bg-red-500 cursor-pointer text-white font-black rounded-2xl hover:bg-red-600 transition-all active:scale-95"
+                            >
+                                Chuyển phần
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setShowSectionChangeModal(false);
+                                    setNextSectionId(null);
+                                }}
+                                className="w-full py-2.5 bg-gray-100 cursor-pointer text-gray-500 font-bold rounded-2xl hover:bg-gray-200 transition-all"
+                            >
+                                Hủy để làm tiếp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Timeout Modal */}
+            {showTimeoutModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-gray-900/60 backdrop-blur-md"
+                        onClick={() => setShowTimeoutModal(false)}
+                    ></div>
+                    <div className="bg-white rounded-[2.5rem] p-8 max-w-md w-full relative z-[110] text-center shadow-2xl animate-in zoom-in duration-300">
+                        <div className="w-20 h-20 bg-red-100 text-red-600 rounded-3xl flex items-center justify-center mx-auto mb-8">
+                            <FaClock size={40} />
+                        </div>
+                        <h2 className="text-3xl font-black text-gray-900 mb-4">Hết giờ!</h2>
+                        <p className="text-gray-500 mb-8 text-lg">
+                            Thời gian làm bài phần này đã kết thúc. Vui lòng tiếp tục sang phần tiếp theo.
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={handleTimeoutContinue}
+                                className="w-full py-2.5 bg-red-600 cursor-pointer text-white font-black rounded-2xl hover:bg-red-700 transition-all active:scale-95"
+                            >
+                                Tiếp tục
                             </button>
                         </div>
                     </div>
@@ -832,6 +1109,21 @@ const ResultView = () => {
         return questions;
     }, [currentTest]);
 
+    // Group questions by section for review display
+    const questionsBySection = useMemo(() => {
+        const grouped = {};
+        allQuestions.forEach((q) => {
+            if (!grouped[q.sectionName]) {
+                grouped[q.sectionName] = [];
+            }
+            grouped[q.sectionName].push(q);
+        });
+        return Object.entries(grouped).map(([sectionName, questions]) => ({
+            sectionName,
+            questions,
+        }));
+    }, [allQuestions]);
+
     if (!resultData || !currentTest) {
         return (
             <div className="p-20 text-center">
@@ -848,7 +1140,8 @@ const ResultView = () => {
 
     const { score, answers } = resultData;
 
-    const percent = Math.round((score.correct / score.total) * 100);
+    const jlptScore = Math.round((score.correct / score.total) * 180);
+    const passingScore = levels.find((l) => l.id === currentTest.level)?.passingScore || 0;
     const reviewQuestion = allQuestions[reviewQuestionIndex];
 
     const handleRedo = () => {
@@ -856,6 +1149,10 @@ const ResultView = () => {
         const popupHeight = 900;
         const left = (window.screen.width - popupWidth) / 2;
         const top = (window.screen.height - popupHeight) / 2;
+
+        // Clear state before redoing
+        localStorage.removeItem(`jlpt_exam_state_${testId}`);
+        localStorage.removeItem(`jlpt_result_${testId}`);
 
         window.open(
             `/thi-thu-JLPT/exam/${testId}`,
@@ -875,7 +1172,7 @@ const ResultView = () => {
                     <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">Kết quả bài thi</h1>
                     <p className="text-gray-500 text-lg mb-6">{currentTest.title}</p>
 
-                    <div className="grid grid-cols-3 gap-3 md:gap-6 mb-6">
+                    <div className="grid grid-cols-2 gap-3 md:gap-6 mb-6">
                         <div className="p-4 bg-red-50 rounded-[1.5rem]">
                             <div className="text-2xl md:text-3xl font-black text-red-600 mb-1">{score.correct}</div>
                             <div className="text-[10px] md:text-xs font-black text-red-400 uppercase tracking-wider">
@@ -888,10 +1185,27 @@ const ResultView = () => {
                                 Tổng câu
                             </div>
                         </div>
-                        <div className="p-4 bg-green-50 rounded-[1.5rem]">
-                            <div className="text-2xl md:text-3xl font-black text-green-600 mb-1">{percent}%</div>
-                            <div className="text-[10px] md:text-xs font-black text-green-400 uppercase tracking-wider">
-                                Tỷ lệ
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 md:gap-6 mb-6">
+                        <div className="p-4 bg-blue-50 rounded-[1.5rem]">
+                            <div className="text-2xl md:text-3xl font-black text-blue-600 mb-1">{jlptScore}/180</div>
+                            <div className="text-[10px] md:text-xs font-black text-blue-400 uppercase tracking-wider">
+                                Điểm JLPT
+                            </div>
+                        </div>
+                        <div
+                            className={`p-4 rounded-[1.5rem] ${jlptScore >= passingScore ? 'bg-green-50' : 'bg-red-50'}`}
+                        >
+                            <div
+                                className={`text-2xl md:text-3xl font-black mb-1 ${jlptScore >= passingScore ? 'text-green-600' : 'text-red-600'}`}
+                            >
+                                {passingScore}
+                            </div>
+                            <div
+                                className={`text-[10px] md:text-xs font-black uppercase tracking-wider ${jlptScore >= passingScore ? 'text-green-400' : 'text-red-400'}`}
+                            >
+                                {jlptScore >= passingScore ? 'Vượt qua ✓' : 'Điểm cần đạt'}
                             </div>
                         </div>
                     </div>
@@ -904,7 +1218,10 @@ const ResultView = () => {
                             <FaRedo /> Làm lại đề này
                         </button>
                         <button
-                            onClick={() => navigate('/thi-thu-JLPT')}
+                            onClick={() => {
+                                navigate('/thi-thu-JLPT');
+                                window.close();
+                            }}
                             className="px-8 py-3 cursor-pointer bg-white text-gray-700 font-black rounded-2xl border border-gray-100 shadow-sm hover:bg-gray-100 transition-all flex items-center justify-center gap-2 text-sm"
                         >
                             <FaHome /> Quay về cấp độ
@@ -931,66 +1248,81 @@ const ResultView = () => {
                         </div>
 
                         {showAllAnswers ? (
-                            <div className="space-y-6">
-                                {allQuestions.map((q, idx) => (
-                                    <div
-                                        key={q.id}
-                                        className="bg-white rounded-[1rem] p-5 shadow-sm border border-gray-100"
-                                    >
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <span
-                                                className={`px-5 py-2 rounded-lg font-black ${answers[q.id] === q.correct ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}
-                                            >
-                                                Câu {idx + 1}
-                                            </span>
-                                            <div>
-                                                <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
-                                                    {q.sectionName}
-                                                </div>
-                                                <div
-                                                    className={`text-sm font-bold ${answers[q.id] === q.correct ? 'text-green-600' : 'text-red-600'}`}
-                                                >
-                                                    {answers[q.id] === q.correct
-                                                        ? 'Câu trả lời đúng'
-                                                        : 'Câu trả lời sai'}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <p className="text-lg text-gray-800 font-bold mb-3">{q.text}</p>
-                                        <div className="grid gap-2 mb-6">
-                                            {q.options.map((opt, oIdx) => (
-                                                <div
-                                                    key={oIdx}
-                                                    className={`p-2 rounded-xl border-2 flex items-center gap-2 ${
-                                                        oIdx === q.correct
-                                                            ? 'bg-green-50 border-green-500 text-green-700'
-                                                            : oIdx === answers[q.id] && answers[q.id] !== q.correct
-                                                              ? 'bg-red-50 border-red-500 text-red-700'
-                                                              : 'bg-gray-50 border-transparent text-gray-400 opacity-60'
-                                                    }`}
-                                                >
+                            <div className="space-y-8">
+                                {questionsBySection.map((section, sectionIdx) => (
+                                    <div key={sectionIdx}>
+                                        <h3 className="text-lg font-black text-gray-800 mb-4 pb-3 border-b-2 border-red-600">
+                                            {section.sectionName}
+                                        </h3>
+                                        <div className="space-y-4">
+                                            {section.questions.map((q) => {
+                                                const globalQIdx = allQuestions.findIndex((aq) => aq.id === q.id);
+                                                return (
                                                     <div
-                                                        className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm ${
-                                                            oIdx === q.correct
-                                                                ? 'bg-green-600 text-white'
-                                                                : oIdx === answers[q.id] && answers[q.id] !== q.correct
-                                                                  ? 'bg-red-600 text-white'
-                                                                  : 'bg-white text-gray-300'
-                                                        }`}
+                                                        key={q.id}
+                                                        className="bg-white rounded-[1rem] p-5 shadow-sm border border-gray-100"
                                                     >
-                                                        {String.fromCharCode(65 + oIdx)}
+                                                        <div className="flex items-center gap-3 mb-4">
+                                                            <span
+                                                                className={`px-5 py-2 rounded-lg font-black ${answers[q.id] === q.correct ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}
+                                                            >
+                                                                Câu {globalQIdx + 1}
+                                                            </span>
+                                                            <div>
+                                                                <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
+                                                                    {q.sectionName}
+                                                                </div>
+                                                                <div
+                                                                    className={`text-sm font-bold ${answers[q.id] === q.correct ? 'text-green-600' : 'text-red-600'}`}
+                                                                >
+                                                                    {answers[q.id] === q.correct
+                                                                        ? 'Câu trả lời đúng'
+                                                                        : 'Câu trả lời sai'}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <p className="text-lg text-gray-800 font-bold mb-3">{q.text}</p>
+                                                        <div className="grid gap-2 mb-6">
+                                                            {q.options.map((opt, oIdx) => (
+                                                                <div
+                                                                    key={oIdx}
+                                                                    className={`p-2 rounded-xl border-2 flex items-center gap-2 ${
+                                                                        oIdx === q.correct
+                                                                            ? 'bg-green-50 border-green-500 text-green-700'
+                                                                            : oIdx === answers[q.id] &&
+                                                                                answers[q.id] !== q.correct
+                                                                              ? 'bg-red-50 border-red-500 text-red-700'
+                                                                              : 'bg-gray-50 border-transparent text-gray-400 opacity-60'
+                                                                    }`}
+                                                                >
+                                                                    <div
+                                                                        className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm ${
+                                                                            oIdx === q.correct
+                                                                                ? 'bg-green-600 text-white'
+                                                                                : oIdx === answers[q.id] &&
+                                                                                    answers[q.id] !== q.correct
+                                                                                  ? 'bg-red-600 text-white'
+                                                                                  : 'bg-white text-gray-300'
+                                                                        }`}
+                                                                    >
+                                                                        {String.fromCharCode(65 + oIdx)}
+                                                                    </div>
+                                                                    <span className="font-bold">{opt}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                        <div className="bg-blue-50/50 p-3 rounded-[1rem] border border-blue-100">
+                                                            <h4 className="flex items-center gap-2 text-blue-800 font-black mb-1">
+                                                                <FaInfoCircle /> Giải thích:
+                                                            </h4>
+                                                            <p className="text-blue-700 leading-relaxed text-[15px] font-medium">
+                                                                {q.explanation ||
+                                                                    'Đang cập nhật giải thích cho câu hỏi này.'}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    <span className="font-bold">{opt}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <div className="bg-blue-50/50 p-3 rounded-[1rem] border border-blue-100">
-                                            <h4 className="flex items-center gap-2 text-blue-800 font-black mb-1">
-                                                <FaInfoCircle /> Giải thích:
-                                            </h4>
-                                            <p className="text-blue-700 leading-relaxed text-[15px] font-medium">
-                                                {q.explanation || 'Đang cập nhật giải thích cho câu hỏi này.'}
-                                            </p>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 ))}
@@ -1116,8 +1448,8 @@ const ResultView = () => {
                                             reviewQuestionIndex === idx && !showAllAnswers
                                                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
                                                 : answers[q.id] === q.correct
-                                                  ? 'bg-green-200 text-green-700 hover:bg-green-200'
-                                                  : 'bg-red-200 text-red-600 hover:bg-red-200'
+                                                  ? 'bg-green-200 cursor-pointer text-green-700 hover:bg-green-200'
+                                                  : 'bg-red-200 cursor-pointer text-red-600 hover:bg-red-200'
                                         }`}
                                     >
                                         {idx + 1}
