@@ -4,10 +4,10 @@ import aboutBanner from '../../assets/img/aboutBanner.jpg';
 export default function AboutSection() {
     return (
         <section className="py-16 bg-gray-100">
-            <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
+            <div className="max-w-7xl mx-auto px-8 grid md:grid-cols-2 gap-8 items-center">
                 {/* Ảnh */}
                 <div>
-                    <img src={aboutBanner} alt="About Sakae" className="rounded-2xl w-145" />
+                    <img src={aboutBanner} alt="About Sakae" className="rounded-2xl w-130" />
                 </div>
 
                 {/* Nội dung */}

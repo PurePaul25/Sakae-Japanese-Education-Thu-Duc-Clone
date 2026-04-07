@@ -50,7 +50,7 @@ function ExtracurricularSection() {
                             />
 
                             {/* Text Container */}
-                            <div className="absolute bottom-0 left-0 w-full p-4 bg-black/20 backdrop-blur-sm border-t border-white/20 transition-all duration-300">
+                            <div className="absolute bottom-0 left-0 w-full p-4 bg-black/20 backdrop-blur-md border-t border-white/20 transition-all duration-300">
                                 <h3 className="text-white text-lg font-bold leading-tight">{item.title}</h3>
                                 {/* <div className="max-h-0 overflow-hidden group-hover:max-h-20 transition-all duration-500 ease-out">
                                     <div className="pt-2 flex items-center text-red-400 font-semibold text-sm">

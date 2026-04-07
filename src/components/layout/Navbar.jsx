@@ -38,6 +38,8 @@ function Navbar() {
     // State và Ref cho hiệu ứng gạch chân di chuyển
     const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0, opacity: 0 });
     const navItemsRef = useRef([]);
+    const dropdownRef = useRef(null);
+
     const location = useLocation();
 
     // Cập nhật gạch chân khi location thay đổi
@@ -79,13 +81,28 @@ function Navbar() {
         // Thêm logic thay đổi ngôn ngữ thực tế ở đây
     };
 
+    // Logic Bắt sự kiện click toàn document của chuyển đổi ngôn ngữ
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     return (
         <header
             className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b-1 border-gray-200 ${
                 isScrolled ? 'bg-white shadow-md' : 'bg-white/70'
             }`}
         >
-            <div className="max-w-7xl mx-auto flex items-center justify-between px-4">
+            <div className="max-w-7xl mx-auto flex items-center justify-between px-3">
                 {/* Logo */}
                 <div className="flex items-center gap-2">
                     <Link to="/">
@@ -162,11 +179,19 @@ function Navbar() {
                         Đăng ký học
                     </Link>
 
+                    {/* Nút đăng nhập */}
+                    <Link
+                        to="/dang-nhap"
+                        className="hidden md:block cursor-pointer text-gray-700 hover:text-red-600 transition duration-250 ease-in-out"
+                    >
+                        Đăng nhập
+                    </Link>
+
                     {/* Chọn ngôn ngữ */}
-                    <div className="relative text-sm z-10">
+                    <div ref={dropdownRef} className="relative text-sm z-10">
                         <button
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                            className="flex items-center gap-2 cursor-pointer rounded border border-gray-300 py-2 pl-3 pr-3 bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                            className="flex items-center gap-2 cursor-pointer rounded border border-gray-300 py-2 pl-3 pr-3 bg-white focus:outline-none focus:ring-1 focus:ring-red-500"
                         >
                             <img src={selectedLang.icon} alt={selectedLang.label} className="w-5 h-5" />
                             <svg
@@ -210,9 +235,13 @@ function Navbar() {
                     {/* Icon menu mobile */}
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className="lg:hidden text-gray-700 hover:text-red-600 transition duration-300 cursor-pointer"
+                        className="lg:hidden text-gray-700 transition duration-300 cursor-pointer ease-in-out focus:outline-none"
                     >
-                        {isMenuOpen ? <FiX size={28} /> : <FiMenu size={28} />}
+                        <div
+                            className={`transition-all duration-300 transform ${isMenuOpen ? 'rotate-90' : 'rotate-0'}`}
+                        >
+                            {isMenuOpen ? <FiX size={28} /> : <FiMenu size={28} />}
+                        </div>
                     </button>
                 </div>
             </div>
@@ -278,15 +307,24 @@ function Navbar() {
                     )}
                     <div className="flex flex-col items-center w-full pt-4 border-t-2 border-gray-800/20  md:hidden">
                         <div className="block sm:hidden mb-4">
-                            <SearchBar />
+                            <SearchBar setIsMenuOpen={setIsMenuOpen} />
                         </div>
-                        <Link
-                            to="/khoa-hoc"
-                            className=" bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200 cursor-pointer"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            Đăng ký học
-                        </Link>
+                        <div className="flex items-center gap-3">
+                            <Link
+                                to="/khoa-hoc"
+                                className=" bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200 cursor-pointer"
+                                onClick={() => setIsMenuOpen(false)}
+                            >
+                                Đăng ký học
+                            </Link>
+                            <Link
+                                to="/dang-nhap"
+                                className="text-red-600 hover:text-red-700 transition duration-200"
+                                onClick={() => setIsMenuOpen(false)}
+                            >
+                                Đăng nhập
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>
