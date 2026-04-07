@@ -26,18 +26,53 @@ const SignupForm = ({ onSwitchMode, direction }) => {
     const passwordStrength = calculatePasswordStrength(signupPassword);
     const passwordRequirements = checkPasswordRequirements(signupPassword);
 
-    const isSignupValid =
-        isValidUsername(signupUsername) &&
-        isValidEmail(signupEmail) &&
-        isPasswordValid(signupPassword) &&
-        signupPassword === signupConfirmPassword;
-
     const handleSignup = (e) => {
         e.preventDefault();
-        if (isSignupValid) {
-            console.log('Signup:', { signupUsername, signupEmail, signupPassword });
-            addToast('Đăng ký thành công! Tài khoản của bạn đã được tạo.', 'success');
+
+        // Validation checks
+        if (!signupUsername) {
+            addToast('Vui lòng nhập tên người dùng', 'error');
+            return;
         }
+
+        if (!isValidUsername(signupUsername)) {
+            addToast('Tên phải có 3-20 ký tự, chỉ chứa chữ, số, _ hoặc -', 'error');
+            return;
+        }
+
+        if (!signupEmail) {
+            addToast('Vui lòng nhập email', 'error');
+            return;
+        }
+
+        if (!isValidEmail(signupEmail)) {
+            addToast('Email không hợp lệ, vui lòng kiểm tra lại', 'error');
+            return;
+        }
+
+        if (!signupPassword) {
+            addToast('Vui lòng tạo mật khẩu', 'error');
+            return;
+        }
+
+        if (!isPasswordValid(signupPassword)) {
+            addToast('Mật khẩu phải có: Số, chữ, chữ hoa và trên 7 ký tự', 'error');
+            return;
+        }
+
+        if (signupPassword !== signupConfirmPassword) {
+            addToast('Mật khẩu xác nhận không khớp', 'error');
+            return;
+        }
+
+        // Success
+        console.log('Signup:', { signupUsername, signupEmail, signupPassword });
+        addToast('Đăng ký thành công! Vui lòng đăng nhập để sử dụng nhé!', 'success');
+
+        // Switch to login after 1.5 seconds
+        setTimeout(() => {
+            onSwitchMode('login', -1);
+        }, 1500);
     };
 
     const formVariants = {
@@ -230,19 +265,14 @@ const SignupForm = ({ onSwitchMode, direction }) => {
                         </button>
                     </div>
                     {signupConfirmPassword && signupPassword !== signupConfirmPassword && (
-                        <p className="text-[11px] text-red-500 mt-1 ml-1">Mật khẩu không khớp</p>
+                        <p className="text-xs text-red-500 mt-1 ml-1">Mật khẩu không khớp</p>
                     )}
                 </div>
 
                 {/* Submit Button */}
                 <button
                     type="submit"
-                    disabled={!isSignupValid}
-                    className={`w-full py-3 cursor-pointer rounded-xl font-bold text-white transition-all duration-300 mt-2 ${
-                        isSignupValid
-                            ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-orange-500 shadow-[0_8px_16px_-6px_rgba(220,38,38,0.5)] hover:shadow-[0_12px_20px_-6px_rgba(220,38,38,0.6)] transform hover:-translate-y-0.5'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed hidden-shadow'
-                    }`}
+                    className="w-full py-3 cursor-pointer rounded-xl font-bold text-white transition-all duration-300 mt-2 bg-red-600 hover:bg-red-500 shadow-[0_8px_16px_-6px_rgba(220,38,38,0.5)] hover:shadow-[0_12px_20px_-6px_rgba(220,38,38,0.6)] transform hover:-translate-y-0.5 active:translate-y-0"
                 >
                     Đăng Ký
                 </button>

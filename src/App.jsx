@@ -10,16 +10,17 @@ function App() {
     const location = useLocation();
     const isExamPage = location.pathname.includes('/thi-thu-JLPT/exam');
     const isAuthPage = location.pathname.includes('/dang-nhap') || location.pathname.includes('/dang-ky');
+    const isAdminPage = location.pathname.includes('/admin');
 
     return (
         <div className="flex flex-col min-h-screen">
-            {!isExamPage && !isAuthPage && <Navbar />}
+            {!isExamPage && !isAuthPage && !isAdminPage && <Navbar />}
             <ScrollToTop />
             <Toast />
             <main className="flex-grow">
                 <AppRoutes />
             </main>
-            {!isExamPage && !isAuthPage && <Footer />}
+            {!isExamPage && !isAuthPage && !isAdminPage && <Footer />}
         </div>
     );
 }

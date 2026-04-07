@@ -13,6 +13,8 @@ const GalleryLazy = lazy(() => import('../pages/Gallerys'));
 const JLPTMockTestLazy = lazy(() => import('../pages/JLPTMockTest'));
 const SearchResultsLazy = lazy(() => import('../pages/SearchResults'));
 const AuthLazy = lazy(() => import('../pages/Auth'));
+const AdminAuthLazy = lazy(() => import('../pages/admin/AdminAuth'));
+const AdminDashboardLazy = lazy(() => import('../pages/admin/AdminDashboard'));
 const NotFoundLazy = lazy(() => import('../pages/NotFound'));
 
 // Component xử lý chuyển hướng từ sessionStorage
@@ -55,6 +57,11 @@ function AppRoutes() {
                 <Route path="/dang-nhap" element={<AuthLazy />} />
                 <Route path="/dang-ky" element={<AuthLazy />} />
                 <Route path="/thi-thu-JLPT/*" element={<JLPTMockTestLazy />} />
+
+                {/* Admin Routes */}
+                <Route path="/admin/dang-nhap" element={<AdminAuthLazy />} />
+                <Route path="/admin/dashboard" element={<AdminDashboardLazy />} />
+
                 <Route path="*" element={<NotFoundLazy />} />
             </Routes>
         </Suspense>

@@ -3,8 +3,10 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaEye, FaEyeSlash, FaEnvelope, FaLock, FaArrowLeft } from 'react-icons/fa';
 import { isValidEmail } from '../../utils/authUtils';
+import { loginAPI } from '../../utils/authAPI';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../../contexts/ToastContext';
+import { useUser } from '../../contexts/UserContext';
 import logo from '../../assets/img/logo_Sakae.png';
 
 const LoginForm = ({ onSwitchMode, direction }) => {
@@ -12,17 +14,51 @@ const LoginForm = ({ onSwitchMode, direction }) => {
     const [loginPassword, setLoginPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [rememberPassword, setRememberPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const navigate = useNavigate();
     const { addToast } = useToast();
+    const { login } = useUser();
 
-    const isLoginValid = isValidEmail(loginEmail) && loginPassword.length >= 6;
-
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        if (isLoginValid) {
-            console.log('Login:', { loginEmail, loginPassword, rememberPassword });
-            addToast('Đăng nhập thành công! Chào mừng quay lại Sakae!', 'success');
+
+        // Validation checks
+        if (!loginEmail) {
+            addToast('Vui lòng nhập email', 'error');
+            return;
+        }
+
+        if (!isValidEmail(loginEmail)) {
+            addToast('Email không hợp lệ, vui lòng kiểm tra lại', 'error');
+            return;
+        }
+
+        if (!loginPassword) {
+            addToast('Vui lòng nhập mật khẩu', 'error');
+            return;
+        }
+
+        if (loginPassword.length < 6) {
+            addToast('Mật khẩu phải có ít nhất 6 ký tự', 'error');
+            return;
+        }
+
+        // Try login with fake API
+        setIsLoading(true);
+        try {
+            const userData = await loginAPI(loginEmail, loginPassword);
+            login(userData);
+
+            // Store flag to show toast on home page
+            sessionStorage.setItem('showLoginSuccessToast', 'true');
+
+            // Redirect immediately to home
+            navigate('/');
+        } catch (error) {
+            addToast(error.message, 'error');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -157,14 +193,14 @@ const LoginForm = ({ onSwitchMode, direction }) => {
                 {/* Submit Button */}
                 <button
                     type="submit"
-                    disabled={!isLoginValid}
-                    className={`w-full py-3.5 rounded-xl font-bold text-white transition-all duration-300 ${
-                        isLoginValid
-                            ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-orange-500 shadow-[0_8px_16px_-6px_rgba(220,38,38,0.5)] hover:shadow-[0_12px_20px_-6px_rgba(220,38,38,0.6)] transform hover:-translate-y-0.5'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed hidden-shadow'
+                    disabled={isLoading}
+                    className={`w-full py-3.5 cursor-pointer rounded-xl font-bold text-white transition-all duration-300 ${
+                        isLoading
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-red-600 hover:bg-red-500 hover:shadow-[0_12px_20px_-6px_rgba(220,38,38,0.6)] transform hover:-translate-y-0.5 active:translate-y-0'
                     }`}
                 >
-                    Đăng Nhập
+                    {isLoading ? 'Đang đăng nhập...' : 'Đăng Nhập'}
                 </button>
             </form>
 

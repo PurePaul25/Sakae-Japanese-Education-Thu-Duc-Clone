@@ -1,8 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'framer-motion';
 import logo from '../../assets/img/logo_Sakae.png';
 import vietnamIcon from '../../assets/img/vietnam.png';
 import japanIcon from '../../assets/img/japan.png';
+import { useUser } from '../../contexts/UserContext';
+import { useToast } from '../../contexts/ToastContext';
 
 import { FiMenu, FiX, FiChevronDown } from 'react-icons/fi';
 import SearchBar from './SearchBar';
@@ -30,6 +34,7 @@ function Navbar() {
     ];
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
     const [selectedLang, setSelectedLang] = useState(languages[0]);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -39,8 +44,12 @@ function Navbar() {
     const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0, opacity: 0 });
     const navItemsRef = useRef([]);
     const dropdownRef = useRef(null);
+    const userDropdownRef = useRef(null);
 
     const location = useLocation();
+    const navigate = useNavigate();
+    const { user, logout } = useUser();
+    const { addToast } = useToast();
 
     // Cập nhật gạch chân khi location thay đổi
     useEffect(() => {
@@ -87,6 +96,9 @@ function Navbar() {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setIsDropdownOpen(false);
             }
+            if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+                setIsUserDropdownOpen(false);
+            }
         };
 
         document.addEventListener('mousedown', handleClickOutside);
@@ -95,6 +107,15 @@ function Navbar() {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+
+    const handleLogout = () => {
+        logout();
+        setIsUserDropdownOpen(false);
+        addToast('Bạn đã đăng xuất thành công!', 'success');
+        setTimeout(() => {
+            navigate('/');
+        }, 500);
+    };
 
     return (
         <header
@@ -169,33 +190,45 @@ function Navbar() {
                     <SearchBar />
                 </div>
 
-                {/* Nút đăng ký + ngôn ngữ + hamburger */}
-                <div className="flex items-center gap-4">
-                    {/* Nút đăng ký */}
+                {/* Nút đăng ký + ngôn ngữ + user + hamburger */}
+                <div className="flex items-center gap-3 md:gap-4">
+                    {/* Nút đăng ký học (luôn hiển thị) */}
                     <Link
                         to="/khoa-hoc"
-                        className="hidden md:block cursor-pointer bg-red-600 text-white py-2 px-3 rounded-md hover:bg-red-700 transition duration-250 ease-in-out"
+                        className="hidden md:flex items-center gap-1 cursor-pointer bg-red-600 text-white py-2 px-3 rounded-md hover:bg-red-700 transition duration-200 ease-out"
                     >
                         Đăng ký học
                     </Link>
 
-                    {/* Nút đăng nhập */}
-                    <Link
-                        to="/dang-nhap"
-                        className="hidden md:block cursor-pointer text-gray-700 hover:text-red-600 transition duration-250 ease-in-out"
-                    >
-                        Đăng nhập
-                    </Link>
+                    {/* Nút đăng nhập (desktop) */}
+                    {!user && (
+                        <Link
+                            to="/dang-nhap"
+                            className="hidden md:block cursor-pointer text-gray-700 hover:text-red-600 transition duration-200 ease-out"
+                        >
+                            Đăng nhập
+                        </Link>
+                    )}
+
+                    {/* Nút đăng nhập (mobile) */}
+                    {!user && (
+                        <Link
+                            to="/dang-nhap"
+                            className="md:hidden cursor-pointer text-gray-700 hover:text-red-600 transition duration-200 ease-out text-sm"
+                        >
+                            Đăng nhập
+                        </Link>
+                    )}
 
                     {/* Chọn ngôn ngữ */}
                     <div ref={dropdownRef} className="relative text-sm z-10">
                         <button
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                            className="flex items-center gap-2 cursor-pointer rounded border border-gray-300 py-2 pl-3 pr-3 bg-white focus:outline-none focus:ring-1 focus:ring-red-500"
+                            className="flex items-center gap-2 cursor-pointer rounded border border-gray-300 py-2 pl-3 pr-3 bg-white focus:outline-none focus:ring-1 focus:ring-red-500 transition duration-200 ease-out"
                         >
                             <img src={selectedLang.icon} alt={selectedLang.label} className="w-5 h-5" />
                             <svg
-                                className={`w-4 h-4 transition-transform duration-200 ${
+                                className={`w-4 h-4 transition-transform duration-200 ease-out ${
                                     isDropdownOpen ? 'rotate-180' : ''
                                 }`}
                                 fill="none"
@@ -212,9 +245,12 @@ function Navbar() {
                             </svg>
                         </button>
 
-                        <div
-                            className={`absolute right-0 mt-2 w-40 origin-top-right bg-white rounded-md shadow-lg border border-gray-200 transition-all duration-300 ease-in-out transform ${
-                                isDropdownOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'
+                        <motion.div
+                            initial={{ opacity: 0, y: -8 }}
+                            animate={isDropdownOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: -8 }}
+                            transition={{ duration: 0.15, ease: 'easeOut' }}
+                            className={`absolute right-0 mt-2 w-40 origin-top-right bg-white rounded-md shadow-lg border border-gray-200 ${
+                                isDropdownOpen ? 'visible' : 'invisible'
                             }`}
                         >
                             <ul className="py-1">
@@ -229,8 +265,122 @@ function Navbar() {
                                     </li>
                                 ))}
                             </ul>
-                        </div>
+                        </motion.div>
                     </div>
+
+                    {/* User Dropdown (khi đã login) */}
+                    {user && (
+                        <div ref={userDropdownRef} className="relative text-sm z-20">
+                            {/* Desktop version - avatar + arrow only */}
+                            <button
+                                onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                                className="hidden md:flex items-center gap-2 cursor-pointer rounded-full border border-gray-300 py-1 pl-1 pr-2 bg-white hover:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition duration-200 ease-out"
+                            >
+                                <img
+                                    src={user.avatar}
+                                    alt={user.fullName}
+                                    className="w-8 h-8 rounded-full object-cover"
+                                />
+                                <svg
+                                    className={`w-4 h-4 text-gray-500 transition-transform duration-200 ease-out ${
+                                        isUserDropdownOpen ? 'rotate-180' : ''
+                                    }`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M19 9l-7 7-7-7"
+                                    />
+                                </svg>
+                            </button>
+
+                            {/* Mobile version - icon only button */}
+                            <button
+                                onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                                className="md:hidden flex items-center gap-1 cursor-pointer rounded-full border border-gray-300 py-1 px-1.5 bg-white hover:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition duration-200 ease-out"
+                            >
+                                <img
+                                    src={user.avatar}
+                                    alt={user.fullName}
+                                    className="w-8 h-8 rounded-full object-cover"
+                                />
+                                <svg
+                                    className={`w-3 h-3 text-gray-500 transition-transform duration-200 ease-out ${
+                                        isUserDropdownOpen ? 'rotate-180' : ''
+                                    }`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M19 9l-7 7-7-7"
+                                    />
+                                </svg>
+                            </button>
+
+                            {/* User Dropdown Menu */}
+                            <motion.div
+                                initial={{ opacity: 0, y: -8 }}
+                                animate={isUserDropdownOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: -8 }}
+                                transition={{ duration: 0.15, ease: 'easeOut' }}
+                                className={`absolute right-0 mt-2 w-56 origin-top-right bg-white rounded-lg shadow-xl border border-gray-200 ${
+                                    isUserDropdownOpen ? 'visible' : 'invisible'
+                                }`}
+                            >
+                                {/* User Info Header */}
+                                <div className="p-3 border-b border-gray-100">
+                                    <p className="font-semibold text-gray-800">{user.fullName}</p>
+                                    <p className="text-xs text-gray-500">{user.email}</p>
+                                </div>
+
+                                {/* Menu Items */}
+                                <ul className="pb-2">
+                                    <li>
+                                        <Link
+                                            to="/"
+                                            onClick={() => setIsUserDropdownOpen(false)}
+                                            className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
+                                        >
+                                            👤 Hồ sơ cá nhân
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link
+                                            to="/"
+                                            onClick={() => setIsUserDropdownOpen(false)}
+                                            className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
+                                        >
+                                            🎓 Khóa học của tôi
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link
+                                            to="/"
+                                            onClick={() => setIsUserDropdownOpen(false)}
+                                            className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
+                                        >
+                                            ⚙️ Cài đặt
+                                        </Link>
+                                    </li>
+                                    <li className="border-t border-gray-100">
+                                        <button
+                                            onClick={handleLogout}
+                                            className="block cursor-pointer w-full text-left px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
+                                        >
+                                            🚪 Đăng xuất
+                                        </button>
+                                    </li>
+                                </ul>
+                            </motion.div>
+                        </div>
+                    )}
 
                     {/* Icon menu mobile */}
                     <button
@@ -309,20 +459,13 @@ function Navbar() {
                         <div className="block sm:hidden mb-4">
                             <SearchBar setIsMenuOpen={setIsMenuOpen} />
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="my-1">
                             <Link
                                 to="/khoa-hoc"
                                 className=" bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200 cursor-pointer"
                                 onClick={() => setIsMenuOpen(false)}
                             >
                                 Đăng ký học
-                            </Link>
-                            <Link
-                                to="/dang-nhap"
-                                className="text-red-600 hover:text-red-700 transition duration-200"
-                                onClick={() => setIsMenuOpen(false)}
-                            >
-                                Đăng nhập
                             </Link>
                         </div>
                     </div>

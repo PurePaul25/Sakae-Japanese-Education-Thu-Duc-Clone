@@ -15,11 +15,26 @@ const ForgotPasswordForm = ({ onSwitchMode, direction }) => {
 
     const handleForgotPassword = (e) => {
         e.preventDefault();
-        if (isValidEmail(forgotEmail)) {
-            setResetSent(true);
-            addToast(`Link đặt lại mật khẩu đã được gửi tới ${forgotEmail}`, 'success');
-            setTimeout(() => setResetSent(false), 3000);
+
+        if (!forgotEmail) {
+            addToast('Vui lòng nhập email', 'error');
+            return;
         }
+
+        if (!isValidEmail(forgotEmail)) {
+            addToast('Email không hợp lệ, vui lòng kiểm tra lại', 'error');
+            return;
+        }
+
+        // Success
+        setResetSent(true);
+        addToast(`Link đặt lại mật khẩu đã được gửi tới ${forgotEmail}`, 'success');
+
+        // Clear input and reset state after 3 seconds
+        setTimeout(() => {
+            setForgotEmail('');
+            setResetSent(false);
+        }, 3000);
     };
 
     const formVariants = {
@@ -101,12 +116,7 @@ const ForgotPasswordForm = ({ onSwitchMode, direction }) => {
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            disabled={!isValidEmail(forgotEmail)}
-                            className={`w-full py-3.5 cursor-pointer rounded-xl font-bold text-white transition-all duration-300 ${
-                                isValidEmail(forgotEmail)
-                                    ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-orange-500 shadow-[0_8px_16px_-6px_rgba(220,38,38,0.5)] hover:shadow-[0_12px_20px_-6px_rgba(220,38,38,0.6)] transform hover:-translate-y-0.5'
-                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed hidden-shadow'
-                            }`}
+                            className="w-full py-3.5 cursor-pointer rounded-xl font-bold text-white transition-all duration-300 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-orange-500 shadow-[0_8px_16px_-6px_rgba(220,38,38,0.5)] hover:shadow-[0_12px_20px_-6px_rgba(220,38,38,0.6)] transform hover:-translate-y-0.5 active:translate-y-0"
                         >
                             Gửi Hướng Dẫn
                         </button>

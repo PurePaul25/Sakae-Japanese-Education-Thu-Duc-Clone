@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 // eslint-disable-next-line no-unused-vars
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FaCheckCircle, FaTimesCircle, FaInfoCircle, FaTimes } from 'react-icons/fa';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -114,104 +114,108 @@ const Toast = () => {
         <>
             {/* Mobile: Top Center */}
             <motion.div
-                className="fixed top-4 left-1/2 transform -translate-x-1/2 z-9999 w-11/12 max-w-md md:hidden"
+                className="fixed top-3 left-1/2 transform -translate-x-1/2 z-9999 w-11/12 max-w-md md:hidden"
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
             >
-                {toasts.map((toast) => {
-                    const config = getToastConfig(toast.type);
-                    const Icon = config.icon;
+                <AnimatePresence>
+                    {toasts.map((toast) => {
+                        const config = getToastConfig(toast.type);
+                        const Icon = config.icon;
 
-                    return (
-                        <motion.div
-                            key={toast.id}
-                            layout
-                            variants={toastVariants}
-                            initial="hidden"
-                            animate="visible"
-                            exit="exit"
-                            className={`mb-3 ${config.bgColor} border-2 ${config.borderColor} rounded-lg overflow-hidden shadow-lg backdrop-blur-sm`}
-                        >
-                            {/* Main Content */}
-                            <div className="p-4 flex items-start gap-3">
-                                <Icon className={`${config.iconColor} text-xl mt-0.5 flex-shrink-0`} />
-                                <div className="flex-grow">
-                                    <p className={`font-bold ${config.textColor}`}>{config.title}</p>
-                                    <p className={`text-sm ${config.textColor} opacity-90`}>{toast.message}</p>
-                                </div>
-                                <button
-                                    onClick={() => removeToast(toast.id)}
-                                    className={`${config.iconColor} hover:${config.textColor} transition cursor-pointer flex-shrink-0 mt-0.5`}
-                                >
-                                    <FaTimes size={14} />
-                                </button>
-                            </div>
-
-                            {/* Progress Bar */}
+                        return (
                             <motion.div
-                                initial={{ scaleX: 1 }}
-                                animate={{ scaleX: 0 }}
-                                transition={{
-                                    duration: 4,
-                                    ease: 'linear',
-                                }}
-                                className={`h-1 ${config.progressColor} origin-left`}
-                            />
-                        </motion.div>
-                    );
-                })}
+                                key={toast.id}
+                                layout
+                                variants={toastVariants}
+                                initial="hidden"
+                                animate="visible"
+                                exit="exit"
+                                className={`mb-3 ${config.bgColor} border-2 ${config.borderColor} rounded-lg overflow-hidden shadow-lg backdrop-blur-sm`}
+                            >
+                                {/* Main Content */}
+                                <div className="p-3 flex items-start gap-3">
+                                    <Icon className={`${config.iconColor} text-xl mt-0.5 flex-shrink-0`} />
+                                    <div className="flex-grow">
+                                        <p className={`font-bold ${config.textColor}`}>{config.title}</p>
+                                        <p className={`text-sm ${config.textColor} opacity-90`}>{toast.message}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => removeToast(toast.id)}
+                                        className={`${config.iconColor} hover:${config.textColor} transition cursor-pointer flex-shrink-0 mt-0.5`}
+                                    >
+                                        <FaTimes size={14} />
+                                    </button>
+                                </div>
+
+                                {/* Progress Bar */}
+                                <motion.div
+                                    initial={{ scaleX: 1 }}
+                                    animate={{ scaleX: 0 }}
+                                    transition={{
+                                        duration: 4,
+                                        ease: 'linear',
+                                    }}
+                                    className={`h-1 ${config.progressColor} origin-left`}
+                                />
+                            </motion.div>
+                        );
+                    })}
+                </AnimatePresence>
             </motion.div>
 
             {/* Desktop: Top Right */}
             <motion.div
-                className="fixed top-6 right-6 z-9999 w-96 hidden md:block space-y-3"
+                className="fixed top-3 right-6 z-9999 w-96 hidden md:block space-y-3"
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
             >
-                {toasts.map((toast) => {
-                    const config = getToastConfig(toast.type);
-                    const Icon = config.icon;
+                <AnimatePresence>
+                    {toasts.map((toast) => {
+                        const config = getToastConfig(toast.type);
+                        const Icon = config.icon;
 
-                    return (
-                        <motion.div
-                            key={toast.id}
-                            layout
-                            variants={toastVariants}
-                            initial="hidden"
-                            animate="visible"
-                            exit="exit"
-                            className={`${config.bgColor} border-2 ${config.borderColor} rounded-lg overflow-hidden shadow-xl backdrop-blur-sm`}
-                        >
-                            {/* Main Content */}
-                            <div className="p-4 flex items-start gap-3">
-                                <Icon className={`${config.iconColor} text-xl mt-0.5 flex-shrink-0`} />
-                                <div className="flex-grow">
-                                    <p className={`font-bold ${config.textColor}`}>{config.title}</p>
-                                    <p className={`text-sm ${config.textColor} opacity-90`}>{toast.message}</p>
-                                </div>
-                                <button
-                                    onClick={() => removeToast(toast.id)}
-                                    className={`${config.iconColor} hover:${config.textColor} transition cursor-pointer flex-shrink-0 mt-0.5`}
-                                >
-                                    <FaTimes size={14} />
-                                </button>
-                            </div>
-
-                            {/* Progress Bar */}
+                        return (
                             <motion.div
-                                initial={{ scaleX: 1 }}
-                                animate={{ scaleX: 0 }}
-                                transition={{
-                                    duration: 4,
-                                    ease: 'linear',
-                                }}
-                                className={`h-1 ${config.progressColor} origin-left`}
-                            />
-                        </motion.div>
-                    );
-                })}
+                                key={toast.id}
+                                layout
+                                variants={toastVariants}
+                                initial="hidden"
+                                animate="visible"
+                                exit="exit"
+                                className={`${config.bgColor} border-2 ${config.borderColor} rounded-lg overflow-hidden shadow-xl backdrop-blur-sm`}
+                            >
+                                {/* Main Content */}
+                                <div className="p-3 flex items-start gap-3">
+                                    <Icon className={`${config.iconColor} text-xl mt-0.5 flex-shrink-0`} />
+                                    <div className="flex-grow">
+                                        <p className={`font-bold ${config.textColor}`}>{config.title}</p>
+                                        <p className={`text-sm ${config.textColor} opacity-90`}>{toast.message}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => removeToast(toast.id)}
+                                        className={`${config.iconColor} hover:${config.textColor} transition cursor-pointer flex-shrink-0 mt-0.5`}
+                                    >
+                                        <FaTimes size={14} />
+                                    </button>
+                                </div>
+
+                                {/* Progress Bar */}
+                                <motion.div
+                                    initial={{ scaleX: 1 }}
+                                    animate={{ scaleX: 0 }}
+                                    transition={{
+                                        duration: 4,
+                                        ease: 'linear',
+                                    }}
+                                    className={`h-1 ${config.progressColor} origin-left`}
+                                />
+                            </motion.div>
+                        );
+                    })}
+                </AnimatePresence>
             </motion.div>
         </>
     );
