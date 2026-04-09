@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { useUser } from '../contexts/UserContext';
 
@@ -9,6 +9,7 @@ import ForgotPasswordForm from '../components/auth/ForgotPasswordForm';
 
 const Auth = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const { user } = useUser();
     const [authMode, setAuthMode] = useState('login'); // 'login', 'signup', 'forgot'
     const [direction, setDirection] = useState(0);
@@ -16,7 +17,7 @@ const Auth = () => {
     // Auto-redirect if already logged in and accessing login page
     useEffect(() => {
         if (user && location.pathname.includes('/dang-nhap')) {
-            window.location.href = '/';
+            navigate('/');
         }
     }, [user, location.pathname]);
 

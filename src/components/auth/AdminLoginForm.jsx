@@ -102,7 +102,7 @@ const AdminLoginForm = ({ direction }) => {
                     <img src={logo} alt="Sakae Logo" className="h-30 w-auto object-contain drop-shadow-sm" />
                 </div>
                 <h1 className="text-3xl font-extrabold bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent mb-2">
-                    Admin Login
+                    Đăng Nhập Quản Trị
                 </h1>
                 <p className="text-gray-500 text-sm">Đăng nhập vào bảng quản trị</p>
             </div>
@@ -143,7 +143,7 @@ const AdminLoginForm = ({ direction }) => {
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-red-500 transition-colors focus:outline-none"
+                            className="absolute cursor-pointer inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-red-500 transition-colors focus:outline-none"
                         >
                             {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
                         </button>

@@ -23,11 +23,11 @@ const fakeUsers = [
 const fakeAdmins = [
     {
         id: 'admin-1',
-        username: 'admin',
+        username: 'Admin',
         email: 'admin@sakae.com',
         password: 'Admin1234',
         avatar: 'https://i.pravatar.cc/150?img=33',
-        fullName: 'Admin Sakae',
+        fullName: 'Sakae Cute nè',
         role: 'admin',
     },
 ];
