@@ -169,7 +169,7 @@ function Navbar() {
                                 to={item.href}
                                 ref={(el) => (navItemsRef.current[index] = el)}
                                 className={`h-full px-5 flex items-center justify-center transition-colors duration-300 ease-in-out ${
-                                    location.pathname === item.href ? 'text-red-600' : 'hover:bg-gray-200'
+                                    location.pathname === item.href ? 'text-red-600' : 'hover:bg-gray-100'
                                 }`}
                             >
                                 {item.label}

@@ -1,25 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '../../contexts/ToastContext';
-import { 
-    Users, 
-    BookOpen, 
-    GraduationCap, 
-    TrendingUp, 
-    Clock, 
-    Plus,
-    Activity
-} from 'lucide-react';
+import { Activity } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
-import StatsCard from '../../components/admin/StatsCard';
-import DataTable from '../../components/admin/DataTable';
 import MediaLibrary from '../../components/admin/MediaLibrary';
+import DashboardHome from '../../components/admin/DashboardHome';
+import DataTable from '../../components/admin/DataTable';
+import AdminCourses from '../../components/admin/AdminCourses';
+import AdminSettings from '../../components/admin/AdminSettings';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AdminDashboard = () => {
+    const { category } = useParams();
+    const activeTab = category || 'dashboard';
+    
     const navigate = useNavigate();
     const { addToast } = useToast();
-    const [activeTab, setActiveTab] = useState('dashboard');
     const [isLoading, setIsLoading] = useState(true);
 
     const admin = JSON.parse(localStorage.getItem('sakae_admin') || '{}');
@@ -40,7 +36,7 @@ const AdminDashboard = () => {
         }
 
         setTimeout(() => setIsLoading(false), 800);
-    }, [navigate, addToast]);
+    }, [navigate, addToast, admin.fullName]);
 
     const userColumns = [
         { 
@@ -93,101 +89,8 @@ const AdminDashboard = () => {
 
         switch (activeTab) {
             case 'dashboard':
-                return (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="space-y-8"
-                    >
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <StatsCard 
-                                title="Tổng người dùng" 
-                                value="2,543" 
-                                icon={Users} 
-                                trend="up" 
-                                trendValue="12.5%" 
-                                color="red" 
-                            />
-                            <StatsCard 
-                                title="Khóa học đang mở" 
-                                value="48" 
-                                icon={BookOpen} 
-                                trend="up" 
-                                trendValue="4.2%" 
-                                color="orange" 
-                            />
-                            <StatsCard 
-                                title="Học viên dự thi" 
-                                value="1,205" 
-                                icon={GraduationCap} 
-                                trend="down" 
-                                trendValue="2.1%" 
-                                color="green" 
-                            />
-                            <StatsCard 
-                                title="Hoạt động hàng ngày" 
-                                value="84%" 
-                                icon={Activity} 
-                                trend="up" 
-                                trendValue="8.4%" 
-                                color="purple" 
-                            />
-                        </div>
-
-                        {/* Recent Users Table */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            <div className="lg:col-span-2">
-                                <DataTable 
-                                    title="Người dùng mới" 
-                                    description="Quản lý và xem các học viên mới đăng ký."
-                                    columns={userColumns} 
-                                    data={userData} 
-                                />
-                            </div>
-                            
-                            {/* Quick Actions / Activity Feed */}
-                            <div className="space-y-6">
-                                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-                                    <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Thao tác nhanh</h3>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <button className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-800 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition-all border border-transparent hover:border-red-200 cursor-pointer">
-                                            <Plus size={20} className="mb-2" />
-                                            <span className="text-xs font-semibold">Khóa học mới</span>
-                                        </button>
-                                        <button className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-800 rounded-xl hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 transition-all border border-transparent hover:border-orange-200 cursor-pointer">
-                                            <TrendingUp size={20} className="mb-2" />
-                                            <span className="text-xs font-semibold">Báo cáo</span>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-                                    <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Hoạt động gần đây</h3>
-                                    <div className="space-y-4">
-                                        {[1, 2, 3].map((item) => (
-                                            <div key={item} className="flex gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-red-50 dark:bg-red-900/30 flex items-center justify-center text-red-600 shrink-0">
-                                                    <Clock size={14} />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <p className="text-sm text-slate-700 dark:text-slate-300">
-                                                        <span className="font-semibold text-slate-900 dark:text-white">Admin</span> đã cập nhật khóa học <span className="text-red-600">Ngữ pháp N3</span>.
-                                                    </p>
-                                                    <p className="text-xs text-slate-500 mt-0.5">2 giờ trước</p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <button className="w-full mt-6 py-2 text-sm font-semibold text-slate-500 hover:text-red-600 transition-all cursor-pointer">
-                                        Xem tất cả hoạt động
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-                );
-            case 'media':
+                return <DashboardHome userData={userData} userColumns={userColumns} />;
+            case 'thu-vien-anh':
                 return (
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
@@ -200,7 +103,7 @@ const AdminDashboard = () => {
                         <MediaLibrary />
                     </motion.div>
                 );
-            case 'users':
+            case 'nguoi-dung':
                 return (
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
@@ -211,6 +114,38 @@ const AdminDashboard = () => {
                             description="Danh sách chi tiết tất cả học viên và nhân viên."
                             columns={userColumns} 
                             data={[...userData, ...userData]} 
+                        />
+                    </motion.div>
+                );
+            case 'khoa-hoc':
+                return <AdminCourses />;
+            case 'cai-dat':
+                return <AdminSettings admin={admin} />;
+            case 'jlpt':
+                return (
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                    >
+                        <DataTable 
+                            title="Quản lý đề thi JLPT" 
+                            description="Danh sách bộ đề thi thử N1-N5."
+                            columns={[]} 
+                            data={[]} 
+                        />
+                    </motion.div>
+                );
+            case 'tin-tuc':
+                return (
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                    >
+                        <DataTable 
+                            title="Quản lý tin tức" 
+                            description="Tất cả bài viết và thông báo của trung tâm."
+                            columns={[]} 
+                            data={[]} 
                         />
                     </motion.div>
                 );
@@ -235,17 +170,22 @@ const AdminDashboard = () => {
 
     return (
         <AdminLayout 
-            activeTab={activeTab} 
-            setActiveTab={setActiveTab} 
             admin={admin}
             onLogout={handleLogout}
         >
             <AnimatePresence mode="wait">
-                {renderContent()}
+                <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.2 }}
+                >
+                    {renderContent()}
+                </motion.div>
             </AnimatePresence>
         </AdminLayout>
     );
 };
 
 export default AdminDashboard;
-

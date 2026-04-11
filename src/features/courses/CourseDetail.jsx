@@ -47,20 +47,8 @@ const CourseDetail = () => {
     };
 
     return (
-        <div className="pt-24 pb-14 bg-gray-50 min-h-screen">
+        <div className="pt-28 pb-14 bg-gray-50 min-h-screen">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* Breadcrumb */}
-                <nav className="text-sm mb-6 text-gray-500">
-                    <Link to="/" className="hover:text-red-600">
-                        Trang chủ
-                    </Link>{' '}
-                    {' > '}
-                    <Link to="/lich-khai-giang" className="hover:text-red-600">
-                        Lịch khai giảng
-                    </Link>
-                    {' > '} <span className="text-gray-800 font-medium">{course.course}</span>
-                </nav>
-
                 <div className="grid md:grid-cols-3 gap-8">
                     {/* Cột trái: Thông tin chính */}
                     <div className="md:col-span-2 space-y-8">

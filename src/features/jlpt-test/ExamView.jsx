@@ -711,7 +711,7 @@ const ExamView = () => {
                             <FaQuestionCircle size={40} />
                         </div>
                         <h2 className="text-3xl font-black text-gray-900 mb-4">Bạn chắc chứ?</h2>
-                        <p className="text-gray-500 mb-8 text-lg">
+                        <p className="text-gray-500 mb-8 md:text-lg">
                             Một khi nộp bài bạn sẽ không thể sửa lại bài làm của mình nữa!
                         </p>
                         <div className="flex flex-col gap-3">

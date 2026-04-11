@@ -3,12 +3,10 @@ import { Bell, Search, Sun, Moon, Calendar, User, Settings, LogOut, Check, Clock
 
 const AdminTopbar = ({ admin, onLogout }) => {
     const [currentTime, setCurrentTime] = useState(new Date());
-    const [isDarkMode, setIsDarkMode] = useState(
-        document.documentElement.classList.contains('dark')
-    );
+    const [isDarkMode, setIsDarkMode] = useState(document.documentElement.classList.contains('dark'));
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
-    
+
     const notiRef = useRef(null);
     const profileRef = useRef(null);
 
@@ -48,14 +46,14 @@ const AdminTopbar = ({ admin, onLogout }) => {
             weekday: 'long',
             year: 'numeric',
             month: 'long',
-            day: 'numeric'
+            day: 'numeric',
         });
     };
 
     const formatTime = (date) => {
         return date.toLocaleTimeString('vi-VN', {
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
         });
     };
 
@@ -64,9 +62,9 @@ const AdminTopbar = ({ admin, onLogout }) => {
             {/* Search Bar */}
             <div className="flex-1 max-w-sm hidden md:flex items-center bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-transparent focus-within:border-red-400 focus-within:bg-white dark:focus-within:bg-slate-900 transition-all">
                 <Search className="w-4 h-4 text-slate-400" />
-                <input 
-                    type="text" 
-                    placeholder="Tìm kiếm..." 
+                <input
+                    type="text"
+                    placeholder="Tìm kiếm..."
                     className="bg-transparent border-none focus:ring-0 text-sm w-full ml-2 text-slate-600 dark:text-slate-300 outline-none"
                 />
             </div>
@@ -82,31 +80,31 @@ const AdminTopbar = ({ admin, onLogout }) => {
 
                 {/* Theme Toggle */}
                 <div className="relative group">
-                    <button 
+                    <button
                         onClick={toggleDarkMode}
                         className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                     >
                         {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
                     </button>
                     {/* Tooltip */}
-                    <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-white text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                    <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-white text-xs font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
                         {isDarkMode ? 'Chế độ sáng' : 'Chế độ tối'}
                     </div>
                 </div>
 
                 {/* Notifications */}
                 <div className="relative group" ref={notiRef}>
-                    <button 
+                    <button
                         onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
                         className={`p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg relative transition-colors cursor-pointer ${isNotificationsOpen ? 'bg-slate-100 dark:bg-slate-800' : ''}`}
                     >
                         <Bell size={20} />
                         <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
                     </button>
-                    
+
                     {/* Tooltip (only if not open) */}
                     {!isNotificationsOpen && (
-                        <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-white text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                        <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-white text-xs font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
                             Thông báo
                         </div>
                     )}
@@ -116,16 +114,27 @@ const AdminTopbar = ({ admin, onLogout }) => {
                         <div className="absolute right-0 mt-3 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                             <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
                                 <h3 className="font-bold text-slate-800 dark:text-white">Thông báo</h3>
-                                <button className="text-xs text-red-600 font-semibold hover:underline">Đánh dấu đã đọc</button>
+                                <button className="text-xs cursor-pointer text-red-600 font-semibold hover:underline">
+                                    Đánh dấu đã đọc
+                                </button>
                             </div>
                             <div className="max-h-80 overflow-y-auto">
                                 {fakeNotifications.map((noti) => (
-                                    <div key={noti.id} className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer flex gap-3 border-b border-slate-50 dark:border-slate-800 last:border-none ${!noti.read ? 'bg-red-50/30 dark:bg-red-900/10' : ''}`}>
-                                        <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${noti.read ? 'bg-slate-100 dark:bg-slate-700 text-slate-400' : 'bg-red-100 dark:bg-red-900/40 text-red-600'}`}>
+                                    <div
+                                        key={noti.id}
+                                        className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer flex gap-3 border-b border-slate-50 dark:border-slate-800 last:border-none ${!noti.read ? 'bg-red-50/30 dark:bg-red-900/10' : ''}`}
+                                    >
+                                        <div
+                                            className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${noti.read ? 'bg-slate-100 dark:bg-slate-700 text-slate-400' : 'bg-red-100 dark:bg-red-900/40 text-red-600'}`}
+                                        >
                                             <Bell size={14} />
                                         </div>
                                         <div className="flex-1">
-                                            <p className={`text-sm ${noti.read ? 'text-slate-600 dark:text-slate-400' : 'text-slate-900 dark:text-slate-100 font-medium'}`}>{noti.text}</p>
+                                            <p
+                                                className={`text-sm ${noti.read ? 'text-slate-600 dark:text-slate-400' : 'text-slate-900 dark:text-slate-100 font-medium'}`}
+                                            >
+                                                {noti.text}
+                                            </p>
                                             <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-400 uppercase tracking-tight">
                                                 <Clock size={10} />
                                                 {noti.time}
@@ -147,7 +156,7 @@ const AdminTopbar = ({ admin, onLogout }) => {
 
                 {/* Admin Profile */}
                 <div className="relative group" ref={profileRef}>
-                    <button 
+                    <button
                         onClick={() => setIsProfileOpen(!isProfileOpen)}
                         className={`flex items-center gap-3 pl-2 cursor-pointer p-1 rounded-xl transition-all hover:bg-slate-100 dark:hover:bg-slate-800 ${isProfileOpen ? 'bg-slate-100 dark:bg-slate-800' : ''}`}
                     >
@@ -179,7 +188,9 @@ const AdminTopbar = ({ admin, onLogout }) => {
                     {isProfileOpen && (
                         <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                             <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
-                                <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{admin?.fullName}</p>
+                                <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                                    {admin?.fullName}
+                                </p>
                                 <p className="text-xs text-slate-500 truncate">{admin?.email}</p>
                             </div>
                             <div className="p-2">
@@ -193,7 +204,10 @@ const AdminTopbar = ({ admin, onLogout }) => {
                                 </button>
                             </div>
                             <div className="p-2 border-t border-slate-100 dark:border-slate-800">
-                                <button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors cursor-pointer font-bold">
+                                <button
+                                    onClick={onLogout}
+                                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors cursor-pointer font-bold"
+                                >
                                     <LogOut size={16} />
                                     Đăng xuất
                                 </button>

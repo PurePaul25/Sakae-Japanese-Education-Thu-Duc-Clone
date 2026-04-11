@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaClock, FaChevronLeft, FaListAlt, FaTrophy, FaBookOpen } from 'react-icons/fa';
+import { ArrowLeft, Clock, List, Trophy, BookOpen, Play } from 'lucide-react';
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'framer-motion';
 import { jlptTests } from '../../dataTest/jlptTests';
 import { levels } from './constants';
 
@@ -15,7 +17,6 @@ const TestSelection = () => {
         const left = (window.screen.width - popupWidth) / 2;
         const top = (window.screen.height - popupHeight) / 2;
 
-        // Clear previous state for a fresh start
         localStorage.removeItem(`jlpt_exam_state_${testId}`);
         localStorage.removeItem(`jlpt_result_${testId}`);
 
@@ -27,65 +28,81 @@ const TestSelection = () => {
     };
 
     return (
-        <div className="pt-24 pb-12 bg-gray-50 min-h-screen">
+        <div className="pt-22 pb-14 bg-slate-50 min-h-screen">
             <div className="max-w-6xl mx-auto px-4">
                 <button
-                    onClick={() => navigate('/thi-thu-JLPT')}
-                    className="flex items-center cursor-pointer gap-2 text-red-600 font-bold mb-4 hover:gap-3 transition-all"
+                    onClick={() => navigate('/thi-thu-JLPT/mock-test')}
+                    className="flex items-center gap-2 text-slate-500 hover:text-red-600 font-bold mb-6 transition-colors cursor-pointer group"
                 >
-                    <FaChevronLeft /> Quay lại chọn cấp độ
+                    <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                    <span>Quay lại chọn cấp độ</span>
                 </button>
 
-                <h1 className="text-3xl font-black text-gray-900 mb-10 flex items-center gap-4">
-                    Danh sách đề thi{' '}
-                    <span className="px-4 py-1 bg-red-600 text-white rounded-full text-lg">{levelId}</span>
-                </h1>
+                <div className="mb-8">
+                    <div className="flex items-center gap-3 mb-4">
+                        <span className="px-3 py-1 bg-red-600 text-white rounded-lg text-sm font-black tracking-widest">
+                            {levelId}
+                        </span>
+                        <span className="text-slate-300">/</span>
+                        <span className="text-slate-500 font-bold">Danh sách đề thi thử</span>
+                    </div>
+                </div>
 
                 {tests.length > 0 ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {tests.map((test) => (
-                            <div
+                        {tests.map((test, idx) => (
+                            <motion.div
                                 key={test.id}
-                                className="bg-white rounded-[1rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 group"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.05 }}
+                                className="bg-white rounded-[1.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-100 group flex flex-col h-full"
                             >
-                                <div className="p-4">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <div className="w-10 h-10 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-400">
-                                            <FaListAlt size={20} />
+                                <div className="p-5 flex flex-col h-full">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-red-50 group-hover:text-red-600 transition-colors">
+                                            <List size={20} />
                                         </div>
-                                        <span className="text-xs font-black text-gray-400 uppercase tracking-widest">
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded-full">
                                             {test.sections.length} PHẦN THI
                                         </span>
                                     </div>
-                                    <h3 className="text-xl font-black text-gray-800 mb-2 group-hover:text-red-600 transition-colors">
+                                    <h3 className="text-2xl font-black text-slate-900 mb-2 group-hover:text-red-600 transition-colors leading-tight">
                                         {test.title}
                                     </h3>
-                                    <div className="flex items-center gap-6 text-sm text-gray-500 mb-6 font-medium">
+                                    <div className="flex items-center gap-6 text-sm text-slate-500 mb-8 font-bold">
                                         <span className="flex items-center gap-2">
-                                            <FaClock className="text-red-500" /> {test.totalDuration} phút
+                                            <Clock size={16} className="text-red-500" /> {test.totalDuration} phút
                                         </span>
                                         <span className="flex items-center gap-2">
-                                            <FaTrophy className="text-yellow-500" /> Điểm:{' '}
-                                            {levels.find((l) => l.id === test.level)?.passingScore || 0}
+                                            <Trophy size={16} className="text-orange-500" />{' '}
+                                            {levels.find((l) => l.id === test.level)?.passingScore || 0}đ đạt
                                         </span>
                                     </div>
                                     <button
                                         onClick={() => openExamPopup(test.id)}
-                                        className="w-full py-2 cursor-pointer bg-gray-900 text-white font-bold rounded-2xl hover:bg-red-600 transition-all shadow-lg hover:shadow-red-200 active:scale-95 transform"
+                                        className="mt-auto w-full py-3 cursor-pointer bg-slate-900 text-white font-black rounded-2xl hover:bg-red-600 transition-all shadow-lg hover:shadow-red-200 flex items-center justify-center gap-2 group/btn"
                                     >
-                                        Bắt đầu làm bài
+                                        <span>Bắt đầu làm bài</span>
+                                        <Play
+                                            size={18}
+                                            fill="currentColor"
+                                            className="group-hover/btn:translate-x-1 transition-transform"
+                                        />
                                     </button>
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
                 ) : (
-                    <div className="bg-white p-20 rounded-[3rem] text-center shadow-sm">
-                        <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300">
-                            <FaBookOpen size={40} />
+                    <div className="bg-white p-20 rounded-[3rem] text-center shadow-sm border border-slate-100">
+                        <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8 text-slate-200">
+                            <BookOpen size={48} />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-2">Đang cập nhật đề thi</h3>
-                        <p className="text-gray-500">Các đề thi {levelId} đang được đội ngũ Sakae hoàn thiện.</p>
+                        <h3 className="text-2xl font-black text-slate-900 mb-2">Đang cập nhật đề thi</h3>
+                        <p className="text-slate-500 font-medium">
+                            Các đề thi trình độ {levelId} đang được đội ngũ Sakae hoàn thiện.
+                        </p>
                     </div>
                 )}
             </div>

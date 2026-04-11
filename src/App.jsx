@@ -8,7 +8,7 @@ import AppRoutes from './routes/AppRoutes';
 
 function App() {
     const location = useLocation();
-    const isExamPage = location.pathname.includes('/thi-thu-JLPT/exam');
+    const isExamPage = location.pathname.includes('/exam') || location.pathname.includes('/result');
     const isAuthPage = location.pathname.includes('/dang-nhap') || location.pathname.includes('/dang-ky');
     const isAdminPage = location.pathname.includes('/admin');
 

@@ -2,15 +2,13 @@ import React, { useState } from 'react';
 import AdminSidebar from './AdminSidebar';
 import AdminTopbar from './AdminTopbar';
 
-const AdminLayout = ({ children, activeTab, setActiveTab, admin, onLogout }) => {
+const AdminLayout = ({ children, admin, onLogout }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 flex">
             {/* Sidebar */}
             <AdminSidebar 
-                activeTab={activeTab} 
-                setActiveTab={setActiveTab} 
                 isCollapsed={isCollapsed} 
                 setIsCollapsed={setIsCollapsed} 
                 onLogout={onLogout}

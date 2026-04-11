@@ -36,7 +36,7 @@ const SignupForm = ({ onSwitchMode, direction }) => {
         }
 
         if (!isValidUsername(signupUsername)) {
-            addToast('Tên phải có 3-20 ký tự, chỉ chứa chữ, số, _ hoặc -', 'error');
+            addToast('Tên phải trên 3 ký tự, tối đa 21 ký tự', 'error');
             return;
         }
 
@@ -140,7 +140,7 @@ const SignupForm = ({ onSwitchMode, direction }) => {
                         />
                     </div>
                     {signupUsername && !isValidUsername(signupUsername) && (
-                        <p className="text-[11px] text-red-500 mt-1 ml-1">Tên từ 3-20 ký tự, gồm chữ, số, _ hoặc -</p>
+                        <p className="text-[11px] text-red-500 mt-1 ml-1">Tên phải trên 3 ký tự, tối đa 21 ký tự</p>
                     )}
                 </div>
 
