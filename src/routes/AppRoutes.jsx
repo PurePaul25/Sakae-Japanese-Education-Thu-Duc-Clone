@@ -16,6 +16,11 @@ const AuthLazy = lazy(() => import('../pages/Auth'));
 const AdminAuthLazy = lazy(() => import('../pages/admin/AdminAuth'));
 const AdminDashboardLazy = lazy(() => import('../pages/admin/AdminDashboard'));
 const NotFoundLazy = lazy(() => import('../pages/NotFound'));
+const UserDashboardLazy = lazy(() => import('../pages/user/UserDashboard'));
+const UserProfileLazy = lazy(() => import('../pages/user/UserProfile'));
+const MyCoursesLazy = lazy(() => import('../pages/user/MyCourses'));
+const UserSettingsLazy = lazy(() => import('../pages/user/UserSettings'));
+import ProtectedRoute from '../components/auth/ProtectedRoute';
 
 // Component xử lý chuyển hướng từ sessionStorage
 const RedirectHandler = () => {
@@ -57,6 +62,19 @@ function AppRoutes() {
                 <Route path="/dang-nhap" element={<AuthLazy />} />
                 <Route path="/dang-ky" element={<AuthLazy />} />
                 <Route path="/thi-thu-JLPT/*" element={<JLPTMockTestLazy />} />
+
+                {/* User Routes */}
+                <Route
+                    element={
+                        <ProtectedRoute>
+                            <UserDashboardLazy />
+                        </ProtectedRoute>
+                    }
+                >
+                    <Route path="/profile" element={<UserProfileLazy />} />
+                    <Route path="/khoa-hoc-cua-toi" element={<MyCoursesLazy />} />
+                    <Route path="/cai-dat" element={<UserSettingsLazy />} />
+                </Route>
 
                 {/* Admin Routes */}
                 <Route path="/admin/dang-nhap" element={<AdminAuthLazy />} />

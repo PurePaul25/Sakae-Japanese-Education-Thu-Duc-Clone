@@ -9,6 +9,7 @@ import { useUser } from '../../contexts/UserContext';
 import { useToast } from '../../contexts/ToastContext';
 
 import { FiMenu, FiX, FiChevronDown } from 'react-icons/fi';
+import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import SearchBar from './SearchBar';
 
 const menuItems = [
@@ -39,6 +40,7 @@ function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [mobileSubmenuOpen, setMobileSubmenuOpen] = useState(false);
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
 
     // State và Ref cho hiệu ứng gạch chân di chuyển
     const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0, opacity: 0 });
@@ -85,9 +87,13 @@ function Navbar() {
 
     // Logic Chuyển đổi ngôn ngữ
     const handleLangSelect = (lang) => {
+        if (lang.code === 'ja') {
+            addToast('Tính năng ngôn ngữ Nhật sẽ sớm được ra mắt. Hiện tại hệ thống chỉ hỗ trợ tiếng Việt! Mong bạn thông cảm cho Sakae nhiều nha!', 'info');
+            setIsDropdownOpen(false);
+            return;
+        }
         setSelectedLang(lang);
         setIsDropdownOpen(false);
-        // Thêm logic thay đổi ngôn ngữ thực tế ở đây
     };
 
     // Logic Bắt sự kiện click toàn document của chuyển đổi ngôn ngữ
@@ -108,13 +114,23 @@ function Navbar() {
         };
     }, []);
 
+    const handleLoginClick = () => {
+        setIsLoggingIn(true);
+        setTimeout(() => {
+            navigate('/dang-nhap');
+            setIsLoggingIn(false);
+        }, 600);
+    };
+
     const handleLogout = () => {
-        logout();
         setIsUserDropdownOpen(false);
         addToast('Bạn đã đăng xuất thành công!', 'success');
-        setTimeout(() => {
-            navigate('/');
-        }, 500);
+        
+        // Chuyển hướng trước khi gọi logout() để tránh ProtectedRoute kích hoạt điều hướng sang trang login
+        navigate('/', { replace: true });
+        
+        // Gọi logout() sau khi đã bắt đầu chuyển hướng
+        logout();
     };
 
     return (
@@ -202,22 +218,42 @@ function Navbar() {
 
                     {/* Nút đăng nhập (desktop) */}
                     {!user && (
-                        <Link
-                            to="/dang-nhap"
-                            className="hidden md:block cursor-pointer text-gray-700 hover:text-red-600 transition duration-200 ease-out"
+                        <button
+                            onClick={handleLoginClick}
+                            disabled={isLoggingIn}
+                            className="hidden md:flex items-center gap-2 cursor-pointer text-gray-700 hover:text-red-600 transition duration-200 ease-out disabled:opacity-70"
                         >
-                            Đăng nhập
-                        </Link>
+                            {isLoggingIn ? (
+                                <motion.div
+                                    animate={{ rotate: 360 }}
+                                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                                >
+                                    <AiOutlineLoading3Quarters size={18} />
+                                </motion.div>
+                            ) : (
+                                'Đăng nhập'
+                            )}
+                        </button>
                     )}
 
                     {/* Nút đăng nhập (mobile) */}
                     {!user && (
-                        <Link
-                            to="/dang-nhap"
-                            className="md:hidden cursor-pointer text-gray-700 hover:text-red-600 transition duration-200 ease-out text-sm"
+                        <button
+                            onClick={handleLoginClick}
+                            disabled={isLoggingIn}
+                            className="md:hidden flex items-center gap-1 cursor-pointer text-gray-700 hover:text-red-600 transition duration-200 ease-out text-sm disabled:opacity-70"
                         >
-                            Đăng nhập
-                        </Link>
+                            {isLoggingIn ? (
+                                <motion.div
+                                    animate={{ rotate: 360 }}
+                                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                                >
+                                    <AiOutlineLoading3Quarters size={16} />
+                                </motion.div>
+                            ) : (
+                                'Đăng nhập'
+                            )}
+                        </button>
                     )}
 
                     {/* Chọn ngôn ngữ */}
@@ -344,7 +380,7 @@ function Navbar() {
                                 <ul className="pb-2">
                                     <li>
                                         <Link
-                                            to="/"
+                                            to="/profile"
                                             onClick={() => setIsUserDropdownOpen(false)}
                                             className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
                                         >
@@ -353,7 +389,7 @@ function Navbar() {
                                     </li>
                                     <li>
                                         <Link
-                                            to="/"
+                                            to="/khoa-hoc-cua-toi"
                                             onClick={() => setIsUserDropdownOpen(false)}
                                             className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
                                         >
@@ -362,7 +398,7 @@ function Navbar() {
                                     </li>
                                     <li>
                                         <Link
-                                            to="/"
+                                            to="/cai-dat"
                                             onClick={() => setIsUserDropdownOpen(false)}
                                             className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
                                         >

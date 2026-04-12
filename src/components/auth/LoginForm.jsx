@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { FaEye, FaEyeSlash, FaEnvelope, FaLock, FaArrowLeft } from 'react-icons/fa';
 import { isValidEmail } from '../../utils/authUtils';
 import { loginAPI } from '../../utils/authAPI';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '../../contexts/ToastContext';
 import { useUser } from '../../contexts/UserContext';
 import logo from '../../assets/img/logo_Sakae.png';
@@ -17,6 +17,7 @@ const LoginForm = ({ onSwitchMode, direction }) => {
     const [isLoading, setIsLoading] = useState(false);
 
     const navigate = useNavigate();
+    const location = useLocation();
     const { addToast } = useToast();
     const { login } = useUser();
 
@@ -53,8 +54,9 @@ const LoginForm = ({ onSwitchMode, direction }) => {
             // Store flag to show toast on home page
             sessionStorage.setItem('showLoginSuccessToast', 'true');
 
-            // Redirect immediately to home
-            navigate('/');
+            // Redirect to previous page or home
+            const origin = location.state?.from?.pathname || '/';
+            navigate(origin);
         } catch (error) {
             addToast(error.message, 'error');
         } finally {

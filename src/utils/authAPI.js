@@ -8,7 +8,8 @@ const fakeUsers = [
         email: 'test@example.com',
         password: 'Test1234',
         avatar: 'https://i.pravatar.cc/150?img=1',
-        fullName: 'Test User',
+        fullName: 'Test User Đẹp Zai',
+        role: 'user',
     },
     {
         id: '2',
@@ -17,6 +18,7 @@ const fakeUsers = [
         password: 'John1234',
         avatar: 'https://i.pravatar.cc/150?img=2',
         fullName: 'John Doe',
+        role: 'user',
     },
 ];
 

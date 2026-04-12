@@ -77,6 +77,67 @@ const AdminDashboard = () => {
         { id: 4, fullName: 'Phạm Minh D', email: 'minhd@gmail.com', role: 'user', status: 'active', joinedDate: '2024-04-01' },
     ];
 
+    const jlptColumns = [
+        { key: 'title', label: 'Tên bộ đề' },
+        { 
+            key: 'level', 
+            label: 'Cấp độ',
+            render: (val) => (
+                <span className="px-2 py-0.5 rounded-lg bg-red-50 text-red-600 font-bold text-[10px] uppercase">
+                    JLPT {val}
+                </span>
+            )
+        },
+        { key: 'questions', label: 'Số câu hỏi' },
+        { key: 'duration', label: 'Thời gian' },
+        { 
+            key: 'status', 
+            label: 'Trạng thái',
+            render: (val) => (
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    val === 'published' ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-500'
+                }`}>
+                    {val === 'published' ? 'Đã đăng' : 'Bản nháp'}
+                </span>
+            )
+        },
+    ];
+
+    const jlptData = [
+        { id: 1, title: 'Đề thi thử N3 - Kì 1/2024', level: 'N3', questions: 105, duration: '140p', status: 'published' },
+        { id: 2, title: 'Luyện tập Ngữ pháp N2', level: 'N2', questions: 45, duration: '60p', status: 'published' },
+        { id: 3, title: 'Đề thi thử N5 cấp tốc', level: 'N5', questions: 80, duration: '100p', status: 'draft' },
+        { id: 4, title: 'Tổng hợp Kanji N1', level: 'N1', questions: 60, duration: '45p', status: 'published' },
+    ];
+
+    const newsColumns = [
+        { 
+            key: 'title', 
+            label: 'Tiêu đề bài viết',
+            render: (val) => <span className="font-semibold text-slate-700">{val}</span>
+        },
+        { 
+            key: 'category', 
+            label: 'Danh mục',
+            render: (val) => (
+                <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-md">{val}</span>
+            )
+        },
+        { key: 'author', label: 'Người đăng' },
+        { key: 'date', label: 'Ngày tạo' },
+        { 
+            key: 'views', 
+            label: 'Lượt xem',
+            render: (val) => <span className="text-xs font-mono">{val.toLocaleString()}</span>
+        },
+    ];
+
+    const newsData = [
+        { id: 1, title: 'Thông báo lịch nghỉ lễ 30/4 - 1/5', category: 'Thông báo', author: 'Admin Tuyết', date: '2024-04-10', views: 1240 },
+        { id: 2, title: 'Khai giảng lớp N4 buổi tối tháng 5', category: 'Khóa học', author: 'Hưng Sakae', date: '2024-04-05', views: 856 },
+        { id: 3, title: 'Mẹo nhớ 2136 chữ Kanji thường dùng', category: 'Kiến thức', author: 'Sakae Sensei', date: '2024-04-02', views: 3210 },
+    ];
+
     const renderContent = () => {
         if (isLoading) {
             return (
@@ -93,8 +154,8 @@ const AdminDashboard = () => {
             case 'thu-vien-anh':
                 return (
                     <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
                     >
                         <div className="mb-8">
                             <h2 className="text-3xl font-bold text-slate-800 dark:text-white">Thư viện media</h2>
@@ -106,8 +167,8 @@ const AdminDashboard = () => {
             case 'nguoi-dung':
                 return (
                     <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
                     >
                         <DataTable 
                             title="Tất cả người dùng" 
@@ -124,28 +185,28 @@ const AdminDashboard = () => {
             case 'jlpt':
                 return (
                     <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
                     >
                         <DataTable 
                             title="Quản lý đề thi JLPT" 
-                            description="Danh sách bộ đề thi thử N1-N5."
-                            columns={[]} 
-                            data={[]} 
+                            description="Danh sách bộ đề thi thử và luyện tập từ N1-N5."
+                            columns={jlptColumns} 
+                            data={jlptData} 
                         />
                     </motion.div>
                 );
             case 'tin-tuc':
                 return (
                     <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
                     >
                         <DataTable 
                             title="Quản lý tin tức" 
-                            description="Tất cả bài viết và thông báo của trung tâm."
-                            columns={[]} 
-                            data={[]} 
+                            description="Tất cả bài viết, thông báo và tin tức sự kiện của trung tâm."
+                            columns={newsColumns} 
+                            data={newsData} 
                         />
                     </motion.div>
                 );
@@ -176,10 +237,10 @@ const AdminDashboard = () => {
             <AnimatePresence mode="wait">
                 <motion.div
                     key={activeTab}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.2 }}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
                 >
                     {renderContent()}
                 </motion.div>
@@ -189,3 +250,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

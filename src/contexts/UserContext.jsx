@@ -5,7 +5,7 @@ export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     // Initialize user from localStorage on mount
     useEffect(() => {
@@ -18,6 +18,7 @@ export const UserProvider = ({ children }) => {
                 localStorage.removeItem('sakae_user');
             }
         }
+        setIsLoading(false);
     }, []);
 
     const login = useCallback((userData) => {
