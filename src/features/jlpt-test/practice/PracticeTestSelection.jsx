@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { ArrowLeft, Play, Clock, CheckCircle, Lock } from 'lucide-react';
+import SEO from '../../../hooks/useSEO';
 
 const PracticeTestSelection = () => {
     const { levelId, type } = useParams();
@@ -56,6 +57,8 @@ const PracticeTestSelection = () => {
 
     return (
         <div className="pt-22 pb-14 bg-slate-50 min-h-screen">
+            <SEO page="practicejlptTest" />
+
             <div className="max-w-6xl mx-auto px-4">
                 <button
                     onClick={() => navigate(`/thi-thu-JLPT/practice/${levelId}`)}

@@ -12,6 +12,7 @@ import {
     FaInfoCircle,
 } from 'react-icons/fa';
 import { practiceTests } from '../../../dataTest/practiceTests';
+import SEO from '../../../hooks/useSEO';
 
 const PracticeResultView = () => {
     const { testId } = useParams();
@@ -70,6 +71,8 @@ const PracticeResultView = () => {
 
     return (
         <div className="pt-10 pb-12 bg-gray-50 min-h-screen">
+            <SEO page="practicejlptTest" />
+
             <div className="max-w-7xl mx-auto px-4">
                 {/* Summary Card - Matches ResultView.jsx */}
                 <div className="bg-white rounded-[1rem] p-6 shadow-sm border border-gray-100 text-center mb-8 max-w-4xl mx-auto">

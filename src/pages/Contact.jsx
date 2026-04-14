@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
+import SEO from '../hooks/useSEO';
 
 const Contact = () => {
     const [formData, setFormData] = useState({
@@ -48,6 +49,7 @@ const Contact = () => {
     };
     return (
         <div className="pt-28 pb-14 bg-gray-100 text-gray-800">
+            <SEO page="contact" />
             {/* Toast Notification - Thông báo nổi */}
             <div
                 className={`fixed top-24 sm:right-5 right-0 z-50 transition-all duration-500 ease-in-out ${

@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { FiClock } from 'react-icons/fi';
 import { useToast } from '../../contexts/ToastContext';
+import SEO from '../../hooks/useSEO';
 
 const MyCourses = () => {
     const { addToast } = useToast();
@@ -16,6 +18,8 @@ const MyCourses = () => {
 
     return (
         <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-6 text-center">
+            <SEO page="myCourses" />
+
             <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -23,11 +27,12 @@ const MyCourses = () => {
             >
                 <FiClock size={40} className="animate-pulse" />
             </motion.div>
-            
+
             <div className="space-y-2">
                 <h1 className="text-3xl font-black text-gray-800">Đang phát triển</h1>
                 <p className="text-gray-500 max-w-md mx-auto">
-                    Chúng tôi đang nỗ lực hoàn thiện giao diện quản lý khóa học để mang lại trải nghiệm tốt nhất cho bạn.
+                    Chúng tôi đang nỗ lực hoàn thiện giao diện quản lý khóa học để mang lại trải nghiệm tốt nhất cho
+                    bạn.
                 </p>
             </div>
 

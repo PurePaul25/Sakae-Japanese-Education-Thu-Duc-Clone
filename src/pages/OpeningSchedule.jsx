@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { schedules } from '../dataTest/schedules';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
+import SEO from '../hooks/useSEO';
 
 function OpeningSchedule() {
     const [filterMonth, setFilterMonth] = useState('Tất cả');
@@ -53,6 +54,7 @@ function OpeningSchedule() {
 
     return (
         <div className="pt-18 min-h-screen bg-gray-50 pb-16">
+            <SEO page="openingSchedule" />
             {/* Banner / Header */}
             <section className="text-center mb-8 py-12 px-4 md:px-12 bg-red-100">
                 <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4">

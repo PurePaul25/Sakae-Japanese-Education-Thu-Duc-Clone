@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { FaClock, FaFlag, FaChevronLeft, FaChevronRight, FaListAlt, FaQuestionCircle, FaRedo } from 'react-icons/fa';
 import { practiceTests } from '../../../dataTest/practiceTests';
 import { formatTime } from '../constants';
+import SEO from '../../../hooks/useSEO';
 
 const PracticeExamView = () => {
     const { testId, qIndex } = useParams();
@@ -99,6 +100,7 @@ const PracticeExamView = () => {
 
     return (
         <div className="bg-gray-50 min-h-screen pt-4">
+            <SEO page="practicejlptTest" />
             {/* Header - EXACT MATCH with ExamView.jsx */}
             <div className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-b border-gray-300 z-40 px-4 md:px-8 py-2 h-20 sm:h-17 flex items-center gap-0.5 flex-col sm:flex-row justify-between">
                 <div className="flex items-center gap-4">

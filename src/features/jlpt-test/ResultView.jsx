@@ -14,6 +14,7 @@ import {
 import ScrollToTopButton from '../../components/layout/ScrollToTopButton';
 import { jlptTests } from '../../dataTest/jlptTests';
 import { levels, getTranslatedSectionName } from './constants';
+import SEO from '../../hooks/useSEO';
 
 const ResultView = () => {
     const { testId } = useParams();
@@ -107,7 +108,9 @@ const ResultView = () => {
     };
 
     return (
-        <div className="pt-24 pb-12 bg-gray-50 min-h-screen">
+        <div className="py-12 bg-gray-50 min-h-screen">
+            <SEO page="jlptTest" />
+
             <div className="max-w-7xl mx-auto px-4">
                 {/* Summary Card */}
                 <div className="bg-white rounded-[1rem] p-6 shadow-sm border border-gray-100 text-center mb-8 max-w-4xl mx-auto">

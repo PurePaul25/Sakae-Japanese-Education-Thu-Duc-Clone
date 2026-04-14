@@ -6,6 +6,7 @@ import { useUser } from '../contexts/UserContext';
 import LoginForm from '../components/auth/LoginForm';
 import SignupForm from '../components/auth/SignupForm';
 import ForgotPasswordForm from '../components/auth/ForgotPasswordForm';
+import SEO from '../hooks/useSEO';
 
 const Auth = () => {
     const location = useLocation();
@@ -46,6 +47,7 @@ const Auth = () => {
 
     return (
         <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-red-50 to-orange-50 flex items-center justify-center px-4 py-6 overflow-hidden z-0">
+            <SEO page="auth" />
             {/* Background elements */}
             <div className="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-red-400 rounded-full mix-blend-multiply filter blur-[120px] opacity-20 animate-blob"></div>
             <div className="absolute top-[20%] right-[10%] w-[400px] h-[400px] bg-orange-300 rounded-full mix-blend-multiply filter blur-[100px] opacity-30 animate-blob animation-delay-2000"></div>

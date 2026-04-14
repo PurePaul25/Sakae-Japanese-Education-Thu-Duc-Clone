@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
 import RegistrationModal from '../components/ui/RegistrationModal';
+import SEO from '../hooks/useSEO';
 
 const classesData = [
     {
@@ -151,6 +152,7 @@ const Classes = () => {
 
     return (
         <div className="pt-28 pb-10 bg-gray-100 text-gray-800">
+            <SEO page="classes" />
             {/* Tiêu đề */}
             <section className="text-center mb-10 px-4">
                 <h1 className="text-3xl sm:text-5xl font-extrabold text-gray-800 mb-3">Các khóa học tại Sakae</h1>

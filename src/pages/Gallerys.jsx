@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
 import { FaSearchPlus, FaTimes, FaChevronLeft, FaChevronRight, FaDownload, FaSearchMinus } from 'react-icons/fa';
+import SEO from '../hooks/useSEO';
 
 // Dữ liệu hình ảnh giả lập (Sử dụng các link ảnh có sẵn trong project)
 const galleryData = [
@@ -297,6 +298,7 @@ const Gallerys = () => {
 
     return (
         <div className="pt-28 pb-16 bg-gray-50 min-h-screen">
+            <SEO page="gallery" />
             {/* Header Section */}
             <section className="text-center mb-5 px-4">
                 <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4">

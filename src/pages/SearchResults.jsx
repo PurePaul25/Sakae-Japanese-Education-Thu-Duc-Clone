@@ -3,6 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { searchContent } from '../utils/searchUtils';
 import { FaNewspaper, FaBook, FaCalendar, FaTag, FaArrowRight } from 'react-icons/fa';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
+import SEO from '../hooks/useSEO';
 
 const SearchResults = () => {
     const [searchParams] = useSearchParams();
@@ -25,6 +26,7 @@ const SearchResults = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 mt-17.5">
+            <SEO page="searchResults" />
             <ScrollToTopButton />
 
             {/* Search Header Section */}

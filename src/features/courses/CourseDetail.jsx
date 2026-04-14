@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { schedules } from '../../dataTest/schedules';
 import { FaCalendarAlt, FaClock, FaUserTie, FaMoneyBillWave, FaBookOpen, FaCheckCircle } from 'react-icons/fa';
 import RegistrationModal from '../../components/ui/RegistrationModal';
+import SEO from '../../hooks/useSEO.jsx';
 
 const CourseDetail = () => {
     const { id } = useParams();
@@ -48,6 +49,7 @@ const CourseDetail = () => {
 
     return (
         <div className="pt-28 pb-14 bg-gray-50 min-h-screen">
+            <SEO page="courseDetail" />
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid md:grid-cols-3 gap-8">
                     {/* Cột trái: Thông tin chính */}

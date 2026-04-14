@@ -1,9 +1,11 @@
 import React from 'react';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
+import SEO from '../hooks/useSEO.jsx';
 
 function About() {
     return (
         <div className="pt-30 pb-16 bg-gray-50 text-gray-800">
+            <SEO page="about" />
             {/* 1. Giới thiệu Chính (Header Section) */}
             <section className="max-w-6xl mx-auto px-4 text-center mb-8 border-b border-gray-200 pb-8">
                 <h1 className="text-5xl font-extrabold text-red-600 mb-6 border-b-4 border-red-100 inline-block px-4 pb-1">

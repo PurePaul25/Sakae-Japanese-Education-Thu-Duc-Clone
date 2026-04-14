@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
+import SEO from '../hooks/useSEO';
 
 const newsData = [
     {
@@ -120,6 +121,7 @@ const News = () => {
 
     return (
         <div className="pt-28 pb-12 bg-gray-100 text-gray-800">
+            <SEO page="news" />
             {/* Tiêu đề */}
             <section className="text-center mb-6 px-4">
                 <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4">

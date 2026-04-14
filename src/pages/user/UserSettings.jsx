@@ -2,6 +2,7 @@ import { useState } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiLock, FiBell, FiShield, FiUser, FiGlobe, FiChevronDown, FiMail, FiPhone, FiMapPin } from 'react-icons/fi';
+import SEO from '../../hooks/useSEO';
 
 const UserSettings = () => {
     const [activeSection, setActiveSection] = useState('general');
@@ -122,6 +123,8 @@ const UserSettings = () => {
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 pb-10">
+            <SEO page="userSettings" />
+
             <div>
                 <h1 className="text-3xl font-black text-gray-800 tracking-tight">Cài đặt tài khoản</h1>
                 <p className="text-gray-500 mt-1">Quản lý thông cá nhân và tùy chỉnh trải nghiệm của bạn</p>

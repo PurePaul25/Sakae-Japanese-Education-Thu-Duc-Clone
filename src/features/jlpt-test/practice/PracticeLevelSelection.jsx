@@ -4,12 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { levels } from '../constants';
+import SEO from '../../../hooks/useSEO';
 
 const PracticeLevelSelection = () => {
     const navigate = useNavigate();
 
     return (
         <div className="pt-22 pb-14 bg-slate-50 min-h-screen">
+            <SEO page="practicejlptTest" />
             <div className="max-w-6xl mx-auto px-4">
                 <button
                     onClick={() => navigate('/thi-thu-JLPT')}

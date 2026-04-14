@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { ClipboardCheck, BookOpen, GraduationCap, ArrowRight, Trophy, Target } from 'lucide-react';
+import SEO from '../../hooks/useSEO.jsx';
 
 const JLPTHub = () => {
     const navigate = useNavigate();
@@ -34,6 +35,7 @@ const JLPTHub = () => {
 
     return (
         <div className="pt-24 md:pt-28 pb-12 bg-slate-50 min-h-screen overflow-hidden relative">
+            <SEO page="jlptTest" />
             {/* Background elements */}
             <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-red-50/50 to-transparent pointer-events-none"></div>
 

@@ -16,11 +16,11 @@ const JLPTMockTest = () => {
     return (
         <Routes>
             <Route index element={<JLPTHub />} />
-            
+
             {/* Part 1: Thi Thử (Mock Test) */}
             <Route path="mock-test" element={<LevelSelection />} />
             <Route path="mock-test/level/:levelId" element={<TestSelection />} />
-            
+
             {/* Part 2: Luyện Tập (Practice) */}
             <Route path="practice" element={<PracticeLevelSelection />} />
             <Route path="practice/:levelId" element={<PracticeTypeSelection />} />

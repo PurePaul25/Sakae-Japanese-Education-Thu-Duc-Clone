@@ -5,6 +5,7 @@ import { ArrowLeft, Clock, List, Trophy, BookOpen, Play } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { jlptTests } from '../../dataTest/jlptTests';
 import { levels } from './constants';
+import SEO from '../../hooks/useSEO';
 
 const TestSelection = () => {
     const { levelId } = useParams();
@@ -29,6 +30,7 @@ const TestSelection = () => {
 
     return (
         <div className="pt-22 pb-14 bg-slate-50 min-h-screen">
+            <SEO page="jlptTest" />
             <div className="max-w-6xl mx-auto px-4">
                 <button
                     onClick={() => navigate('/thi-thu-JLPT/mock-test')}

@@ -3,6 +3,7 @@ import { useUser } from '../../contexts/UserContext';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { FiEdit2, FiMail, FiPhone, FiMapPin, FiCalendar, FiUser } from 'react-icons/fi';
+import SEO from '../../hooks/useSEO';
 
 const UserProfile = () => {
     const { user } = useUser();
@@ -20,6 +21,8 @@ const UserProfile = () => {
 
     return (
         <div className="space-y-6">
+            <SEO page="userProfile" />
+
             {/* Header / Banner */}
             <div className="relative h-36 rounded-3xl overflow-hidden bg-gradient-to-br from-red-600 via-red-500 to-red-400 shadow-lg mb-8">
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>

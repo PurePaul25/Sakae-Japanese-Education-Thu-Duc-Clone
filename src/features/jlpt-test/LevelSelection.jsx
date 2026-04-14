@@ -4,11 +4,13 @@ import { ArrowLeft, Clock, Info } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { levels } from './constants';
+import SEO from '../../hooks/useSEO';
 
 const LevelSelection = () => {
     const navigate = useNavigate();
     return (
         <div className="pt-22 pb-14 bg-slate-50 min-h-screen">
+            <SEO page="jlptTest" />
             <div className="max-w-6xl mx-auto px-4">
                 <button
                     onClick={() => navigate('/thi-thu-JLPT')}
