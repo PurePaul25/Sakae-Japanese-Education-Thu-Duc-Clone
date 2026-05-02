@@ -61,6 +61,7 @@ function AppRoutes() {
                 <Route path="/tim-kiem" element={<SearchResultsLazy />} />
                 <Route path="/dang-nhap" element={<AuthLazy />} />
                 <Route path="/dang-ky" element={<AuthLazy />} />
+                <Route path="/dat-lai-mat-khau" element={<AuthLazy />} />
                 <Route path="/thi-thu-JLPT/*" element={<JLPTMockTestLazy />} />
 
                 {/* User Routes */}

@@ -6,6 +6,7 @@ import { useUser } from '../contexts/UserContext';
 import LoginForm from '../components/auth/LoginForm';
 import SignupForm from '../components/auth/SignupForm';
 import ForgotPasswordForm from '../components/auth/ForgotPasswordForm';
+import ResetPasswordForm from '../components/auth/ResetPasswordForm';
 import SEO from '../hooks/useSEO';
 
 const Auth = () => {
@@ -26,6 +27,8 @@ const Auth = () => {
     useEffect(() => {
         if (location.pathname.includes('/dang-ky')) {
             setAuthMode('signup');
+        } else if (location.pathname.includes('/dat-lai-mat-khau')) {
+            setAuthMode('reset');
         } else {
             setAuthMode('login');
         }
@@ -65,6 +68,10 @@ const Auth = () => {
 
                     {authMode === 'forgot' && (
                         <ForgotPasswordForm key="forgot" onSwitchMode={handleSwitchMode} direction={direction} />
+                    )}
+
+                    {authMode === 'reset' && (
+                        <ResetPasswordForm key="reset" onSwitchMode={handleSwitchMode} direction={direction} />
                     )}
                 </AnimatePresence>
             </div>

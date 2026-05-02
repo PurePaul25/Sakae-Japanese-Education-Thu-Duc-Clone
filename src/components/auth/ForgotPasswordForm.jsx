@@ -5,15 +5,17 @@ import { FaEnvelope, FaArrowLeft } from 'react-icons/fa';
 import { isValidEmail } from '../../utils/authUtils';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../../contexts/ToastContext';
+import { forgotPasswordAPI } from '../../utils/authAPI';
 import logo from '../../assets/img/logo_Sakae.png';
 
 const ForgotPasswordForm = ({ onSwitchMode, direction }) => {
     const [forgotEmail, setForgotEmail] = useState('');
     const [resetSent, setResetSent] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const { addToast } = useToast();
 
-    const handleForgotPassword = (e) => {
+    const handleForgotPassword = async (e) => {
         e.preventDefault();
 
         if (!forgotEmail) {
@@ -26,15 +28,16 @@ const ForgotPasswordForm = ({ onSwitchMode, direction }) => {
             return;
         }
 
-        // Success
-        setResetSent(true);
-        addToast(`Link đặt lại mật khẩu đã được gửi tới ${forgotEmail}`, 'success');
-
-        // Clear input and reset state after 3 seconds
-        setTimeout(() => {
-            setForgotEmail('');
-            setResetSent(false);
-        }, 3000);
+        setIsLoading(true);
+        try {
+            await forgotPasswordAPI(forgotEmail);
+            setResetSent(true);
+            addToast(`Link đặt lại mật khẩu đã được gửi tới ${forgotEmail}`, 'success');
+        } catch (error) {
+            addToast(error.message, 'error');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const formVariants = {
@@ -85,7 +88,7 @@ const ForgotPasswordForm = ({ onSwitchMode, direction }) => {
             </div>
 
             {/* Form */}
-            <div className="relative z-10 min-h-[220px] flex flex-col justify-center">
+            <div className="relative z-10 min-h-[200px] flex flex-col justify-center">
                 {!resetSent ? (
                     <motion.form
                         initial={{ opacity: 0 }}
@@ -116,24 +119,36 @@ const ForgotPasswordForm = ({ onSwitchMode, direction }) => {
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            className="w-full py-3.5 cursor-pointer rounded-xl font-bold text-white transition-all duration-300 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-orange-500 shadow-[0_8px_16px_-6px_rgba(220,38,38,0.5)] hover:shadow-[0_12px_20px_-6px_rgba(220,38,38,0.6)] transform hover:-translate-y-0.5 active:translate-y-0"
+                            disabled={isLoading}
+                            className={`w-full py-3.5 cursor-pointer rounded-xl font-bold text-white transition-all duration-300 ${
+                                isLoading
+                                    ? 'bg-gray-400 cursor-not-allowed'
+                                    : 'bg-red-600 hover:bg-red-500 shadow-[0_8px_16px_-6px_rgba(220,38,38,0.5)] hover:shadow-[0_12px_20px_-6px_rgba(220,38,38,0.6)] transform hover:-translate-y-0.5 active:translate-y-0'
+                            }`}
                         >
-                            Gửi Hướng Dẫn
+                            {isLoading ? 'Đang gửi...' : 'Gửi Hướng Dẫn'}
                         </button>
                     </motion.form>
                 ) : (
                     <motion.div
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="text-center py-6"
+                        className="text-center py-4"
                     >
                         <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <span className="text-4xl text-green-500">✓</span>
                         </div>
-                        <h2 className="text-xl font-bold text-gray-800 mb-2">Thành Công!</h2>
-                        <p className="text-gray-500 text-sm">
-                            Vui lòng kiểm tra email <span className="font-semibold text-gray-700">{forgotEmail}</span>
+                        <h2 className="text-xl font-bold text-gray-800 mb-2">Yêu cầu đã gửi!</h2>
+                        <p className="text-gray-500 text-sm mb-4">
+                            Mã khôi phục đã được gửi tới <span className="font-semibold text-gray-700">{forgotEmail}</span>. <br/>
+                            Vui lòng kiểm tra email của bạn.
                         </p>
+                        <button
+                            onClick={() => onSwitchMode('reset', 1)}
+                            className="cursor-pointer text-red-600 text-sm font-bold hover:underline"
+                        >
+                            Tôi đã có mã, đặt lại mật khẩu ngay
+                        </button>
                     </motion.div>
                 )}
             </div>
