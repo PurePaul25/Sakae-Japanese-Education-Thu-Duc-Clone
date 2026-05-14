@@ -95,8 +95,18 @@ const UserProfile = () => {
         const file = e.target.files[0];
         if (!file) return;
 
+        // Kiểm tra loại file
         if (!file.type.startsWith('image/')) {
             addToast('Vui lòng chọn tệp hình ảnh', 'error');
+            return;
+        }
+
+        // Kiểm tra dung lượng (5MB = 5 * 1024 * 1024 bytes)
+        const maxSize = 5 * 1024 * 1024;
+        if (file.size > maxSize) {
+            addToast('Kích thước ảnh quá lớn (tối đa 5MB). Vui lòng chọn ảnh nhẹ hơn.', 'error');
+            // Reset input file để người dùng có thể chọn lại cùng 1 file sau khi bị lỗi
+            e.target.value = '';
             return;
         }
 
