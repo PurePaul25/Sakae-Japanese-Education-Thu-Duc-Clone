@@ -2,9 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
-import logo from '../../assets/img/logo_Sakae.png';
-import vietnamIcon from '../../assets/img/vietnam.png';
-import japanIcon from '../../assets/img/japan.png';
+import { ASSETS } from '../../constants/assets';
 import { useUser } from '../../contexts/UserContext';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -30,8 +28,8 @@ const menuItems = [
 
 function Navbar() {
     const languages = [
-        { code: 'vi', label: 'Tiếng Việt', icon: vietnamIcon },
-        { code: 'ja', label: '日本語', icon: japanIcon },
+        { code: 'vi', label: 'Tiếng Việt', icon: ASSETS.ICONS.VIETNAM },
+        { code: 'ja', label: '日本語', icon: ASSETS.ICONS.JAPAN },
     ];
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -88,7 +86,10 @@ function Navbar() {
     // Logic Chuyển đổi ngôn ngữ
     const handleLangSelect = (lang) => {
         if (lang.code === 'ja') {
-            addToast('Tính năng ngôn ngữ Nhật sẽ sớm được ra mắt. Hiện tại hệ thống chỉ hỗ trợ tiếng Việt! Mong bạn thông cảm cho Sakae nhiều nha!', 'info');
+            addToast(
+                'Tính năng ngôn ngữ Nhật sẽ sớm được ra mắt. Hiện tại hệ thống chỉ hỗ trợ tiếng Việt! Mong bạn thông cảm cho Sakae nhiều nha!',
+                'info',
+            );
             setIsDropdownOpen(false);
             return;
         }
@@ -125,10 +126,10 @@ function Navbar() {
     const handleLogout = () => {
         setIsUserDropdownOpen(false);
         addToast('Bạn đã đăng xuất thành công!', 'success');
-        
+
         // Chuyển hướng trước khi gọi logout() để tránh ProtectedRoute kích hoạt điều hướng sang trang login
         navigate('/', { replace: true });
-        
+
         // Gọi logout() sau khi đã bắt đầu chuyển hướng
         logout();
     };
@@ -143,7 +144,7 @@ function Navbar() {
                 {/* Logo */}
                 <div className="flex items-center gap-2">
                     <Link to="/">
-                        <img src={logo} alt="Sakae Logo" className="h-[70px]" />
+                        <img src={ASSETS.LOGO} alt="Sakae Logo" className="h-[70px]" />
                     </Link>
                 </div>
 
@@ -315,7 +316,7 @@ function Navbar() {
                                 <img
                                     src={user.avatar}
                                     alt={user.fullName}
-                                    className="w-8 h-8 rounded-full object-cover"
+                                    className="w-8 h-8 rounded-full border-1 border-gray-200 object-cover"
                                 />
                                 <svg
                                     className={`w-4 h-4 text-gray-500 transition-transform duration-200 ease-out ${
@@ -342,7 +343,7 @@ function Navbar() {
                                 <img
                                     src={user.avatar}
                                     alt={user.fullName}
-                                    className="w-8 h-8 rounded-full object-cover"
+                                    className="w-8 h-8 rounded-full border-1 border-gray-200 object-cover"
                                 />
                                 <svg
                                     className={`w-3 h-3 text-gray-500 transition-transform duration-200 ease-out ${
@@ -372,7 +373,9 @@ function Navbar() {
                             >
                                 {/* User Info Header */}
                                 <div className="p-3 border-b border-gray-100">
-                                    <p className="font-semibold text-gray-800">{user.fullName}</p>
+                                    <p className="font-semibold text-gray-800">
+                                        {user.fullName || user.username || user.email || 'Người dùng'}
+                                    </p>
                                     <p className="text-xs text-gray-500">{user.email}</p>
                                 </div>
 

@@ -288,7 +288,7 @@ const ResetPasswordForm = ({ onSwitchMode, direction }) => {
 
             <button
                 onClick={() => onSwitchMode('login', -1)}
-                className="w-full mt-6 flex items-center justify-center gap-2 text-sm font-semibold text-gray-600 hover:text-red-600 transition-colors"
+                className="w-full mt-6 cursor-pointer flex items-center justify-center gap-2 text-sm font-semibold text-gray-600 hover:text-red-600 transition-colors"
             >
                 <FaArrowLeft /> Quay lại đăng nhập
             </button>

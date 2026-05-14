@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import aboutBanner from '../../assets/img/aboutBanner.jpg';
+import { ASSETS } from '../../constants/assets';
 
 export default function AboutSection() {
     return (
@@ -7,7 +7,7 @@ export default function AboutSection() {
             <div className="max-w-7xl mx-auto px-8 grid md:grid-cols-2 gap-8 items-center">
                 {/* Ảnh */}
                 <div>
-                    <img src={aboutBanner} alt="About Sakae" className="rounded-2xl w-145 border-1 border-gray-300" />
+                    <img src={ASSETS.BANNERS.ABOUT} alt="About Sakae" className="rounded-2xl w-145 border-1 border-gray-300" />
                 </div>
 
                 {/* Nội dung */}

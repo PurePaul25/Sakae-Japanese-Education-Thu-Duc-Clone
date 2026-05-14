@@ -1,6 +1,7 @@
 import React from 'react';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
 import SEO from '../hooks/useSEO.jsx';
+import { ASSETS } from '../constants/assets';
 
 function About() {
     return (
@@ -41,7 +42,7 @@ function About() {
                     {/* Cột 2: Ảnh */}
                     <div className="order-2">
                         <img
-                            src="//bizweb.dktcdn.net/100/059/929/themes/76022/assets/logo-2-1.jpg?1747711551525"
+                            src={ASSETS.BANNERS.ABOUT_PAGE}
                             alt="About Sakae"
                             className="rounded-xl shadow-lg w-full h-auto transition duration-300 ease-in-out transform hover:scale-[1.02]"
                         />
@@ -90,45 +91,43 @@ function About() {
 
             {/* 4. Đội ngũ Giảng viên Chuyên nghiệp (Sử dụng Card và chia 3 cột) */}
             <section className="max-w-6xl mx-auto px-4 mt-10 text-center border-t border-gray-200 pt-10">
-                <h2 className="text-4xl font-extrabold text-gray-800 mb-12 border-b-2 border-red-300 inline-block px-4 pb-1">
+                <h2 className="text-4xl font-extrabold text-gray-800 mb-4 border-b-2 border-red-300 inline-block px-4 pb-1">
                     Đội ngũ Giảng viên
                 </h2>
-                <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-8">
-                    {[
-                        {
-                            name: 'Phương Thảo Sensei',
-                            role: 'Giảng viên N2',
-                            exp: '12 năm kinh nghiệm, sống tại Tokyo 5 năm.',
-                        },
-                        {
-                            name: 'Nishimiya Sensei',
-                            role: 'Giảng viên Bản ngữ',
-                            exp: 'Chuyên sâu về phương pháp học tiếng Nhật hiệu quả và giao tiếp tự nhiên.',
-                        },
-                        {
-                            name: 'Kurita Sensei',
-                            role: 'Giảng viên Sơ cấp',
-                            exp: 'Hỗ trợ hơn 100 học viên du học thành công tại Nhật Bản.',
-                        },
-                    ].map((item, i) => (
-                        <div
-                            key={i}
-                            className="
-                        bg-white p-6 rounded-lg shadow-md border border-gray-200 
-                        hover:bg-red-50 hover:shadow-lg transform hover:scale-[1.02]
-                        transition duration-300
-                    "
-                        >
-                            {/* Placeholder Ảnh/Avatar */}
-                            <div className="mx-auto w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-4 text-4xl font-bold text-gray-600">
-                                {item.name.charAt(0)}
-                            </div>
 
-                            <h3 className="text-xl font-extrabold text-gray-800 mb-1">{item.name}</h3>
-                            <p className="text-red-600 font-semibold mb-3">{item.role}</p>
-                            <p className="text-gray-700 text-sm italic">{item.exp}</p>
+                <p className="text-gray-600 mb-6 max-w-3xl mx-auto leading-relaxed">
+                    Đội ngũ giáo viên Nhật – Việt được đào tạo bài bản, tận tình với học viên và tâm huyết với công việc giảng dạy. 
+                    Chúng tôi cam kết chất lượng đầu ra dựa trên các tiêu chuẩn khắt khe và tốt nhất:
+                </p>
+
+                <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                    {/* Giáo viên Nhật Bản */}
+                    <div className="bg-gradient-to-br from-white to-red-50/30 p-5 rounded-3xl border border-red-100 shadow-sm hover:shadow-md transition-all duration-300 text-left relative overflow-hidden group">
+                        <div className="absolute -right-8 -top-8 w-32 h-32 bg-red-500/5 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-red-200">
+                                <span className="text-2xl">🇯🇵</span>
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-800">Giáo viên Nhật Bản</h3>
                         </div>
-                    ))}
+                        <p className="text-gray-700 leading-relaxed font-medium">
+                            Đạt Chứng chỉ Năng lực Giáo dục Nhật Ngữ hoặc hoàn thành Chương trình Đào tạo Giáo viên Tiếng Nhật 420 giờ, có bề dày kinh nghiệm giảng dạy thực tế.
+                        </p>
+                    </div>
+
+                    {/* Giáo viên Việt Nam */}
+                    <div className="bg-gradient-to-br from-white to-red-50/30 p-5 rounded-3xl border border-red-100 shadow-sm hover:shadow-md transition-all duration-300 text-left relative overflow-hidden group">
+                        <div className="absolute -right-8 -top-8 w-32 h-32 bg-red-500/5 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-red-200">
+                                <span className="text-2xl">🇻🇳</span>
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-800">Giáo viên Việt Nam</h3>
+                        </div>
+                        <p className="text-gray-700 leading-relaxed font-medium">
+                            Đạt trình độ tối thiểu tương đương N3, am hiểu tâm lý học viên Việt Nam và sở hữu phương pháp sư phạm truyền cảm hứng.
+                        </p>
+                    </div>
                 </div>
             </section>
 

@@ -7,12 +7,34 @@ export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    const normalizeUserData = (rawData) => {
+        const normalized = rawData?.data || rawData || {};
+        const nestedUser = normalized?.user || {};
+        const accessToken =
+            normalized?.accessToken ||
+            normalized?.token ||
+            normalized?.data?.accessToken ||
+            nestedUser?.accessToken ||
+            null;
+
+        const result = {
+            ...nestedUser,
+            ...normalized,
+            accessToken,
+        };
+
+        delete result.user;
+        delete result.data;
+
+        return result;
+    };
+
     // Initialize user from localStorage on mount
     useEffect(() => {
         const savedUser = localStorage.getItem('sakae_user');
         if (savedUser) {
             try {
-                setUser(JSON.parse(savedUser));
+                setUser(normalizeUserData(JSON.parse(savedUser)));
             } catch (error) {
                 console.error('Error loading user from localStorage:', error);
                 localStorage.removeItem('sakae_user');
@@ -22,8 +44,9 @@ export const UserProvider = ({ children }) => {
     }, []);
 
     const login = useCallback((userData) => {
-        setUser(userData);
-        localStorage.setItem('sakae_user', JSON.stringify(userData));
+        const storedUser = normalizeUserData(userData);
+        setUser(storedUser);
+        localStorage.setItem('sakae_user', JSON.stringify(storedUser));
     }, []);
 
     const logout = useCallback(() => {
@@ -31,11 +54,20 @@ export const UserProvider = ({ children }) => {
         localStorage.removeItem('sakae_user');
     }, []);
 
+    const updateUser = useCallback((newData) => {
+        setUser((prevUser) => {
+            const updatedUser = { ...prevUser, ...newData };
+            localStorage.setItem('sakae_user', JSON.stringify(updatedUser));
+            return updatedUser;
+        });
+    }, []);
+
     const value = {
         user,
         isLoading,
         login,
         logout,
+        updateUser,
         setIsLoading,
     };
 

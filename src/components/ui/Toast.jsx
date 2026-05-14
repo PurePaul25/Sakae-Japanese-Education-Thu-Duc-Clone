@@ -58,7 +58,7 @@ const Toast = () => {
             x: 0,
             scale: 1,
             transition: {
-                duration: 0.4,
+                duration: 0.25,
                 ease: 'easeOut',
             },
         },
@@ -67,7 +67,7 @@ const Toast = () => {
             x: 400,
             scale: 0.9,
             transition: {
-                duration: 0.3,
+                duration: 0.25,
                 ease: 'easeIn',
             },
         },
@@ -81,7 +81,7 @@ const Toast = () => {
             y: 0,
             scale: 1,
             transition: {
-                duration: 0.2,
+                duration: 0.25,
                 ease: 'easeOut',
             },
         },
@@ -90,7 +90,7 @@ const Toast = () => {
             y: -100,
             scale: 0.9,
             transition: {
-                duration: 0.3,
+                duration: 0.25,
                 ease: 'easeIn',
             },
         },

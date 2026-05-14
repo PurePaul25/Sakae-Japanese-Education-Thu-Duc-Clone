@@ -1,10 +1,12 @@
 import api from './api';
 
+const normalizeResponse = (response) => response?.data?.data ?? response?.data;
+
 // Login API
 export const loginAPI = async (email, password) => {
     try {
         const response = await api.post('/auth/login', { email, password });
-        return response.data;
+        return normalizeResponse(response);
     } catch (error) {
         throw new Error(error.response?.data?.message || 'Email hoặc mật khẩu không chính xác');
     }
@@ -13,14 +15,14 @@ export const loginAPI = async (email, password) => {
 // Signup API
 export const signupAPI = async (username, email, password, fullName, gender = 'OTHER') => {
     try {
-        const response = await api.post('/auth/register', { 
-            username, 
-            email, 
-            password, 
-            fullName: fullName || username, 
-            gender 
+        const response = await api.post('/auth/register', {
+            username,
+            email,
+            password,
+            fullName: fullName || username,
+            gender,
         });
-        return response.data;
+        return normalizeResponse(response);
     } catch (error) {
         throw new Error(error.response?.data?.message || 'Đăng ký thất bại, vui lòng thử lại');
     }
@@ -30,7 +32,7 @@ export const signupAPI = async (username, email, password, fullName, gender = 'O
 export const forgotPasswordAPI = async (email) => {
     try {
         const response = await api.post('/auth/forgot-password', { email });
-        return response.data;
+        return normalizeResponse(response);
     } catch (error) {
         throw new Error(error.response?.data?.message || 'Email không tồn tại trong hệ thống');
     }
@@ -40,7 +42,7 @@ export const forgotPasswordAPI = async (email) => {
 export const verifyEmailAPI = async (email, code) => {
     try {
         const response = await api.post('/auth/verify-email', { email, code });
-        return response.data;
+        return normalizeResponse(response);
     } catch (error) {
         throw new Error(error.response?.data?.message || 'Xác thực thất bại');
     }
@@ -50,7 +52,7 @@ export const verifyEmailAPI = async (email, code) => {
 export const resendCodeAPI = async (email) => {
     try {
         const response = await api.post('/auth/resend-code', { email });
-        return response.data;
+        return normalizeResponse(response);
     } catch (error) {
         throw new Error(error.response?.data?.message || 'Không thể gửi lại mã');
     }
@@ -60,7 +62,7 @@ export const resendCodeAPI = async (email) => {
 export const resetPasswordAPI = async (email, token, password) => {
     try {
         const response = await api.post('/auth/reset-password', { email, token, password });
-        return response.data;
+        return normalizeResponse(response);
     } catch (error) {
         throw new Error(error.response?.data?.message || 'Mã xác thực không chính xác hoặc đã hết hạn');
     }
@@ -70,7 +72,7 @@ export const resetPasswordAPI = async (email, token, password) => {
 export const getCurrentUserAPI = async () => {
     try {
         const response = await api.get('/auth/me');
-        return response.data;
+        return normalizeResponse(response);
     } catch (error) {
         throw new Error(error.response?.data?.message || 'Không thể lấy thông tin người dùng');
     }
@@ -82,11 +84,12 @@ export const getCurrentUserAPI = async () => {
 export const adminLoginAPI = async (email, password) => {
     try {
         const response = await api.post('/auth/login', { email, password });
+        const result = normalizeResponse(response);
         // Check if user is admin
-        if (response.data.user.role !== 'admin') {
+        if (result.user.role !== 'admin') {
             throw new Error('Bạn không có quyền truy cập trang quản trị');
         }
-        return response.data;
+        return result;
     } catch (error) {
         throw new Error(error.response?.data?.message || error.message || 'Đăng nhập admin thất bại');
     }

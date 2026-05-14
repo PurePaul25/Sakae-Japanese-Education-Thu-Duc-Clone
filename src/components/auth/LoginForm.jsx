@@ -4,10 +4,11 @@ import { motion } from 'framer-motion';
 import { FaEye, FaEyeSlash, FaEnvelope, FaLock, FaArrowLeft } from 'react-icons/fa';
 import { isValidEmail } from '../../utils/authUtils';
 import { loginAPI } from '../../utils/authAPI';
+import api from '../../utils/api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '../../contexts/ToastContext';
 import { useUser } from '../../contexts/UserContext';
-import logo from '../../assets/img/logo_Sakae.png';
+import { ASSETS } from '../../constants/assets';
 
 const LoginForm = ({ onSwitchMode, direction }) => {
     const [loginEmail, setLoginEmail] = useState('');
@@ -19,7 +20,7 @@ const LoginForm = ({ onSwitchMode, direction }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { addToast } = useToast();
-    const { login } = useUser();
+    const { login, updateUser } = useUser();
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -50,9 +51,16 @@ const LoginForm = ({ onSwitchMode, direction }) => {
         try {
             const userData = await loginAPI(loginEmail, loginPassword);
             login(userData);
+            addToast('Đăng nhập thành công! Chào mừng bạn quay lại Sakae!', 'success');
 
-            // Store flag to show toast on home page
-            sessionStorage.setItem('showLoginSuccessToast', 'true');
+            // Fetch the full user profile after successful login so Navbar can display fullName
+            try {
+                const profileResponse = await api.get('/users/profile');
+                const profileData = profileResponse.data.data || profileResponse.data;
+                updateUser(profileData);
+            } catch (profileError) {
+                console.warn('Unable to fetch profile after login:', profileError);
+            }
 
             // Redirect to previous page or home
             const origin = location.state?.from?.pathname || '/';
@@ -103,7 +111,7 @@ const LoginForm = ({ onSwitchMode, direction }) => {
             {/* Logo and Header */}
             <div className="text-center mb-6 relative z-10">
                 <div className="flex justify-center">
-                    <img src={logo} alt="Sakae Logo" className="h-30 w-auto object-contain drop-shadow-sm" />
+                    <img src={ASSETS.LOGO} alt="Sakae Logo" className="h-30 w-auto object-contain drop-shadow-sm" />
                 </div>
                 <h1 className="text-3xl font-extrabold bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent mb-2">
                     Chào Mừng Trở Lại
@@ -147,7 +155,7 @@ const LoginForm = ({ onSwitchMode, direction }) => {
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-red-500 transition-colors focus:outline-none"
+                            className="absolute inset-y-0 right-0 pr-4 cursor-pointer flex items-center text-gray-400 hover:text-red-500 transition-colors focus:outline-none"
                         >
                             {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
                         </button>

@@ -12,14 +12,6 @@ import SEO from '../hooks/useSEO.jsx';
 function Home() {
     const { addToast } = useToast();
 
-    // Check if login was successful and show toast
-    useEffect(() => {
-        const showLoginToast = sessionStorage.getItem('showLoginSuccessToast');
-        if (showLoginToast) {
-            addToast('Đăng nhập thành công! Chào mừng bạn quay lại Sakae!', 'success');
-            sessionStorage.removeItem('showLoginSuccessToast');
-        }
-    }, [addToast]);
 
     return (
         <main>

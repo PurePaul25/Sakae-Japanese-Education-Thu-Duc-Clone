@@ -12,7 +12,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../../contexts/ToastContext';
 import { signupAPI } from '../../utils/authAPI';
-import logo from '../../assets/img/logo_Sakae.png';
+import { ASSETS } from '../../constants/assets';
 import VerificationModal from './VerificationModal';
 
 const SignupForm = ({ onSwitchMode, direction }) => {
@@ -120,7 +120,7 @@ const SignupForm = ({ onSwitchMode, direction }) => {
             {/* Header */}
             <div className="text-center mb-6 relative z-10">
                 <div className="flex justify-center">
-                    <img src={logo} alt="Sakae Logo" className="h-30 w-auto object-contain drop-shadow-sm" />
+                    <img src={ASSETS.LOGO} alt="Sakae Logo" className="h-30 w-auto object-contain drop-shadow-sm" />
                 </div>
                 <h1 className="text-3xl font-extrabold bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent mb-1">
                     Tạo Tài Khoản
