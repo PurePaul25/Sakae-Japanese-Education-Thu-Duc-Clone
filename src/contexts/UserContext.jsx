@@ -32,12 +32,17 @@ export const UserProvider = ({ children }) => {
     // Initialize user from localStorage on mount
     useEffect(() => {
         const savedUser = localStorage.getItem('sakae_user');
-        if (savedUser) {
+        const savedAdmin = localStorage.getItem('sakae_admin');
+        
+        const dataToUse = savedUser || savedAdmin;
+        
+        if (dataToUse) {
             try {
-                setUser(normalizeUserData(JSON.parse(savedUser)));
+                setUser(normalizeUserData(JSON.parse(dataToUse)));
             } catch (error) {
                 console.error('Error loading user from localStorage:', error);
                 localStorage.removeItem('sakae_user');
+                localStorage.removeItem('sakae_admin');
             }
         }
         setIsLoading(false);
@@ -52,7 +57,16 @@ export const UserProvider = ({ children }) => {
     const logout = useCallback(() => {
         setUser(null);
         localStorage.removeItem('sakae_user');
+        localStorage.removeItem('sakae_admin');
     }, []);
+
+    useEffect(() => {
+        const handleAuthExpired = () => {
+            logout();
+        };
+        window.addEventListener('sakae-auth-expired', handleAuthExpired);
+        return () => window.removeEventListener('sakae-auth-expired', handleAuthExpired);
+    }, [logout]);
 
     const updateUser = useCallback((newData) => {
         setUser((prevUser) => {

@@ -11,6 +11,7 @@ import AdminSettings from '../../components/admin/AdminSettings';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import SEO from '../../hooks/useSEO';
+import { useUser } from '../../contexts/UserContext';
 
 const AdminDashboard = () => {
     const { category } = useParams();
@@ -18,14 +19,30 @@ const AdminDashboard = () => {
 
     const navigate = useNavigate();
     const { addToast } = useToast();
+    const { user: contextUser } = useUser();
     const [isLoading, setIsLoading] = useState(true);
 
-    const admin = JSON.parse(localStorage.getItem('sakae_admin') || '{}');
+    // Get admin info from multiple sources for robustness
+    const localAdmin = JSON.parse(localStorage.getItem('sakae_admin') || '{}');
+    const admin = contextUser?.role === 'ADMIN' ? contextUser : (localAdmin.user || localAdmin);
+    const adminName = admin.fullName || admin.user?.fullName || 'Quản trị viên';
 
     useEffect(() => {
-        // Authenticate
+        // Authenticate - Check both potential sources of admin data
         const adminData = localStorage.getItem('sakae_admin');
-        if (!adminData) {
+        const userData = localStorage.getItem('sakae_user');
+        
+        let currentAdmin = null;
+        if (adminData) {
+            currentAdmin = JSON.parse(adminData);
+        } else if (userData) {
+            const parsedUser = JSON.parse(userData);
+            if (parsedUser.role === 'ADMIN') {
+                currentAdmin = parsedUser;
+            }
+        }
+
+        if (!currentAdmin) {
             navigate('/admin/dang-nhap');
             return;
         }
@@ -33,12 +50,12 @@ const AdminDashboard = () => {
         // Show login success toast
         const showLoginToast = sessionStorage.getItem('showAdminLoginSuccessToast');
         if (showLoginToast) {
-            addToast(`Đăng nhập thành công! Chào mừng ${admin.fullName}!`, 'success');
+            addToast(`Đăng nhập thành công! Chào mừng ${adminName}!`, 'success');
             sessionStorage.removeItem('showAdminLoginSuccessToast');
         }
 
         setTimeout(() => setIsLoading(false), 800);
-    }, [navigate, addToast, admin.fullName]);
+    }, [navigate, addToast, adminName]);
 
     const userColumns = [
         {
@@ -226,7 +243,7 @@ const AdminDashboard = () => {
             case 'thu-vien-anh':
                 return (
                     <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
-                        <div className="mb-8">
+                        <div className="mb-5">
                             <h2 className="text-3xl font-bold text-slate-800 dark:text-white">Thư viện media</h2>
                             <p className="text-slate-500 mt-1">Quản lý hình ảnh, biểu ngữ và tài liệu khóa học.</p>
                         </div>

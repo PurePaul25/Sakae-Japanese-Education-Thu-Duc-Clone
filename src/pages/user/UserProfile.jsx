@@ -111,8 +111,17 @@ const UserProfile = () => {
         }
 
         setSelectedFile(file);
+        
+        // Thu hồi URL cũ để tránh rò rỉ bộ nhớ
+        if (previewUrl && previewUrl.startsWith('blob:')) {
+            URL.revokeObjectURL(previewUrl);
+        }
+
         const url = URL.createObjectURL(file);
         setPreviewUrl(url);
+        
+        // Reset input để có thể chọn lại chính file này nếu muốn
+        e.target.value = '';
     };
 
     const handleChange = (e) => {

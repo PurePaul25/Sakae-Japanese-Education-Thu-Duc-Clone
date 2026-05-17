@@ -95,37 +95,51 @@ function About() {
                     Đội ngũ Giảng viên
                 </h2>
 
-                <p className="text-gray-600 mb-6 max-w-3xl mx-auto leading-relaxed">
-                    Đội ngũ giáo viên Nhật – Việt được đào tạo bài bản, tận tình với học viên và tâm huyết với công việc giảng dạy. 
-                    Chúng tôi cam kết chất lượng đầu ra dựa trên các tiêu chuẩn khắt khe và tốt nhất:
+                <p className="text-gray-600 mb-6 max-w-4xl mx-auto md:text-lg leading-relaxed">
+                    Đội ngũ giáo viên Nhật – Việt được đào tạo bài bản, tận tình với học viên và tâm huyết với công việc
+                    giảng dạy. Chúng tôi cam kết chất lượng đầu ra dựa trên các tiêu chuẩn khắt khe và tốt nhất
                 </p>
 
                 <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
                     {/* Giáo viên Nhật Bản */}
                     <div className="bg-gradient-to-br from-white to-red-50/30 p-5 rounded-3xl border border-red-100 shadow-sm hover:shadow-md transition-all duration-300 text-left relative overflow-hidden group">
                         <div className="absolute -right-8 -top-8 w-32 h-32 bg-red-500/5 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
+
                         <div className="flex items-center gap-4 mb-4">
-                            <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-red-200">
-                                <span className="text-2xl">🇯🇵</span>
+                            {/* Flag Japan */}
+                            <div className="w-12 h-12 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                                <div className="w-full h-full bg-white flex items-center justify-center border border-gray-100">
+                                    <div className="w-5 h-5 bg-red-500 rounded-full"></div>
+                                </div>
                             </div>
+
                             <h3 className="text-2xl font-bold text-gray-800">Giáo viên Nhật Bản</h3>
                         </div>
-                        <p className="text-gray-700 leading-relaxed font-medium">
-                            Đạt Chứng chỉ Năng lực Giáo dục Nhật Ngữ hoặc hoàn thành Chương trình Đào tạo Giáo viên Tiếng Nhật 420 giờ, có bề dày kinh nghiệm giảng dạy thực tế.
+
+                        <p className="text-gray-700 leading-relaxed text-justify font-medium">
+                            Đạt Chứng chỉ Năng lực Giáo dục Nhật Ngữ hoặc hoàn thành Chương trình Đào tạo Giáo viên
+                            Tiếng Nhật 420 giờ, có bề dày kinh nghiệm giảng dạy thực tế.
                         </p>
                     </div>
 
                     {/* Giáo viên Việt Nam */}
                     <div className="bg-gradient-to-br from-white to-red-50/30 p-5 rounded-3xl border border-red-100 shadow-sm hover:shadow-md transition-all duration-300 text-left relative overflow-hidden group">
                         <div className="absolute -right-8 -top-8 w-32 h-32 bg-red-500/5 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
+
                         <div className="flex items-center gap-4 mb-4">
-                            <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-red-200">
-                                <span className="text-2xl">🇻🇳</span>
+                            {/* Flag Vietnam */}
+                            <div className="w-12 h-12 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                                <div className="w-full h-full bg-red-500 flex items-center justify-center">
+                                    <span className="text-yellow-300 text-2xl">★</span>
+                                </div>
                             </div>
+
                             <h3 className="text-2xl font-bold text-gray-800">Giáo viên Việt Nam</h3>
                         </div>
-                        <p className="text-gray-700 leading-relaxed font-medium">
-                            Đạt trình độ tối thiểu tương đương N3, am hiểu tâm lý học viên Việt Nam và sở hữu phương pháp sư phạm truyền cảm hứng.
+
+                        <p className="text-gray-700 leading-relaxed text-justify font-medium">
+                            Đạt trình độ tối thiểu tương đương N3, am hiểu tâm lý học viên Việt Nam và sở hữu phương
+                            pháp sư phạm truyền cảm hứng.
                         </p>
                     </div>
                 </div>
@@ -142,7 +156,7 @@ function About() {
                         {
                             title: 'Phòng học hiện đại',
                             icon: '🖥️',
-                            desc: 'Trang bị máy chiếu, máy lạnh và hệ thống âm thanh tiêu chuẩn, tạo môi trường thoải mái nhất.',
+                            desc: 'Trang bị thiết bị thông minh, máy lạnh và âm thanh tiêu chuẩn, tạo môi trường thoải mái nhất.',
                         },
                         {
                             title: 'Hoạt động học tập đa dạng',

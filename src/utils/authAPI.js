@@ -86,7 +86,7 @@ export const adminLoginAPI = async (email, password) => {
         const response = await api.post('/auth/login', { email, password });
         const result = normalizeResponse(response);
         // Check if user is admin
-        if (result.user.role !== 'admin') {
+        if (result.user.role !== 'ADMIN') {
             throw new Error('Bạn không có quyền truy cập trang quản trị');
         }
         return result;

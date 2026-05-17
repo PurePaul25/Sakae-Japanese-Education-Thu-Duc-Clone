@@ -10,10 +10,18 @@ const api = axios.create({
 // Add a request interceptor to add the bearer token to every request
 api.interceptors.request.use(
     (config) => {
+        // Skip auth routes
+        if (config.url.includes('/auth/')) {
+            return config;
+        }
+
+        const savedAdmin = localStorage.getItem('sakae_admin');
         const savedUser = localStorage.getItem('sakae_user');
-        if (savedUser) {
+        const dataToUse = savedAdmin || savedUser;
+
+        if (dataToUse) {
             try {
-                const parsedUser = JSON.parse(savedUser);
+                const parsedUser = JSON.parse(dataToUse);
                 const accessToken =
                     parsedUser?.accessToken ||
                     parsedUser?.token ||
@@ -41,9 +49,18 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response && error.response.status === 401) {
-            // Handle unauthorized error (e.g., redirect to login or refresh token)
-            // localStorage.removeItem('sakae_user');
-            // window.location.href = '/dang-nhap';
+            // Only handle session expiry if this is not an auth attempt
+            if (error.config && !error.config.url.includes('/auth/')) {
+                localStorage.removeItem('sakae_user');
+                localStorage.removeItem('sakae_admin');
+                
+                // Dispatch custom event to notify React context and components
+                window.dispatchEvent(
+                    new CustomEvent('sakae-auth-expired', {
+                        detail: { message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!' }
+                    })
+                );
+            }
         }
         return Promise.reject(error);
     },

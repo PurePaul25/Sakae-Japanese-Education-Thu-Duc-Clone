@@ -115,6 +115,18 @@ function Navbar() {
         };
     }, []);
 
+    // Listen for session expiry to show error toast and redirect
+    useEffect(() => {
+        const handleAuthExpired = (event) => {
+            const message = event.detail?.message || 'Phiên đăng nhập của bạn đã hết hạn. Vui lòng đăng nhập lại!';
+            addToast(message, 'error');
+            navigate('/dang-nhap', { replace: true });
+        };
+        window.addEventListener('sakae-auth-expired', handleAuthExpired);
+        return () => window.removeEventListener('sakae-auth-expired', handleAuthExpired);
+    }, [addToast, navigate]);
+
+
     const handleLoginClick = () => {
         setIsLoggingIn(true);
         setTimeout(() => {

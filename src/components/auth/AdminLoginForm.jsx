@@ -6,6 +6,7 @@ import { isValidEmail } from '../../utils/authUtils';
 import { adminLoginAPI } from '../../utils/authAPI';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../../contexts/ToastContext';
+import { useUser } from '../../contexts/UserContext';
 import { ASSETS } from '../../constants/assets';
 
 const AdminLoginForm = ({ direction }) => {
@@ -16,6 +17,7 @@ const AdminLoginForm = ({ direction }) => {
 
     const navigate = useNavigate();
     const { addToast } = useToast();
+    const { login } = useUser();
 
     const handleAdminLogin = async (e) => {
         e.preventDefault();
@@ -41,12 +43,13 @@ const AdminLoginForm = ({ direction }) => {
             return;
         }
 
-        // Try login with fake API
+        // Try login
         setIsLoading(true);
         try {
             const adminData = await adminLoginAPI(adminEmail, adminPassword);
 
-            // Save admin data to localStorage
+            // Save to context and localStorage
+            login(adminData);
             localStorage.setItem('sakae_admin', JSON.stringify(adminData));
 
             // Store flag to show toast on admin dashboard

@@ -20,7 +20,7 @@ const AdminLayout = ({ children, admin, onLogout }) => {
                 <AdminTopbar admin={admin} onLogout={onLogout}/>
 
                 {/* Page Content */}
-                <main className="p-6 md:p-8">
+                <main className="py-6 px-8">
                     <div className="max-w-7xl mx-auto">
                         {children}
                     </div>
