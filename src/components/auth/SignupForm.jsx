@@ -54,6 +54,11 @@ const SignupForm = ({ onSwitchMode, direction }) => {
             return;
         }
 
+        if (!signupEmail.toLowerCase().endsWith('@gmail.com')) {
+            addToast('Hệ thống chỉ hỗ trợ đăng ký bằng Gmail cá nhân (kết thúc bằng @gmail.com)', 'error');
+            return;
+        }
+
         if (!signupPassword) {
             addToast('Vui lòng tạo mật khẩu', 'error');
             return;

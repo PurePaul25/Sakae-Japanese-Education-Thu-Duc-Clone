@@ -83,6 +83,11 @@ const ResetPasswordForm = ({ onSwitchMode, direction }) => {
             return;
         }
 
+        if (!email.toLowerCase().endsWith('@gmail.com')) {
+            addToast('Hệ thống chỉ hỗ trợ bằng Gmail cá nhân (kết thúc bằng @gmail.com)', 'error');
+            return;
+        }
+
         if (!token) {
             addToast('Vui lòng nhập mã xác thực', 'error');
             return;

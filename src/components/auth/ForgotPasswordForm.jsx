@@ -28,6 +28,11 @@ const ForgotPasswordForm = ({ onSwitchMode, direction }) => {
             return;
         }
 
+        if (!forgotEmail.toLowerCase().endsWith('@gmail.com')) {
+            addToast('Hệ thống chỉ hỗ trợ khôi phục bằng Gmail cá nhân (kết thúc bằng @gmail.com)', 'error');
+            return;
+        }
+
         setIsLoading(true);
         try {
             await forgotPasswordAPI(forgotEmail);
