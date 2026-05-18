@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaLock, FaEye, FaEyeSlash, FaArrowLeft, FaShieldAlt, FaEnvelope, FaCheck, FaTimes } from 'react-icons/fa';
 import { 
@@ -6,7 +6,7 @@ import {
     checkPasswordRequirements, 
     isPasswordValid 
 } from '../../utils/authUtils';
-import { resetPasswordAPI } from '../../utils/authAPI';
+import { resetPasswordAPI, forgotPasswordAPI } from '../../utils/authAPI';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '../../contexts/ToastContext';
 import { ASSETS } from '../../constants/assets';
@@ -21,6 +21,53 @@ const ResetPasswordForm = ({ onSwitchMode, direction }) => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [timeLeft, setTimeLeft] = useState(90); // 90 seconds (1m30s)
+    const [canResend, setCanResend] = useState(false);
+    const [isResending, setIsResending] = useState(false);
+    
+    // Countdown Timer Effect
+    useEffect(() => {
+        if (timeLeft <= 0) {
+            setCanResend(true);
+            return;
+        }
+        
+        const timer = setInterval(() => {
+            setTimeLeft((prev) => {
+                if (prev <= 1) {
+                    setCanResend(true);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [timeLeft]);
+
+    const formatTime = (seconds) => {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+    };
+
+    const handleResendToken = async () => {
+        if (!email) {
+            addToast('Vui lòng nhập email để nhận lại mã', 'error');
+            return;
+        }
+        setIsResending(true);
+        try {
+            await forgotPasswordAPI(email);
+            setTimeLeft(90);
+            setCanResend(false);
+            addToast('Mã xác nhận mới đã được gửi tới email của bạn!', 'success');
+        } catch (error) {
+            addToast(error.message, 'error');
+        } finally {
+            setIsResending(false);
+        }
+    };
     
     const navigate = useNavigate();
     const { addToast } = useToast();
@@ -38,6 +85,11 @@ const ResetPasswordForm = ({ onSwitchMode, direction }) => {
 
         if (!token) {
             addToast('Vui lòng nhập mã xác thực', 'error');
+            return;
+        }
+
+        if (timeLeft <= 0) {
+            addToast('Mã xác nhận của bạn đã hết hạn. Vui lòng bấm "Gửi lại mã" để nhận mã mới.', 'error');
             return;
         }
 
@@ -155,18 +207,38 @@ const ResetPasswordForm = ({ onSwitchMode, direction }) => {
 
                 {/* Token Field */}
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1 ml-1">Mã xác nhận</label>
-                    <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-red-500 transition-colors">
-                            <FaShieldAlt size={16} />
+                    <div className="flex justify-between items-center mb-1 ml-1">
+                        <label className="block text-sm font-semibold text-gray-700">Mã xác nhận</label>
+                        <span className={`text-xs font-bold ${timeLeft <= 0 ? 'text-red-500 animate-pulse' : 'text-gray-500'}`}>
+                            {timeLeft <= 0 ? 'Mã đã hết hạn' : `Hiệu lực: ${formatTime(timeLeft)}`}
+                        </span>
+                    </div>
+                    <div className="flex gap-2">
+                        <div className="relative group flex-1">
+                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-red-500 transition-colors">
+                                <FaShieldAlt size={16} />
+                            </div>
+                            <input
+                                type="text"
+                                value={token}
+                                onChange={(e) => setToken(e.target.value)}
+                                placeholder="Mã 6 chữ số"
+                                className="w-full pl-10 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:border-red-500 transition-all font-mono text-center tracking-[0.2em] font-bold text-lg"
+                                maxLength={6}
+                            />
                         </div>
-                        <input
-                            type="text"
-                            value={token}
-                            onChange={(e) => setToken(e.target.value)}
-                            placeholder="Nhập mã 6 chữ số từ email"
-                            className="w-full pl-10 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:border-red-500 transition-all"
-                        />
+                        <button
+                            type="button"
+                            disabled={!canResend || isResending}
+                            onClick={handleResendToken}
+                            className={`px-4 py-3.5 cursor-pointer rounded-xl text-xs font-bold transition-all border ${
+                                canResend 
+                                    ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' 
+                                    : 'bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed'
+                            }`}
+                        >
+                            {isResending ? 'Đang gửi...' : 'Gửi lại mã'}
+                        </button>
                     </div>
                 </div>
 
