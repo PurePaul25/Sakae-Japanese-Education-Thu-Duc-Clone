@@ -19,7 +19,7 @@ const AdminDashboard = () => {
 
     const navigate = useNavigate();
     const { addToast } = useToast();
-    const { user: contextUser } = useUser();
+    const { user: contextUser, logout } = useUser();
     const [isLoading, setIsLoading] = useState(true);
 
     // Get admin info from multiple sources for robustness
@@ -299,7 +299,9 @@ const AdminDashboard = () => {
     };
 
     const handleLogout = () => {
+        logout(); // Clear user context, sakae_user, and sakae_admin
         localStorage.removeItem('sakae_admin');
+        localStorage.removeItem('sakae_user');
         addToast('Đã đăng xuất thành công!', 'success');
         setTimeout(() => {
             navigate('/admin/dang-nhap');
