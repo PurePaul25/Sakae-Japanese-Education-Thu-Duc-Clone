@@ -3,6 +3,8 @@ import ScrollToTopButton from '../components/layout/ScrollToTopButton';
 import { FaSearchPlus, FaTimes, FaChevronLeft, FaChevronRight, FaDownload, FaSearchMinus } from 'react-icons/fa';
 import SEO from '../hooks/useSEO';
 import api from '../utils/api';
+import { useUser } from '../contexts/UserContext';
+import { useToast } from '../contexts/ToastContext';
 
 const categories = ['Tất cả', 'Lễ hội', 'Lớp học', 'Giao lưu', 'Thiếu nhi', 'Sự kiện', 'Du học'];
 
@@ -66,6 +68,8 @@ const UserCustomSelect = ({ value, onChange, options, placeholder }) => {
 };
 
 const Gallerys = () => {
+    const { user } = useUser();
+    const { addToast } = useToast();
     const [activeCategory, setActiveCategory] = useState('Tất cả');
     const [sortOrder, setSortOrder] = useState('newest');
     const [selectedImage, setSelectedImage] = useState(null);
@@ -81,6 +85,11 @@ const Gallerys = () => {
     const [galleryData, setGalleryData] = useState([]);
     const touchStartX = useRef(null);
     const touchEndX = useRef(null);
+
+    // Comments states
+    const [comments, setComments] = useState([]);
+    const [newComment, setNewComment] = useState('');
+    const [loadingComments, setLoadingComments] = useState(false);
 
     const years = useMemo(() => {
         return [...new Set((galleryData || []).map((img) => new Date(img.rawDate).getFullYear()))].sort(
@@ -119,12 +128,14 @@ const Gallerys = () => {
                 id: item.id,
                 category: item.category || 'Chung',
                 title: item.title || 'Ảnh hoạt động',
+                caption: item.caption,
                 src: item.imageUrl,
                 date: new Date(item.createdAt).toLocaleDateString('vi-VN'),
                 rawDate: new Date(item.createdAt),
                 likesCount: item.likesCount || 0,
                 commentsCount: item.commentsCount || 0,
                 isLiked: item.isLiked || false,
+                createdBy: item.createdBy,
             }));
             setGalleryData(formattedData);
         } catch (error) {
@@ -136,7 +147,138 @@ const Gallerys = () => {
 
     useEffect(() => {
         fetchGallery();
-    }, []);
+    }, [user]);
+
+    // Fetch comments when selectedImage is opened
+    useEffect(() => {
+        if (!selectedImage) {
+            setComments([]);
+            return;
+        }
+
+        const fetchPostDetails = async () => {
+            try {
+                setLoadingComments(true);
+                const response = await api.get(`/gallery/${selectedImage.id}`);
+                const data = response.data?.data || response.data || {};
+                setComments(data.comments || []);
+            } catch (error) {
+                console.error('Lỗi khi lấy bình luận:', error);
+            } finally {
+                setLoadingComments(false);
+            }
+        };
+
+        fetchPostDetails();
+    }, [selectedImage]);
+
+    const handleLike = async (postId, e) => {
+        if (e) e.stopPropagation();
+        if (!user) {
+            addToast('Vui lòng đăng nhập để thả tim bài viết!', 'warning');
+            return;
+        }
+
+        try {
+            // Optimistic UI update
+            setGalleryData(prev => prev.map(post => {
+                if (post.id === postId) {
+                    const nextLiked = !post.isLiked;
+                    return {
+                        ...post,
+                        isLiked: nextLiked,
+                        likesCount: nextLiked ? post.likesCount + 1 : Math.max(0, post.likesCount - 1)
+                    };
+                }
+                return post;
+            }));
+
+            // If selectedImage is currently open, update its state too
+            if (selectedImage && selectedImage.id === postId) {
+                setSelectedImage(prev => {
+                    const nextLiked = !prev.isLiked;
+                    return {
+                        ...prev,
+                        isLiked: nextLiked,
+                        likesCount: nextLiked ? prev.likesCount + 1 : Math.max(0, prev.likesCount - 1)
+                    };
+                });
+            }
+
+            await api.post(`/gallery/${postId}/like`);
+        } catch (error) {
+            addToast(error.message || 'Lỗi khi thích bài viết', 'error');
+            fetchGallery(); // Revert
+        }
+    };
+
+    const handleAddComment = async (e) => {
+        if (e) e.preventDefault();
+        if (!newComment.trim()) return;
+
+        if (!user) {
+            addToast('Vui lòng đăng nhập để bình luận!', 'warning');
+            return;
+        }
+
+        try {
+            const tempComment = newComment;
+            setNewComment(''); // Clear input immediately
+
+            const response = await api.post(`/gallery/${selectedImage.id}/comments`, { content: tempComment });
+            const addedComment = response.data?.data || response.data;
+            
+            // Add comment to list
+            setComments(prev => [addedComment, ...prev]);
+
+            // Update comments count in list
+            setGalleryData(prev => prev.map(post => {
+                if (post.id === selectedImage.id) {
+                    return { ...post, commentsCount: post.commentsCount + 1 };
+                }
+                return post;
+            }));
+            
+            if (selectedImage) {
+                setSelectedImage(prev => ({
+                    ...prev,
+                    commentsCount: prev.commentsCount + 1
+                }));
+            }
+
+            addToast('Đã gửi bình luận của bạn!', 'success');
+        } catch (error) {
+            addToast(error.message || 'Lỗi khi gửi bình luận', 'error');
+        }
+    };
+
+    const handleDeleteComment = async (commentId) => {
+        try {
+            await api.delete(`/gallery/comments/${commentId}`);
+            
+            // Remove comment from state
+            setComments(prev => prev.filter(c => c.id !== commentId));
+
+            // Decrement comments count in lists
+            setGalleryData(prev => prev.map(post => {
+                if (post.id === selectedImage.id) {
+                    return { ...post, commentsCount: Math.max(0, post.commentsCount - 1) };
+                }
+                return post;
+            }));
+
+            if (selectedImage) {
+                setSelectedImage(prev => ({
+                    ...prev,
+                    commentsCount: Math.max(0, prev.commentsCount - 1)
+                }));
+            }
+
+            addToast('Đã xóa bình luận!', 'success');
+        } catch (error) {
+            addToast(error.message || 'Lỗi khi xóa bình luận', 'error');
+        }
+    };
 
     const filteredImages = useMemo(() => {
         let images = [...galleryData];
@@ -429,15 +571,28 @@ const Gallerys = () => {
                                         </span>
                                     </div>
 
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-4">
-                                        <h3 className="text-white font-bold text-lg leading-tight transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-5">
+                                        <span className="px-2.5 py-0.5 bg-red-600 text-white text-[9px] font-black rounded-full uppercase tracking-wider self-start mb-2">
+                                            {image.category}
+                                        </span>
+                                        <h3 className="text-white font-bold text-base leading-tight transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500 mb-3">
                                             {image.title}
                                         </h3>
-                                        <div className="flex items-center justify-between transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-75">
-                                            <span className="text-white/80 text-xs font-medium">{image.date}</span>
-                                            <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg">
-                                                <FaSearchPlus size={18} />
+                                        <div className="flex items-center justify-between border-t border-white/10 pt-3 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500 delay-75">
+                                            <div className="flex items-center gap-3">
+                                                <button
+                                                    onClick={(e) => handleLike(image.id, e)}
+                                                    className="flex items-center gap-1 text-white hover:text-red-500 transition-colors focus:outline-none"
+                                                >
+                                                    <span className={`text-base ${image.isLiked ? 'text-red-500' : ''}`}>❤️</span>
+                                                    <span className="text-xs font-black">{image.likesCount}</span>
+                                                </button>
+                                                <div className="flex items-center gap-1 text-white">
+                                                    <span className="text-base">💬</span>
+                                                    <span className="text-xs font-black">{image.commentsCount}</span>
+                                                </div>
                                             </div>
+                                            <span className="text-white/60 text-[10px] font-bold uppercase tracking-wider">{image.date}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -493,129 +648,270 @@ const Gallerys = () => {
 
             {selectedImage && (
                 <div
-                    className="fixed inset-0 z-[200] bg-black/98 flex items-center justify-center animate-fadeIn select-none"
+                    className="fixed inset-0 z-[200] bg-slate-950/98 backdrop-blur-md flex flex-col lg:flex-row animate-fadeIn"
                     onClick={() => setSelectedImage(null)}
                 >
-                    {/* Header Controls */}
-                    <div
-                        className="absolute top-0 left-0 right-0 p-4 md:p-6 flex justify-between items-center z-[220]"
+                    {/* Left Column - Image Viewer */}
+                    <div 
+                        className="relative flex-1 bg-black flex items-center justify-center min-h-[50vh] lg:min-h-0 select-none overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex items-center gap-2 bg-white/5 backdrop-blur-2xl rounded-2xl p-1 border border-white/10">
-                            <button
-                                onClick={handleZoomOut}
-                                className="relative group w-10 h-10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all cursor-pointer"
+                        {/* Header Controls */}
+                        <div className="absolute top-0 left-0 right-0 p-4 md:p-6 flex justify-between items-center z-[220]">
+                            <div className="flex items-center gap-2 bg-white/5 backdrop-blur-2xl rounded-2xl p-1 border border-white/10">
+                                <button
+                                    onClick={handleZoomOut}
+                                    className="relative group w-10 h-10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all cursor-pointer"
+                                >
+                                    <FaSearchMinus size={16} />
+                                    <span className="absolute top-full mt-2 left-0 origin-top-left scale-0 group-hover:scale-100 transition-all duration-150 bg-slate-950/95 backdrop-blur-2xl text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 whitespace-nowrap shadow-2xl pointer-events-none z-[230]">
+                                        Thu nhỏ
+                                    </span>
+                                </button>
+                                <div className="px-2 min-w-[60px] text-center border-x border-white/10">
+                                    <span className="text-white text-sm font-black tracking-widest">
+                                        {Math.round(zoom * 100)}%
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={handleZoomIn}
+                                    className="relative group w-10 h-10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all cursor-pointer"
+                                >
+                                    <FaSearchPlus size={16} />
+                                    <span className="absolute top-full mt-2 right-0 origin-top-right scale-0 group-hover:scale-100 transition-all duration-150 bg-slate-950/95 backdrop-blur-2xl text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 whitespace-nowrap shadow-2xl pointer-events-none z-[230]">
+                                        Phóng to
+                                    </span>
+                                </button>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={handleDownload}
+                                    className="relative group w-11 h-11 flex items-center justify-center rounded-2xl bg-white/5 text-white hover:bg-white/10 transition-all cursor-pointer border border-white/10"
+                                >
+                                    <FaDownload size={18} />
+                                    <span className="absolute top-full mt-2 right-0 origin-top-right scale-0 group-hover:scale-100 transition-all duration-150 bg-slate-950/95 backdrop-blur-2xl text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 whitespace-nowrap shadow-2xl pointer-events-none z-[230]">
+                                        Tải ảnh về
+                                    </span>
+                                </button>
+                                <button
+                                    onClick={() => setSelectedImage(null)}
+                                    className="relative group w-11 h-11 flex items-center justify-center rounded-2xl bg-red-600 text-white hover:bg-red-700 transition-all shadow-xl shadow-red-900/40 cursor-pointer lg:hidden"
+                                >
+                                    <FaTimes size={20} />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Navigation Buttons */}
+                        <button
+                            className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-2xl bg-white/5 text-white hover:bg-red-600 transition-all z-[220] border border-white/10 cursor-pointer group backdrop-blur-md"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handlePrev();
+                            }}
+                        >
+                            <FaChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                        </button>
+                        <button
+                            className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-2xl bg-white/5 text-white hover:bg-red-600 transition-all z-[220] border border-white/10 cursor-pointer group backdrop-blur-md"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleNext();
+                            }}
+                        >
+                            <FaChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                        </button>
+
+                        {/* Image Container */}
+                        <div
+                            className="absolute inset-0 flex items-center justify-center p-4 md:p-12 touch-none overflow-hidden"
+                            onMouseDown={onMouseDown}
+                            onMouseMove={onMouseMove}
+                            onMouseUp={onMouseUp}
+                            onMouseLeave={onMouseLeave}
+                            onTouchStart={onTouchStart}
+                            onTouchMove={onTouchMove}
+                            onTouchEnd={onTouchEnd}
+                        >
+                            <div
+                                style={{
+                                    transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                                    transition: isDragging ? 'none' : 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                                    cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
+                                }}
+                                className="flex items-center justify-center"
                             >
-                                <FaSearchMinus size={16} />
-                                <span className="absolute top-full mt-2 left-0 origin-top-left scale-0 group-hover:scale-100 transition-all duration-150 bg-slate-950/95 backdrop-blur-2xl text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 whitespace-nowrap shadow-2xl pointer-events-none z-[230]">
-                                    Thu nhỏ
-                                </span>
-                            </button>
-                            <div className="px-2 min-w-[60px] text-center border-x border-white/10">
-                                <span className="text-white text-sm font-black tracking-widest">
-                                    {Math.round(zoom * 100)}%
+                                <img
+                                    key={selectedImage.id}
+                                    src={selectedImage.src}
+                                    alt={selectedImage.title}
+                                    className="max-w-[90vw] lg:max-w-[60vw] max-h-[75vh] object-contain shadow-2xl rounded-lg pointer-events-none border border-white/5"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Column - Comments and Details Sidebar */}
+                    <div 
+                        className="w-full lg:w-[400px] xl:w-[440px] bg-white h-[50vh] lg:h-full flex flex-col border-t lg:border-t-0 lg:border-l border-slate-100 shadow-2xl relative z-[220] animate-slideLeft"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Close button for desktop layout */}
+                        <button
+                            onClick={() => setSelectedImage(null)}
+                            className="absolute top-4 right-4 z-50 w-8 h-8 rounded-full bg-slate-100 hover:bg-red-500 hover:text-white text-slate-500 flex items-center justify-center transition-all cursor-pointer hidden lg:flex shadow-sm"
+                            title="Đóng (Esc)"
+                        >
+                            <FaTimes size={14} />
+                        </button>
+
+                        {/* Post Creator / Header */}
+                        <div className="p-4 border-b border-slate-100 flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
+                                <img 
+                                    src={selectedImage.createdBy?.avatar || "https://res.cloudinary.com/sakae-academy/image/upload/v1715617260/sakae-academy/users/sakae-default-user-avatar.png"} 
+                                    alt={selectedImage.createdBy?.fullName || "Trung tâm Sakae"} 
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <h4 className="font-extrabold text-sm text-slate-800 leading-tight truncate">
+                                    {selectedImage.createdBy?.fullName || "Trung tâm Sakae"}
+                                </h4>
+                                <span className="text-[10px] font-black text-red-600 tracking-widest uppercase">
+                                    Ban Quản Trị
                                 </span>
                             </div>
-                            <button
-                                onClick={handleZoomIn}
-                                className="relative group w-10 h-10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all cursor-pointer"
-                            >
-                                <FaSearchPlus size={16} />
-                                <span className="absolute top-full mt-2 right-0 origin-top-right scale-0 group-hover:scale-100 transition-all duration-150 bg-slate-950/95 backdrop-blur-2xl text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 whitespace-nowrap shadow-2xl pointer-events-none z-[230]">
-                                    Phóng to
-                                </span>
-                            </button>
+                            <span className="px-2.5 py-0.5 bg-red-50 text-red-600 text-[9px] font-black rounded-full uppercase tracking-wider flex-shrink-0 mr-8 lg:mr-0">
+                                {selectedImage.category}
+                            </span>
                         </div>
 
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={handleDownload}
-                                className="relative group w-11 h-11 flex items-center justify-center rounded-2xl bg-white/5 text-white hover:bg-white/10 transition-all cursor-pointer border border-white/10"
-                            >
-                                <FaDownload size={18} />
-                                <span className="absolute top-full mt-2 right-0 origin-top-right scale-0 group-hover:scale-100 transition-all duration-150 bg-slate-950/95 backdrop-blur-2xl text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 whitespace-nowrap shadow-2xl pointer-events-none z-[230]">
-                                    Tải ảnh về
-                                </span>
-                            </button>
-                            <button
-                                onClick={() => setSelectedImage(null)}
-                                className="relative group w-11 h-11 flex items-center justify-center rounded-2xl bg-red-600 text-white hover:bg-red-700 transition-all shadow-xl shadow-red-900/40 cursor-pointer"
-                            >
-                                <FaTimes size={20} />
-                                <span className="absolute top-full mt-2 right-0 origin-top-right scale-0 group-hover:scale-100 transition-all duration-150 bg-slate-950/95 backdrop-blur-2xl text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 whitespace-nowrap shadow-2xl pointer-events-none z-[230]">
-                                    Đóng (Esc)
-                                </span>
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Navigation Buttons */}
-                    <button
-                        className="absolute left-4 md:left-10 top-1/2 -translate-y-1/2 w-13 h-13 flex items-center justify-center rounded-3xl bg-white/5 text-white hover:bg-red-600 transition-all z-[220] border border-white/10 cursor-pointer group backdrop-blur-md"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handlePrev();
-                        }}
-                    >
-                        <FaChevronLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
-                    </button>
-                    <button
-                        className="absolute right-4 md:right-10 top-1/2 -translate-y-1/2 w-13 h-13 flex items-center justify-center rounded-3xl bg-white/5 text-white hover:bg-red-600 transition-all z-[220] border border-white/10 cursor-pointer group backdrop-blur-md"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleNext();
-                        }}
-                    >
-                        <FaChevronRight size={24} className="group-hover:translate-x-1 transition-transform" />
-                    </button>
-
-                    {/* Image Area */}
-                    <div
-                        className="absolute inset-0 flex items-center justify-center p-4 md:p-16 touch-none overflow-hidden"
-                        onClick={(e) => e.stopPropagation()}
-                        onMouseDown={onMouseDown}
-                        onMouseMove={onMouseMove}
-                        onMouseUp={onMouseUp}
-                        onMouseLeave={onMouseLeave}
-                        onTouchStart={onTouchStart}
-                        onTouchMove={onTouchMove}
-                        onTouchEnd={onTouchEnd}
-                    >
-                        <div
-                            style={{
-                                transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-                                transition: isDragging ? 'none' : 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                                cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
-                            }}
-                            className="flex items-center justify-center"
-                        >
-                            <img
-                                key={selectedImage.id}
-                                src={selectedImage.src}
-                                alt={selectedImage.title}
-                                className="max-w-[85vw] max-h-[80vh] object-contain shadow-[0_0_80px_rgba(0,0,0,0.8)] rounded-lg pointer-events-none border border-white/5"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Bottom Info Bar - Redesigned to be more balanced */}
-                    <div
-                        className="absolute bottom-0 left-0 right-0 p-8 md:px-8 md:py-6 flex flex-col items-center z-[220] bg-gradient-to-t from-black via-black/80 to-transparent"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="text-center max-w-4xl animate-slideUp">
-                            <h2 className="text-white w-full font-black text-xl md:text-3xl lg:text-4xl tracking-tight mb-2 drop-shadow-2xl max-w-5xl mx-auto leading-tight">
+                        {/* Caption details */}
+                        <div className="p-4 border-b border-slate-100 bg-slate-50/50 max-h-[140px] overflow-y-auto">
+                            <h2 className="font-extrabold text-sm text-slate-800 leading-snug mb-1">
                                 {selectedImage.title}
                             </h2>
-                            <div className="flex items-center justify-center gap-3">
-                                <span className="px-3 py-1 bg-red-600 text-white text-[11px] font-bold rounded-full uppercase tracking-[0.2em] shadow-lg shadow-red-900/40">
-                                    {selectedImage.category}
-                                </span>
-                                <div className="w-1 h-1 bg-white/20 rounded-full"></div>
-                                <span className="text-white/50 text-xs font-bold uppercase tracking-[0.2em]">
-                                    {selectedImage.date}
+                            <p className="text-xs text-slate-600 whitespace-pre-line leading-relaxed">
+                                {selectedImage.caption || "Hình ảnh ghi lại khoảnh khắc hoạt động vô cùng thú vị của thầy và trò tại Nhật Ngữ Sakae."}
+                            </p>
+                            <span className="text-[9px] text-slate-400 font-extrabold block mt-2 tracking-wider">
+                                ĐĂNG NGÀY: {selectedImage.date}
+                            </span>
+                        </div>
+
+                        {/* Comments feed block */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-white scrollbar-thin">
+                            <h3 className="font-extrabold text-[10px] text-slate-400 uppercase tracking-widest">
+                                Bình luận ({comments.length})
+                            </h3>
+                            {loadingComments ? (
+                                <div className="flex flex-col items-center justify-center py-10">
+                                    <div className="w-6 h-6 border-2 border-slate-200 border-t-red-600 rounded-full animate-spin mb-2"></div>
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Đang tải...</span>
+                                </div>
+                            ) : comments.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <span className="text-2xl block mb-1">💬</span>
+                                    <span className="text-xs text-slate-400">Chưa có bình luận nào. Hãy là người đầu tiên!</span>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {comments.map((comment) => (
+                                        <div key={comment.id} className="flex gap-2.5 items-start group/comment bg-slate-50 p-2.5 rounded-2xl border border-slate-100/50 hover:border-slate-200 transition-all duration-300">
+                                            <div className="w-8 h-8 rounded-full bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
+                                                <img 
+                                                    src={comment.user?.avatar || "https://res.cloudinary.com/sakae-academy/image/upload/v1715617260/sakae-academy/users/sakae-default-user-avatar.png"} 
+                                                    alt={comment.user?.fullName} 
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <span className="font-bold text-xs text-slate-700 truncate">
+                                                        {comment.user?.fullName}
+                                                    </span>
+                                                    <span className="text-[9px] text-slate-400 flex-shrink-0">
+                                                        {new Date(comment.createdAt).toLocaleDateString('vi-VN')}
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs text-slate-600 mt-0.5 leading-relaxed break-words pr-2">
+                                                    {comment.content}
+                                                </p>
+                                            </div>
+                                            {(user?.id === comment.userId || user?.role === 'ADMIN') && (
+                                                <button 
+                                                    onClick={() => handleDeleteComment(comment.id)}
+                                                    className="opacity-0 group-hover/comment:opacity-100 text-slate-400 hover:text-red-500 transition-all p-1 cursor-pointer"
+                                                    title="Xóa bình luận"
+                                                >
+                                                    ✕
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Interactive panel */}
+                        <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <button 
+                                    onClick={(e) => handleLike(selectedImage.id, e)}
+                                    className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer ${
+                                        selectedImage.isLiked 
+                                            ? 'bg-red-50 text-red-600 border border-red-200' 
+                                            : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                                    }`}
+                                >
+                                    <span>{selectedImage.isLiked ? '❤️ Đã thích' : '🤍 Thích'}</span>
+                                    <span className="font-extrabold">{selectedImage.likesCount}</span>
+                                </button>
+                                <span className="text-xs text-slate-500 font-bold">
+                                    💬 {selectedImage.commentsCount} bình luận
                                 </span>
                             </div>
+                        </div>
+
+                        {/* Write Comment Box */}
+                        <div className="p-3 border-t border-slate-100 bg-white sticky bottom-0 z-50">
+                            {user ? (
+                                <form onSubmit={handleAddComment} className="flex gap-2">
+                                    <input 
+                                        type="text"
+                                        value={newComment}
+                                        onChange={(e) => setNewComment(e.target.value)}
+                                        placeholder="Viết bình luận công khai..."
+                                        className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 text-xs transition-all"
+                                    />
+                                    <button 
+                                        type="submit"
+                                        disabled={!newComment.trim()}
+                                        className={`px-4 py-2 cursor-pointer font-bold text-xs rounded-xl text-white transition-all shadow-sm ${
+                                            newComment.trim() 
+                                                ? 'bg-red-600 hover:bg-red-500 shadow-red-100' 
+                                                : 'bg-gray-300 cursor-not-allowed'
+                                        }`}
+                                    >
+                                        Gửi
+                                    </button>
+                                </form>
+                            ) : (
+                                <div className="text-center py-2 bg-slate-50 rounded-xl border border-slate-200/50">
+                                    <span className="text-xs text-slate-500">
+                                        Vui lòng{' '}
+                                        <button 
+                                            onClick={() => window.location.href = '/dang-nhap'}
+                                            className="text-red-600 font-bold hover:underline cursor-pointer bg-transparent border-none outline-none"
+                                        >
+                                            đăng nhập
+                                        </button>{' '}
+                                        để thích & bình luận!
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
