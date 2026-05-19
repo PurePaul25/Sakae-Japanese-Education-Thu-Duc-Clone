@@ -263,7 +263,7 @@ const GalleryLightbox = ({
 
                 {/* Mobile Floating Detail Overlay */}
                 <div
-                    className="absolute bottom-3 left-3 right-3 bg-slate-950/50 backdrop-blur-xl border border-white/10 rounded-3xl p-3 text-white z-[220] flex flex-col gap-2 lg:hidden max-h-[35vh] overflow-y-auto animate-slideUp"
+                    className="absolute bottom-3 left-3 right-3 bg-slate-950/50 backdrop-blur-xl border border-white/10 rounded-2xl px-3 py-2.5 text-white z-[220] flex flex-col gap-2 lg:hidden max-h-[35vh] overflow-y-auto animate-slideUp"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Creator, Category & Date */}
@@ -280,19 +280,19 @@ const GalleryLightbox = ({
                                 />
                             </div>
                             <div className="min-w-0">
-                                <h4 className="font-extrabold text-xs text-white leading-tight truncate">
+                                <h4 className="font-extrabold text-sm text-white leading-tight truncate">
                                     {selectedImage.createdBy?.fullName || 'Trung tâm Sakae'}
                                 </h4>
-                                <span className="text-[9px] font-black text-red-500 tracking-wider uppercase">
+                                <span className="text-[11px] font-black text-red-500 tracking-wider uppercase">
                                     Ban Quản Trị
                                 </span>
                             </div>
                         </div>
                         <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                            <span className="px-2 py-0.5 bg-red-600/90 text-white text-[8px] font-black rounded-full uppercase tracking-wider">
+                            <span className="px-2 py-0.5 bg-red-600/90 text-white text-[11px] font-black rounded-full uppercase tracking-wider">
                                 {selectedImage.category}
                             </span>
-                            <span className="text-[9px] text-white/50 font-bold uppercase tracking-wider">
+                            <span className="text-[11px] text-white/50 font-bold uppercase tracking-wider">
                                 {selectedImage.date}
                             </span>
                         </div>
@@ -300,8 +300,8 @@ const GalleryLightbox = ({
 
                     {/* Title & Caption */}
                     <div className="space-y-1">
-                        <h2 className="font-black text-sm text-white leading-snug">{selectedImage.title}</h2>
-                        <p className="text-[11px] text-white/70 line-clamp-2 leading-relaxed">
+                        <h2 className="font-black text-[15px] text-white leading-snug">{selectedImage.title}</h2>
+                        <p className="text-xs text-white/70 line-clamp-2 leading-relaxed">
                             {selectedImage.caption ||
                                 'Hình ảnh ghi lại khoảnh khắc hoạt động vô cùng thú vị của thầy và trò tại Nhật Ngữ Sakae.'}
                         </p>
@@ -313,7 +313,7 @@ const GalleryLightbox = ({
                             onClick={(e) => handleLike(selectedImage.id, e)}
                             className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl text-[11px] font-extrabold transition-all shadow-md cursor-pointer ${
                                 selectedImage.isLiked
-                                    ? 'bg-red-600 text-white border border-red-500'
+                                    ? 'bg-red-500 text-white border border-red-400'
                                     : 'bg-white/10 text-white border border-white/10 hover:bg-white/20'
                             }`}
                         >
@@ -327,7 +327,7 @@ const GalleryLightbox = ({
                             className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl text-[11px] font-extrabold bg-white text-slate-800 hover:bg-slate-100 transition-all shadow-md cursor-pointer"
                         >
                             <span>💬 Bình luận</span>
-                            <span className="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded-md text-[9px] font-black">
+                            <span className="bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded-md text-[9px] font-black">
                                 {selectedImage.commentsCount}
                             </span>
                         </button>
@@ -341,7 +341,7 @@ const GalleryLightbox = ({
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Post Creator / Header */}
-                <div className="p-4 border-b border-slate-100 flex items-center gap-3">
+                <div className="p-3 border-b border-slate-100 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
                         <img
                             src={
@@ -353,33 +353,31 @@ const GalleryLightbox = ({
                         />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <h4 className="font-extrabold text-sm text-slate-800 leading-tight truncate">
+                        <h4 className="font-extrabold text-slate-800 leading-tight truncate">
                             {selectedImage.createdBy?.fullName || 'Trung tâm Sakae'}
                         </h4>
-                        <span className="text-[10px] font-black text-red-600 tracking-widest uppercase">
-                            Ban Quản Trị
-                        </span>
+                        <span className="text-xs font-black text-red-600 tracking-widest uppercase">Ban Quản Trị</span>
                     </div>
-                    <span className="px-2.5 py-0.5 bg-red-50 text-red-600 text-[9px] font-black rounded-full uppercase tracking-wider flex-shrink-0">
+                    <span className="px-2.5 py-0.5 bg-red-50 text-red-600 text-xs font-black rounded-full uppercase tracking-wider flex-shrink-0">
                         {selectedImage.category}
                     </span>
                 </div>
 
                 {/* Caption details */}
-                <div className="p-4 border-b border-slate-100 bg-slate-50/50 max-h-[140px] overflow-y-auto">
-                    <h2 className="font-extrabold text-sm text-slate-800 leading-snug mb-1">{selectedImage.title}</h2>
-                    <p className="text-xs text-slate-600 whitespace-pre-line leading-relaxed">
+                <div className="p-3 border-b border-slate-100 bg-slate-50/50 max-h-[180px] overflow-y-auto">
+                    <h2 className="font-extrabold text-xl text-slate-800 leading-snug mb-1">{selectedImage.title}</h2>
+                    <p className="text-sm text-slate-600 whitespace-pre-line leading-relaxed">
                         {selectedImage.caption ||
                             'Hình ảnh ghi lại khoảnh khắc hoạt động vô cùng thú vị của thầy và trò tại Nhật Ngữ Sakae.'}
                     </p>
-                    <span className="text-[9px] text-slate-400 font-extrabold block mt-2 tracking-wider">
+                    <span className="text-xs text-slate-500 font-extrabold block mt-2 tracking-wider">
                         ĐĂNG NGÀY: {selectedImage.date}
                     </span>
                 </div>
 
                 {/* Comments feed block */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-white scrollbar-thin">
-                    <h3 className="font-extrabold text-[10px] text-slate-400 uppercase tracking-widest">
+                <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-white scrollbar-thin">
+                    <h3 className="font-extrabold text-sm text-slate-700 uppercase tracking-widest">
                         Bình luận ({comments.length})
                     </h3>
                     {loadingComments ? (
@@ -397,11 +395,11 @@ const GalleryLightbox = ({
                             </span>
                         </div>
                     ) : (
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             {comments.map((comment) => (
                                 <div key={comment.id} className="flex gap-2.5 items-start">
                                     {/* Avatar outside on the left */}
-                                    <div className="w-8 h-8 rounded-full bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0 mt-0.5 shadow-sm">
+                                    <div className="w-9 h-9 rounded-full bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0 mt-0.5 shadow-sm">
                                         <img
                                             src={
                                                 comment.user?.avatar ||
@@ -415,7 +413,7 @@ const GalleryLightbox = ({
                                     {/* Bubble comment content and actions row (vertical container) */}
                                     <div className="flex-1 flex flex-col min-w-0">
                                         {/* Speech bubble */}
-                                        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100/50 shadow-sm text-xs w-full relative">
+                                        <div className="bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-100/50 shadow-sm text-xs w-full relative">
                                             {editingCommentId === comment.id ? (
                                                 /* Inline Comment Editor Form */
                                                 <form
@@ -432,7 +430,7 @@ const GalleryLightbox = ({
                                                             }
                                                         }}
                                                         disabled={isEditingLoading}
-                                                        className={`w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 text-xs transition-all resize-none min-h-[34px] max-h-[100px] overflow-y-auto leading-relaxed ${isEditingLoading ? 'cursor-not-allowed opacity-60' : ''}`}
+                                                        className={`w-full px-2 py-1 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 text-sm transition-all resize-none min-h-[34px] max-h-[100px] overflow-y-auto leading-relaxed ${isEditingLoading ? 'cursor-not-allowed opacity-60' : ''}`}
                                                         autoFocus
                                                     />
                                                     <div className="flex gap-1.5 justify-end">
@@ -440,14 +438,14 @@ const GalleryLightbox = ({
                                                             type="button"
                                                             onClick={() => setEditingCommentId(null)}
                                                             disabled={isEditingLoading}
-                                                            className="px-2.5 py-1 text-[10px] font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            className="px-2.5 py-1.5 text-[13px] font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
                                                             Hủy
                                                         </button>
                                                         <button
                                                             type="submit"
                                                             disabled={!editingContent.trim() || isEditingLoading}
-                                                            className="px-2.5 py-1 text-[10px] font-bold text-white bg-red-600 hover:bg-red-500 rounded-lg transition-all cursor-pointer shadow-sm shadow-red-100 flex items-center gap-1.5 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
+                                                            className="px-2.5 py-1.5 text-[13px] font-bold text-white bg-red-600 hover:bg-red-500 rounded-lg transition-all cursor-pointer shadow-sm shadow-red-100 flex items-center gap-1.5 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
                                                         >
                                                             {isEditingLoading ? (
                                                                 <>
@@ -464,14 +462,14 @@ const GalleryLightbox = ({
                                                 /* Display Normal Mode */
                                                 <>
                                                     <div className="flex items-center justify-between gap-3">
-                                                        <span className="font-extrabold text-[11px] text-slate-800 truncate">
+                                                        <span className="font-extrabold text-sm text-slate-800 truncate">
                                                             {comment.user?.fullName}
                                                         </span>
-                                                        <span className="text-[8px] text-slate-400 font-bold flex-shrink-0 uppercase tracking-wider">
+                                                        <span className="text-xs text-slate-400 font-bold flex-shrink-0 uppercase tracking-wider">
                                                             {new Date(comment.createdAt).toLocaleDateString('vi-VN')}
                                                         </span>
                                                     </div>
-                                                    <p className="text-slate-600 leading-relaxed break-words pr-1 whitespace-pre-wrap">
+                                                    <p className="text-sm text-slate-600 leading-relaxed break-words pr-1 whitespace-pre-wrap">
                                                         {renderFormattedComment(comment.content)}
                                                     </p>
                                                 </>
@@ -480,12 +478,12 @@ const GalleryLightbox = ({
 
                                         {/* Actions Row immediately below comment speech bubble */}
                                         {editingCommentId !== comment.id && (
-                                            <div className="flex items-center gap-3 mt-1.5 ml-2 text-[10px] font-bold text-slate-400">
-                                                <button className="hover:text-red-500 transition-colors cursor-pointer focus:outline-none">
+                                            <div className="flex items-center gap-3 mt-1.5 ml-2 text-xs font-bold text-slate-400">
+                                                <button className="hover:text-red-500 transition-colors cursor-pointer focus:outline-none p-0.5">
                                                     Thích
                                                 </button>
                                                 <span className="text-[8px] text-slate-300">•</span>
-                                                <button className="hover:text-slate-600 transition-colors cursor-pointer focus:outline-none">
+                                                <button className="hover:text-slate-600 transition-colors cursor-pointer focus:outline-none p-0.5">
                                                     Phản hồi
                                                 </button>
                                                 <span className="text-[8px] text-slate-300">•</span>
@@ -499,7 +497,7 @@ const GalleryLightbox = ({
                                                                 activeMenuId === comment.id ? null : comment.id,
                                                             );
                                                         }}
-                                                        className="ellipsis-trigger hover:text-slate-600 transition-colors cursor-pointer flex items-center justify-center p-0.5 focus:outline-none"
+                                                        className="ellipsis-trigger hover:text-slate-600 transition-colors cursor-pointer flex items-center justify-center p-1 focus:outline-none"
                                                         title="Tùy chọn bình luận"
                                                     >
                                                         <FaEllipsisH size={10} />
@@ -513,7 +511,7 @@ const GalleryLightbox = ({
                                                         >
                                                             <button
                                                                 onClick={() => handleCopyComment(comment.content)}
-                                                                className="w-full text-left px-3.5 py-2 hover:bg-slate-100 text-slate-700 font-bold text-[11px] flex items-center gap-2 cursor-pointer transition-colors"
+                                                                className="w-full text-left px-3.5 py-2 hover:bg-slate-100 text-slate-700 font-bold text-sm flex items-center gap-2 cursor-pointer transition-colors"
                                                             >
                                                                 Sao chép
                                                             </button>
@@ -523,7 +521,7 @@ const GalleryLightbox = ({
                                                                 <>
                                                                     <button
                                                                         onClick={() => handleStartEdit(comment)}
-                                                                        className="w-full text-left px-3.5 py-2 hover:bg-slate-100 text-slate-700 font-bold text-[11px] flex items-center gap-2 cursor-pointer transition-colors"
+                                                                        className="w-full text-left px-3.5 py-2 hover:bg-slate-100 text-slate-700 font-bold text-sm flex items-center gap-2 cursor-pointer transition-colors"
                                                                     >
                                                                         Chỉnh sửa
                                                                     </button>
@@ -532,7 +530,7 @@ const GalleryLightbox = ({
                                                                             setConfirmDeleteId(comment.id);
                                                                             setActiveMenuId(null);
                                                                         }}
-                                                                        className="w-full text-left px-3.5 py-2 hover:bg-red-100 text-red-600 font-bold text-[11px] flex items-center gap-2 cursor-pointer transition-colors"
+                                                                        className="w-full text-left px-3.5 py-2 hover:bg-red-100 text-red-600 font-bold text-sm flex items-center gap-2 cursor-pointer transition-colors"
                                                                     >
                                                                         Xóa
                                                                     </button>
@@ -586,12 +584,12 @@ const GalleryLightbox = ({
                                 placeholder="Viết bình luận công khai..."
                                 disabled={isSubmitting}
                                 rows={1}
-                                className={`flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 text-xs transition-all resize-none min-h-[38px] max-h-[120px] overflow-y-auto leading-relaxed ${isSubmitting ? 'cursor-not-allowed opacity-60' : ''}`}
+                                className={`flex-1 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 text-sm transition-all resize-none min-h-[38px] max-h-[120px] overflow-y-auto leading-relaxed ${isSubmitting ? 'cursor-not-allowed opacity-60' : ''}`}
                             />
                             <button
                                 type="submit"
                                 disabled={!newComment.trim() || isSubmitting}
-                                className={`px-4 py-2 cursor-pointer font-bold text-xs rounded-xl text-white transition-all shadow-sm flex items-center justify-center gap-1.5 min-w-[64px] ${
+                                className={`px-4 py-2 cursor-pointer font-bold text-sm rounded-xl text-white transition-all shadow-sm flex items-center justify-center gap-1.5 min-w-[64px] ${
                                     newComment.trim() && !isSubmitting
                                         ? 'bg-red-600 hover:bg-red-500 shadow-red-100'
                                         : 'bg-gray-300 cursor-not-allowed'
@@ -648,20 +646,20 @@ const GalleryLightbox = ({
 
                     {/* Modal Card */}
                     <div
-                        className="relative bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl text-center z-[290] border border-slate-100 animate-scaleIn"
+                        className="relative bg-white rounded-2xl p-6 max-w-xl w-full shadow-2xl text-center z-[290] border border-slate-100 animate-scaleIn"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4 text-xl">
-                            ⚠️
+                        <div className="w-16 h-16 rounded-full bg-red-200 text-red-600 flex items-center justify-center mx-auto mb-4">
+                            <span className="text-4xl mb-3">⚠️</span>
                         </div>
-                        <h3 className="text-slate-900 font-extrabold text-base mb-2">Xác nhận xóa bình luận</h3>
-                        <p className="text-slate-500 text-xs leading-relaxed mb-6">
+                        <h3 className="text-slate-900 font-extrabold text-3xl mb-2">Xác nhận xóa bình luận</h3>
+                        <p className="text-slate-500 text-lg leading-relaxed mb-6">
                             Bạn có chắc chắn muốn xóa bình luận này không? Thao tác này không thể hoàn tác.
                         </p>
                         <div className="flex gap-3 justify-center">
                             <button
                                 onClick={() => setConfirmDeleteId(null)}
-                                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition-all cursor-pointer flex-1"
+                                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold transition-all cursor-pointer flex-1"
                             >
                                 Hủy
                             </button>
@@ -670,7 +668,7 @@ const GalleryLightbox = ({
                                     handleDeleteComment(confirmDeleteId);
                                     setConfirmDeleteId(null);
                                 }}
-                                className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition-all cursor-pointer flex-1 shadow-md shadow-red-100"
+                                className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold transition-all cursor-pointer flex-1 shadow-md shadow-red-100"
                             >
                                 Xác nhận xóa
                             </button>

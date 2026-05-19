@@ -216,10 +216,10 @@ const LightboxBottomSheet = ({
                 </div>
 
                 {/* Bottom Sheet Header */}
-                <div className="p-3 border-b border-slate-100 flex justify-between items-center bg-white flex-shrink-0">
+                <div className="px-3 py-2 border-b border-slate-100 flex justify-between items-center bg-white flex-shrink-0">
                     <h3 className="font-extrabold text-sm text-slate-800 uppercase tracking-widest flex items-center gap-2">
                         <span>💬 Bình luận</span>
-                        <span className="bg-red-50 text-red-600 text-xs px-2.5 py-0.5 rounded-full font-black">
+                        <span className="bg-red-50 text-red-600 text-[13px] px-2.5 py-0.5 rounded-full font-black">
                             {comments.length}
                         </span>
                     </h3>
@@ -233,7 +233,7 @@ const LightboxBottomSheet = ({
                 </div>
 
                 {/* Comments Scrollable Feed Container */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/30 scrollbar-thin">
+                <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-slate-50/30 scrollbar-thin">
                     {loadingComments ? (
                         <div className="flex flex-col items-center justify-center py-16">
                             <div className="w-8 h-8 border-3 border-slate-200 border-t-red-600 rounded-full animate-spin mb-3"></div>
@@ -253,7 +253,7 @@ const LightboxBottomSheet = ({
                             {comments.map((comment) => (
                                 <div key={comment.id} className="flex gap-2.5 items-start relative group/comment">
                                     {/* Avatar outside on the left */}
-                                    <div className="w-8 h-8 rounded-full bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0 mt-0.5 shadow-sm">
+                                    <div className="w-9 h-9 rounded-full bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0 mt-0.5 shadow-sm">
                                         <img
                                             src={
                                                 comment.user?.avatar ||
@@ -267,7 +267,7 @@ const LightboxBottomSheet = ({
                                     {/* Bubble comment content and actions row (vertical container) */}
                                     <div className="flex-1 flex flex-col min-w-0">
                                         {/* Speech bubble */}
-                                        <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm text-xs w-full relative">
+                                        <div className="bg-white px-2.5 py-2  rounded-xl border border-slate-100 shadow-sm text-xs w-full relative">
                                             {editingCommentId === comment.id ? (
                                                 /* Inline Comment Editor Form */
                                                 <form
@@ -284,7 +284,7 @@ const LightboxBottomSheet = ({
                                                             }
                                                         }}
                                                         disabled={isEditingLoading}
-                                                        className={`w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 text-xs transition-all resize-none min-h-[34px] max-h-[100px] overflow-y-auto leading-relaxed ${isEditingLoading ? 'cursor-not-allowed opacity-60' : ''}`}
+                                                        className={`w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 text-xs transition-all resize-none min-h-[34px] max-h-[100px] overflow-y-auto leading-relaxed ${isEditingLoading ? 'cursor-not-allowed opacity-60' : ''}`}
                                                         autoFocus
                                                     />
                                                     <div className="flex gap-1.5 justify-end">
@@ -292,14 +292,14 @@ const LightboxBottomSheet = ({
                                                             type="button"
                                                             onClick={() => setEditingCommentId(null)}
                                                             disabled={isEditingLoading}
-                                                            className="px-2.5 py-1 text-[10px] font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            className="px-2.5 py-1.5 text-xs font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
                                                             Hủy
                                                         </button>
                                                         <button
                                                             type="submit"
                                                             disabled={!editingContent.trim() || isEditingLoading}
-                                                            className="px-2.5 py-1 text-[10px] font-bold text-white bg-red-600 hover:bg-red-500 rounded-lg transition-all cursor-pointer shadow-sm shadow-red-100 flex items-center gap-1.5 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
+                                                            className="px-2.5 py-1.5 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded-lg transition-all cursor-pointer shadow-sm shadow-red-100 flex items-center gap-1.5 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
                                                         >
                                                             {isEditingLoading ? (
                                                                 <>
@@ -316,14 +316,14 @@ const LightboxBottomSheet = ({
                                                 /* Display Normal Mode */
                                                 <>
                                                     <div className="flex items-center justify-between gap-3">
-                                                        <span className="font-extrabold text-[11px] text-slate-800 truncate">
+                                                        <span className="font-extrabold text-sm text-slate-800 truncate">
                                                             {comment.user?.fullName}
                                                         </span>
-                                                        <span className="text-[8px] text-slate-400 font-bold flex-shrink-0 uppercase tracking-wider">
+                                                        <span className="text-xs text-slate-400 font-bold flex-shrink-0 uppercase tracking-wider">
                                                             {new Date(comment.createdAt).toLocaleDateString('vi-VN')}
                                                         </span>
                                                     </div>
-                                                    <p className="text-slate-600 leading-relaxed break-words whitespace-pre-wrap">
+                                                    <p className="text-slate-600 leading-relaxed break-words whitespace-pre-wrap text-sm">
                                                         {renderFormattedComment(comment.content)}
                                                     </p>
                                                 </>
@@ -332,7 +332,7 @@ const LightboxBottomSheet = ({
 
                                         {/* Actions Row immediately below comment speech bubble */}
                                         {editingCommentId !== comment.id && (
-                                            <div className="flex items-center gap-3 mt-1.5 ml-2.5 text-[10px] font-bold text-slate-400">
+                                            <div className="flex items-center gap-3 mt-1.5 ml-2.5 text-[13px] font-bold text-slate-400">
                                                 <button className="hover:text-red-500 transition-colors cursor-pointer focus:outline-none">
                                                     Thích
                                                 </button>
@@ -365,7 +365,7 @@ const LightboxBottomSheet = ({
                                                         >
                                                             <button
                                                                 onClick={() => handleCopyComment(comment.content)}
-                                                                className="w-full text-left px-3.5 py-2 hover:bg-slate-100 text-slate-700 font-bold text-[11px] flex items-center gap-2 cursor-pointer transition-colors"
+                                                                className="w-full text-left px-3.5 py-2 hover:bg-slate-100 text-slate-700 font-bold text-[13px] flex items-center gap-2 cursor-pointer transition-colors"
                                                             >
                                                                 Sao chép
                                                             </button>
@@ -375,7 +375,7 @@ const LightboxBottomSheet = ({
                                                                 <>
                                                                     <button
                                                                         onClick={() => handleStartEdit(comment)}
-                                                                        className="w-full text-left px-3.5 py-2 hover:bg-slate-100 text-slate-700 font-bold text-[11px] flex items-center gap-2 cursor-pointer transition-colors"
+                                                                        className="w-full text-left px-3.5 py-2 hover:bg-slate-100 text-slate-700 font-bold text-[13px] flex items-center gap-2 cursor-pointer transition-colors"
                                                                     >
                                                                         Chỉnh sửa
                                                                     </button>
@@ -384,7 +384,7 @@ const LightboxBottomSheet = ({
                                                                             setConfirmDeleteId(comment.id);
                                                                             setActiveMenuId(null);
                                                                         }}
-                                                                        className="w-full text-left px-3.5 py-2 hover:bg-red-100 text-red-600 font-bold text-[11px] flex items-center gap-2 cursor-pointer transition-colors"
+                                                                        className="w-full text-left px-3.5 py-2 hover:bg-red-100 text-red-600 font-bold text-[13px] flex items-center gap-2 cursor-pointer transition-colors"
                                                                     >
                                                                         Xóa
                                                                     </button>
@@ -417,12 +417,12 @@ const LightboxBottomSheet = ({
                                 placeholder="Viết bình luận công khai..."
                                 disabled={isSubmitting}
                                 rows={1}
-                                className={`flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-red-500 focus:bg-white text-xs transition-all shadow-inner resize-none min-h-[42px] max-h-[100px] overflow-y-auto leading-relaxed ${isSubmitting ? 'cursor-not-allowed opacity-60' : ''}`}
+                                className={`flex-1 px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-red-500 focus:bg-white text-sm transition-all shadow-inner resize-none min-h-[42px] max-h-[100px] overflow-y-auto leading-relaxed ${isSubmitting ? 'cursor-not-allowed opacity-60' : ''}`}
                             />
                             <button
                                 type="submit"
                                 disabled={!newComment.trim() || isSubmitting}
-                                className={`px-5 py-3 cursor-pointer font-bold text-xs rounded-2xl text-white transition-all shadow-sm flex items-center justify-center gap-1.5 min-w-[70px] ${
+                                className={`px-3 py-2.5 cursor-pointer font-bold text-sm rounded-2xl text-white transition-all shadow-sm flex items-center justify-center gap-1.5 min-w-[70px] ${
                                     newComment.trim() && !isSubmitting
                                         ? 'bg-red-600 hover:bg-red-500 shadow-red-100'
                                         : 'bg-gray-300 cursor-not-allowed'
@@ -472,14 +472,14 @@ const LightboxBottomSheet = ({
                         <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4 text-xl">
                             ⚠️
                         </div>
-                        <h3 className="text-slate-900 font-extrabold text-base mb-2">Xác nhận xóa bình luận</h3>
-                        <p className="text-slate-500 text-xs leading-relaxed mb-6">
+                        <h3 className="text-slate-900 font-extrabold text-xl mb-2">Xác nhận xóa bình luận</h3>
+                        <p className="text-slate-500 text-sm leading-relaxed mb-6">
                             Bạn có chắc chắn muốn xóa bình luận này không? Thao tác này không thể hoàn tác.
                         </p>
                         <div className="flex gap-3 justify-center">
                             <button
                                 onClick={() => setConfirmDeleteId(null)}
-                                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition-all cursor-pointer flex-1"
+                                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-bold transition-all cursor-pointer flex-1"
                             >
                                 Hủy
                             </button>
@@ -488,7 +488,7 @@ const LightboxBottomSheet = ({
                                     handleDeleteComment(confirmDeleteId);
                                     setConfirmDeleteId(null);
                                 }}
-                                className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition-all cursor-pointer flex-1 shadow-md shadow-red-100"
+                                className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-bold transition-all cursor-pointer flex-1 shadow-md shadow-red-100"
                             >
                                 Xác nhận xóa
                             </button>

@@ -442,7 +442,7 @@ const Gallerys = () => {
                 ) : (
                     <>
                         {/* Gallery Grid items mapping */}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                             {paginatedImages.map((image) => (
                                 <GalleryCard
                                     key={image.id}
