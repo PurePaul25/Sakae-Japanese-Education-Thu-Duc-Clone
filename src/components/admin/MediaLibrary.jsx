@@ -86,6 +86,14 @@ const MediaLibrary = () => {
     const [editData, setEditData] = useState({ id: '', title: '', caption: '', category: '' });
     const { addToast } = useToast();
 
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 12;
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, activeCategory, selectedMonth, selectedYear]);
+
     const years = React.useMemo(() => {
         return [...new Set((images || []).map((img) => new Date(img.createdAt).getFullYear()))].sort((a, b) => b - a);
     }, [images]);
@@ -198,6 +206,9 @@ const MediaLibrary = () => {
         return matchesSearch && matchesCategory && matchesMonth && matchesYear;
     });
 
+    const totalPages = Math.ceil(filteredImages.length / itemsPerPage);
+    const paginatedImages = filteredImages.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
     return (
         <div className="space-y-6">
             {/* Header / Actions */}
@@ -263,7 +274,7 @@ const MediaLibrary = () => {
                     {/* Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <AnimatePresence>
-                            {filteredImages.map((image) => (
+                            {paginatedImages.map((image) => (
                                 <motion.div
                                     key={image.id}
                                     layout
@@ -316,6 +327,57 @@ const MediaLibrary = () => {
                             ))}
                         </AnimatePresence>
                     </div>
+
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                        <div className="mt-8 flex justify-center items-center gap-4">
+                            <button
+                                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                                disabled={currentPage === 1}
+                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold shadow-sm"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2.5}
+                                        d="M15 19l-7-7 7-7"
+                                    />
+                                </svg>
+                            </button>
+
+                            <div className="flex gap-2">
+                                {Array.from({ length: totalPages }).map((_, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => setCurrentPage(i + 1)}
+                                        className={`w-10 h-10 flex items-center justify-center rounded-xl font-black transition-all ${
+                                            currentPage === i + 1
+                                                ? 'bg-red-600 text-white shadow-md shadow-red-200'
+                                                : 'bg-white border cursor-pointer border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'
+                                        }`}
+                                    >
+                                        {i + 1}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <button
+                                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                                disabled={currentPage === totalPages}
+                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold shadow-sm"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2.5}
+                                        d="M9 5l7 7-7 7"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
+                    )}
 
                     {filteredImages.length === 0 && (
                         <div className="flex flex-col items-center justify-center py-32 bg-slate-50 dark:bg-slate-900/50 rounded-[2.5rem] border-2 border-dashed border-slate-200 dark:border-slate-800">

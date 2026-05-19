@@ -44,6 +44,8 @@ api.interceptors.request.use(
     },
 );
 
+let isAuthExpiredDispatched = false;
+
 // Add a response interceptor to handle errors globally
 api.interceptors.response.use(
     (response) => response,
@@ -51,15 +53,23 @@ api.interceptors.response.use(
         if (error.response && error.response.status === 401) {
             // Only handle session expiry if this is not an auth attempt
             if (error.config && !error.config.url.includes('/auth/')) {
-                localStorage.removeItem('sakae_user');
-                localStorage.removeItem('sakae_admin');
-                
-                // Dispatch custom event to notify React context and components
-                window.dispatchEvent(
-                    new CustomEvent('sakae-auth-expired', {
-                        detail: { message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!' }
-                    })
-                );
+                if (!isAuthExpiredDispatched) {
+                    isAuthExpiredDispatched = true;
+                    localStorage.removeItem('sakae_user');
+                    localStorage.removeItem('sakae_admin');
+                    
+                    // Dispatch custom event to notify React context and components
+                    window.dispatchEvent(
+                        new CustomEvent('sakae-auth-expired', {
+                            detail: { message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!' }
+                        })
+                    );
+                    
+                    // Reset flag after a delay to prevent duplicate toasts
+                    setTimeout(() => {
+                        isAuthExpiredDispatched = false;
+                    }, 3000);
+                }
             }
         }
         return Promise.reject(error);
