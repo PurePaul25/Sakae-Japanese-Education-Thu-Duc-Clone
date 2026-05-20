@@ -294,7 +294,7 @@ const MediaLibrary = () => {
                                         />
                                     </div>
 
-                                    <div className="p-4">
+                                    <div className="p-3.5">
                                         <div className="flex justify-between items-start mb-1">
                                             <span className="px-3 py-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-[10px] font-black rounded-full uppercase tracking-widest">
                                                 {image.category}
@@ -416,7 +416,7 @@ const MediaLibrary = () => {
                                 />
                             </div>
 
-                            <div className="w-full md:w-96 p-8 flex flex-col border-l border-slate-100 dark:border-slate-800">
+                            <div className="w-full md:w-96 p-6 flex flex-col border-l border-slate-100 dark:border-slate-800">
                                 <div className="flex justify-between items-start mb-8">
                                     <div>
                                         <span className="px-3 py-1 bg-red-600 text-white text-[10px] font-black rounded-full uppercase tracking-widest mb-3 inline-block">
@@ -441,7 +441,7 @@ const MediaLibrary = () => {
                                                 <Activity size={18} />
                                             </div>
                                             <div>
-                                                <p className="text-xs font-black text-slate-400 uppercase tracking-tighter">
+                                                <p className="text-xs font-black text-slate-500 uppercase tracking-tighter">
                                                     Mô tả
                                                 </p>
                                                 <p className="text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
@@ -455,7 +455,7 @@ const MediaLibrary = () => {
                                                 <Calendar size={18} />
                                             </div>
                                             <div>
-                                                <p className="text-xs font-black text-slate-400 uppercase tracking-tighter">
+                                                <p className="text-xs font-black text-slate-500 uppercase tracking-tighter">
                                                     Ngày đăng
                                                 </p>
                                                 <p className="text-slate-600 dark:text-slate-300 mt-1">
@@ -507,7 +507,7 @@ const MediaLibrary = () => {
                             className="bg-white dark:bg-slate-900 rounded-[1rem] max-w-2xl w-full overflow-hidden shadow-2xl border border-white/20"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
                                 <h3 className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-2">
                                     <Edit3 className="text-red-600" /> Sửa thông tin
                                 </h3>
@@ -519,7 +519,7 @@ const MediaLibrary = () => {
                                 </button>
                             </div>
 
-                            <form onSubmit={handleUpdate} className="p-5 space-y-6">
+                            <form onSubmit={handleUpdate} className="p-4 space-y-5">
                                 <div className="space-y-4">
                                     <div>
                                         <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mb-2 block ml-1">

@@ -8,7 +8,7 @@ const GalleryUploadModal = ({ isOpen, onClose, onUploadSuccess, addToast }) => {
     const [formData, setFormData] = useState({
         title: '',
         caption: '',
-        category: 'Lớp học'
+        category: 'Lớp học',
     });
     const [isUploading, setIsUploading] = useState(false);
 
@@ -43,7 +43,7 @@ const GalleryUploadModal = ({ isOpen, onClose, onUploadSuccess, addToast }) => {
             data.append('category', formData.category);
 
             await api.post('/gallery', data, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
 
             addToast('Đăng ảnh thành công!', 'success');
@@ -68,13 +68,16 @@ const GalleryUploadModal = ({ isOpen, onClose, onUploadSuccess, addToast }) => {
                     <h3 className="text-xl font-bold flex items-center gap-2">
                         <FaCloudUploadAlt /> Đăng ảnh hoạt động
                     </h3>
-                    <button onClick={onClose} className="p-2 hover:bg-white/20 cursor-pointer rounded-full transition-colors">
+                    <button
+                        onClick={onClose}
+                        className="p-2 hover:bg-white/20 cursor-pointer rounded-full transition-colors"
+                    >
                         <FaTimes />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    <div 
+                <form onSubmit={handleSubmit} className="p-5 space-y-4">
+                    <div
                         className={`border-2 border-dashed rounded-xl p-4 transition-all flex flex-col items-center justify-center min-h-[200px] cursor-pointer
                             ${preview ? 'border-red-200 bg-red-50' : 'border-gray-200 hover:border-red-400 bg-gray-50'}`}
                         onClick={() => document.getElementById('gallery-file-input').click()}
@@ -87,10 +90,10 @@ const GalleryUploadModal = ({ isOpen, onClose, onUploadSuccess, addToast }) => {
                                 <p className="text-sm text-gray-500">Nhấn để chọn ảnh (Tối đa 5MB)</p>
                             </div>
                         )}
-                        <input 
+                        <input
                             id="gallery-file-input"
-                            type="file" 
-                            className="hidden" 
+                            type="file"
+                            className="hidden"
                             accept="image/*"
                             onChange={handleFileChange}
                         />
@@ -99,23 +102,25 @@ const GalleryUploadModal = ({ isOpen, onClose, onUploadSuccess, addToast }) => {
                     <div className="space-y-3">
                         <div>
                             <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Tiêu đề</label>
-                            <input 
+                            <input
                                 type="text"
                                 placeholder="Nhập tiêu đề ảnh..."
-                                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all text-sm"
+                                className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all text-sm"
                                 value={formData.title}
-                                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                 required
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="flex w-full items-center justify-between">
                             <div>
-                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Danh mục</label>
-                                <select 
-                                    className="w-full px-4 cursor-pointer py-2 rounded-lg border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all text-sm bg-white"
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Danh mục
+                                </label>
+                                <select
+                                    className="w-full px-3 cursor-pointer py-2 rounded-lg border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all text-sm bg-white"
                                     value={formData.category}
-                                    onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                 >
                                     <option value="Lớp học">Lớp học</option>
                                     <option value="Lễ hội">Lễ hội</option>
@@ -126,27 +131,29 @@ const GalleryUploadModal = ({ isOpen, onClose, onUploadSuccess, addToast }) => {
                                 </select>
                             </div>
                             <div>
-                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Mô tả ngắn</label>
-                                <input 
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Mô tả ngắn
+                                </label>
+                                <input
                                     type="text"
                                     placeholder="Không bắt buộc..."
-                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all text-sm"
+                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all text-sm"
                                     value={formData.caption}
-                                    onChange={(e) => setFormData({...formData, caption: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, caption: e.target.value })}
                                 />
                             </div>
                         </div>
                     </div>
 
                     <div className="pt-4 flex gap-3">
-                        <button 
+                        <button
                             type="button"
                             onClick={onClose}
                             className="flex-1 py-3 cursor-pointer rounded-xl border border-gray-200 font-bold text-gray-600 hover:bg-gray-50 transition-all text-sm"
                         >
                             Hủy bỏ
                         </button>
-                        <button 
+                        <button
                             type="submit"
                             disabled={isUploading}
                             className={`flex-1 py-3 rounded-xl font-bold text-white shadow-lg transition-all text-sm

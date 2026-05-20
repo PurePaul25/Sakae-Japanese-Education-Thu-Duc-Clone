@@ -284,7 +284,7 @@ const LightboxBottomSheet = ({
                                                             }
                                                         }}
                                                         disabled={isEditingLoading}
-                                                        className={`w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 text-xs transition-all resize-none min-h-[34px] max-h-[100px] overflow-y-auto leading-relaxed ${isEditingLoading ? 'cursor-not-allowed opacity-60' : ''}`}
+                                                        className={`w-full px-1.5 py-1 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 text-sm transition-all resize-none min-h-[34px] max-h-[100px] overflow-y-auto leading-relaxed ${isEditingLoading ? 'cursor-not-allowed opacity-60' : ''}`}
                                                         autoFocus
                                                     />
                                                     <div className="flex gap-1.5 justify-end">
@@ -292,14 +292,14 @@ const LightboxBottomSheet = ({
                                                             type="button"
                                                             onClick={() => setEditingCommentId(null)}
                                                             disabled={isEditingLoading}
-                                                            className="px-2.5 py-1.5 text-xs font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            className="px-2.5 py-1.5 text-[13px] font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
                                                             Hủy
                                                         </button>
                                                         <button
                                                             type="submit"
                                                             disabled={!editingContent.trim() || isEditingLoading}
-                                                            className="px-2.5 py-1.5 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded-lg transition-all cursor-pointer shadow-sm shadow-red-100 flex items-center gap-1.5 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
+                                                            className="px-2.5 py-1.5 text-[13px] font-bold text-white bg-red-600 hover:bg-red-500 rounded-lg transition-all cursor-pointer shadow-sm shadow-red-100 flex items-center gap-1.5 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
                                                         >
                                                             {isEditingLoading ? (
                                                                 <>
@@ -315,7 +315,7 @@ const LightboxBottomSheet = ({
                                             ) : (
                                                 /* Display Normal Mode */
                                                 <>
-                                                    <div className="flex items-center justify-between gap-3">
+                                                    <div className="flex items-center justify-between gap-2.5">
                                                         <span className="font-extrabold text-sm text-slate-800 truncate">
                                                             {comment.user?.fullName}
                                                         </span>
@@ -323,7 +323,7 @@ const LightboxBottomSheet = ({
                                                             {new Date(comment.createdAt).toLocaleDateString('vi-VN')}
                                                         </span>
                                                     </div>
-                                                    <p className="text-slate-600 leading-relaxed break-words whitespace-pre-wrap text-sm">
+                                                    <p className="text-slate-600 leading-normal break-words whitespace-pre-wrap text-sm">
                                                         {renderFormattedComment(comment.content)}
                                                     </p>
                                                 </>
@@ -439,8 +439,8 @@ const LightboxBottomSheet = ({
                             </button>
                         </form>
                     ) : (
-                        <div className="text-center py-3 bg-slate-50 rounded-2xl border border-slate-200/50">
-                            <span className="text-xs text-slate-500 font-semibold">
+                        <div className="text-center py-2 bg-slate-50 rounded-2xl border border-slate-200/50">
+                            <span className="text-sm text-slate-500 font-semibold">
                                 Vui lòng{' '}
                                 <button
                                     onClick={() => (window.location.href = '/dang-nhap')}

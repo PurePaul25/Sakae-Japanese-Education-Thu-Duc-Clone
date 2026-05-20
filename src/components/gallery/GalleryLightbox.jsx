@@ -269,7 +269,7 @@ const GalleryLightbox = ({
                     {/* Creator, Category & Date */}
                     <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-2">
                         <div className="flex items-center gap-2.5 min-w-0">
-                            <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10 flex-shrink-0">
+                            <div className="w-9 h-9 rounded-full overflow-hidden border border-white/10 flex-shrink-0">
                                 <img
                                     src={
                                         selectedImage.createdBy?.avatar ||
@@ -300,8 +300,8 @@ const GalleryLightbox = ({
 
                     {/* Title & Caption */}
                     <div className="space-y-1">
-                        <h2 className="font-black text-[15px] text-white leading-snug">{selectedImage.title}</h2>
-                        <p className="text-xs text-white/70 line-clamp-2 leading-relaxed">
+                        <h2 className="font-black text-white leading-snug">{selectedImage.title}</h2>
+                        <p className="text-sm text-white/70 line-clamp-2 leading-relaxed">
                             {selectedImage.caption ||
                                 'Hình ảnh ghi lại khoảnh khắc hoạt động vô cùng thú vị của thầy và trò tại Nhật Ngữ Sakae.'}
                         </p>
@@ -311,23 +311,23 @@ const GalleryLightbox = ({
                     <div className="flex items-center gap-3 pt-2 border-t border-white/10">
                         <button
                             onClick={(e) => handleLike(selectedImage.id, e)}
-                            className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl text-[11px] font-extrabold transition-all shadow-md cursor-pointer ${
+                            className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-extrabold transition-all shadow-md cursor-pointer ${
                                 selectedImage.isLiked
-                                    ? 'bg-red-500 text-white border border-red-400'
+                                    ? 'bg-red-200 text-red-600 border border-red-300'
                                     : 'bg-white/10 text-white border border-white/10 hover:bg-white/20'
                             }`}
                         >
                             <span>{selectedImage.isLiked ? '❤️ Đã thích' : '🤍 Thích'}</span>
-                            <span className="bg-black/25 px-1.5 py-0.5 rounded-md text-[9px] font-black">
+                            <span className="bg-black/15 px-1.5 py-0.5 rounded-md text-[10px] font-black">
                                 {selectedImage.likesCount}
                             </span>
                         </button>
                         <button
                             onClick={() => setIsMobileCommentOpen(true)}
-                            className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl text-[11px] font-extrabold bg-white text-slate-800 hover:bg-slate-100 transition-all shadow-md cursor-pointer"
+                            className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-extrabold bg-white text-slate-800 hover:bg-slate-100 transition-all shadow-md cursor-pointer"
                         >
                             <span>💬 Bình luận</span>
-                            <span className="bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded-md text-[9px] font-black">
+                            <span className="bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded-md text-[10px] font-black">
                                 {selectedImage.commentsCount}
                             </span>
                         </button>
@@ -469,7 +469,7 @@ const GalleryLightbox = ({
                                                             {new Date(comment.createdAt).toLocaleDateString('vi-VN')}
                                                         </span>
                                                     </div>
-                                                    <p className="text-sm text-slate-600 leading-relaxed break-words pr-1 whitespace-pre-wrap">
+                                                    <p className="text-sm text-slate-600 leading-normal break-words pr-1 whitespace-pre-wrap">
                                                         {renderFormattedComment(comment.content)}
                                                     </p>
                                                 </>
@@ -549,20 +549,20 @@ const GalleryLightbox = ({
                 </div>
 
                 {/* Interactive panel */}
-                <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <div className="p-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={(e) => handleLike(selectedImage.id, e)}
-                            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer ${
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold transition-all shadow-sm cursor-pointer ${
                                 selectedImage.isLiked
                                     ? 'bg-red-50 text-red-600 border border-red-200'
-                                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                                    : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-100'
                             }`}
                         >
                             <span>{selectedImage.isLiked ? '❤️ Đã thích' : '🤍 Thích'}</span>
                             <span className="font-extrabold">{selectedImage.likesCount}</span>
                         </button>
-                        <span className="text-xs text-slate-500 font-bold">
+                        <span className="text-sm text-slate-500 font-bold">
                             💬 {selectedImage.commentsCount} bình luận
                         </span>
                     </div>
@@ -607,7 +607,7 @@ const GalleryLightbox = ({
                         </form>
                     ) : (
                         <div className="text-center py-2 bg-slate-50 rounded-xl border border-slate-200/50">
-                            <span className="text-xs text-slate-500">
+                            <span className="text-sm text-slate-500">
                                 Vui lòng{' '}
                                 <button
                                     onClick={() => (window.location.href = '/dang-nhap')}
