@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useUser } from '../../contexts/UserContext';
 import { useToast } from '../../contexts/ToastContext';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { FiEdit2, FiMail, FiPhone, FiMapPin, FiCalendar, FiUser, FiCheck, FiX } from 'react-icons/fi';
 import SEO from '../../hooks/useSEO';
@@ -44,7 +45,7 @@ const UserProfile = () => {
                 setIsLoading(true);
                 const response = await api.get('/users/profile');
                 const data = response.data.data || response.data;
-                console.log('Profile data fetched:', data); 
+                console.log('Profile data fetched:', data);
                 if (!isMounted) return;
                 setProfile(data);
                 setFormData({
@@ -111,7 +112,7 @@ const UserProfile = () => {
         }
 
         setSelectedFile(file);
-        
+
         // Thu hồi URL cũ để tránh rò rỉ bộ nhớ
         if (previewUrl && previewUrl.startsWith('blob:')) {
             URL.revokeObjectURL(previewUrl);
@@ -119,7 +120,7 @@ const UserProfile = () => {
 
         const url = URL.createObjectURL(file);
         setPreviewUrl(url);
-        
+
         // Reset input để có thể chọn lại chính file này nếu muốn
         e.target.value = '';
     };
@@ -132,17 +133,17 @@ const UserProfile = () => {
     const handleSave = async () => {
         try {
             setIsSaving(true);
-            
+
             let currentAvatarUrl = profile?.avatar;
 
             // 1. Upload avatar trước nếu có chọn ảnh mới
             if (selectedFile) {
                 const uploadFormData = new FormData();
                 uploadFormData.append('file', selectedFile);
-                
+
                 try {
                     const uploadRes = await api.post('/users/avatar', uploadFormData, {
-                        headers: { 'Content-Type': 'multipart/form-data' }
+                        headers: { 'Content-Type': 'multipart/form-data' },
                     });
                     // Giả sử API trả về { avatar: 'url_moi' }
                     currentAvatarUrl = uploadRes.data.avatar || uploadRes.data.data?.avatar;
@@ -160,17 +161,17 @@ const UserProfile = () => {
 
             const response = await api.patch('/users/profile', patchData);
             const updatedProfile = response.data.data || response.data;
-            
+
             // 3. Hợp nhất dữ liệu mới nhất (bao gồm cả avatar mới)
-            const finalUserData = { 
+            const finalUserData = {
                 ...user, // Giữ lại accessToken và các thông tin cũ
-                ...updatedProfile, 
-                avatar: currentAvatarUrl 
+                ...updatedProfile,
+                avatar: currentAvatarUrl,
             };
-            
+
             setProfile(finalUserData);
             updateUser(finalUserData); // Cập nhật Global Context (Header sẽ nhận được)
-            
+
             setIsEditing(false);
             setSelectedFile(null);
             setPreviewUrl(null);
@@ -203,11 +204,11 @@ const UserProfile = () => {
             <SEO page="userProfile" />
 
             {/* Header / Banner */}
-            <div className="relative h-36 rounded-3xl overflow-hidden bg-gradient-to-br from-red-600 via-red-500 to-red-400 shadow-lg mb-8">
+            <div className="relative h-36 rounded-3xl overflow-hidden bg-gradient-to-br from-red-600 via-red-500 to-red-400 shadow-lg mb-6">
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
 
-                <div className="absolute top-4 left-6 flex items-end gap-6">
+                <div className="absolute top-4 left-4 md:top-4 md:left-6 flex items-end gap-6">
                     <motion.div
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
@@ -220,7 +221,7 @@ const UserProfile = () => {
                             alt={profile?.fullName}
                             className="w-26 h-26 rounded-2xl border-2 border-white object-cover shadow-xl relative z-10 bg-white"
                         />
-                        <button 
+                        <button
                             onClick={handleAvatarClick}
                             className={`absolute -bottom-2.5 -right-2.5 p-2 text-white rounded-xl shadow-md cursor-pointer transition-all hover:scale-105 z-20 ${
                                 isEditing ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-400 opacity-70'
@@ -236,7 +237,7 @@ const UserProfile = () => {
                             className="hidden"
                         />
                     </motion.div>
-                    <div className="pb-8 text-white">
+                    <div className="pb-4 md:pb-8 text-white">
                         <motion.h1
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -264,9 +265,9 @@ const UserProfile = () => {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100"
+                        className="bg-white p-3.5 md:p-6 rounded-2xl shadow-sm border border-gray-100"
                     >
-                        <div className="flex justify-between items-center mb-6">
+                        <div className="flex justify-between items-center mb-4">
                             <h2 className="text-xl font-bold text-gray-800">Thông tin cá nhân</h2>
                             <div className="flex items-center gap-2">
                                 {isEditing ? (
@@ -274,7 +275,7 @@ const UserProfile = () => {
                                         <button
                                             onClick={handleSave}
                                             disabled={isSaving}
-                                            className="text-sm cursor-pointer bg-green-50 text-green-600 px-3 py-1.5 rounded-lg font-semibold hover:bg-green-100 flex items-center gap-1 transition-colors disabled:opacity-50"
+                                            className="text-sm cursor-pointer bg-green-50 text-green-600 px-3 py-2 rounded-lg font-semibold hover:bg-green-100 flex items-center gap-1 transition-colors disabled:opacity-50"
                                         >
                                             <FiCheck size={14} /> {isSaving ? 'Đang lưu...' : 'Lưu'}
                                         </button>
@@ -310,7 +311,7 @@ const UserProfile = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <div className="space-y-1">
                                 <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
                                     Họ và tên
@@ -321,7 +322,7 @@ const UserProfile = () => {
                                         name="fullName"
                                         value={formData.fullName}
                                         onChange={handleChange}
-                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
+                                        className="w-full px-2.5 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
                                     />
                                 ) : (
                                     <p className="text-gray-700 font-medium">{profile?.fullName}</p>
@@ -345,7 +346,7 @@ const UserProfile = () => {
                                         name="phoneNumber"
                                         value={formData.phoneNumber}
                                         onChange={handleChange}
-                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
+                                        className="w-full px-2.5 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
                                     />
                                 ) : (
                                     <p className="text-gray-700 font-medium flex items-center gap-2">
@@ -383,7 +384,7 @@ const UserProfile = () => {
                                         name="dateOfBirth"
                                         value={formData.dateOfBirth}
                                         onChange={handleChange}
-                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
+                                        className="w-full px-2.5 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
                                     />
                                 ) : (
                                     <p className="text-gray-700 font-medium flex items-center gap-2">
@@ -409,7 +410,7 @@ const UserProfile = () => {
                                         value={formData.address}
                                         onChange={handleChange}
                                         rows="2"
-                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all resize-none"
+                                        className="w-full px-2.5 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all resize-none"
                                     />
                                 ) : (
                                     <p className="text-gray-700 font-medium flex items-center gap-2">
@@ -424,7 +425,7 @@ const UserProfile = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100"
+                        className="bg-white p-3.5 md:p-6 rounded-2xl shadow-sm border border-gray-100"
                     >
                         <h2 className="text-xl font-bold text-gray-800 mb-2">Giới thiệu bản thân</h2>
                         {isEditing ? (
@@ -434,7 +435,7 @@ const UserProfile = () => {
                                 onChange={handleChange}
                                 rows="4"
                                 placeholder="Hãy chia sẻ một chút về bản thân bạn..."
-                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all resize-none text-gray-600 leading-relaxed"
+                                className="w-full px-2.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all resize-none text-gray-600 leading-relaxed"
                             />
                         ) : (
                             <p className="text-gray-600 leading-relaxed">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     FaSearchPlus,
     FaTimes,
@@ -41,6 +41,7 @@ const GalleryLightbox = ({
     setComments,
 }) => {
     const { addToast } = useToast();
+    const commentInputRef = useRef(null);
     const [isMobileCommentOpen, setIsMobileCommentOpen] = useState(false);
 
     // Desktop comment action states
@@ -51,6 +52,43 @@ const GalleryLightbox = ({
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isEditingLoading, setIsEditingLoading] = useState(false);
+
+    // Description expand/collapse states
+    const [isDescExpanded, setIsDescExpanded] = useState(false);
+
+    // Likes modal states
+    const [showLikesModal, setShowLikesModal] = useState(false);
+    const [likedUsers, setLikedUsers] = useState([]);
+    const [loadingLikes, setLoadingLikes] = useState(false);
+
+    const handleOpenLikesModal = async (imageId) => {
+        setShowLikesModal(true);
+        setLoadingLikes(true);
+        try {
+            const response = await api.get(`/gallery/${imageId}/likes`);
+            const users = response.data?.data || response.data || [];
+            setLikedUsers(users);
+        } catch (error) {
+            console.error('Error fetching liked users:', error);
+            addToast('Không thể lấy danh sách người thích', 'error');
+        } finally {
+            setLoadingLikes(false);
+        }
+    };
+
+    // Reset expand state on image change
+    useEffect(() => {
+        setIsDescExpanded(false);
+    }, [selectedImage]);
+
+    // Dynamic height auto-grow for desktop public comment input
+    useEffect(() => {
+        const textarea = commentInputRef.current;
+        if (textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = `${textarea.scrollHeight}px`;
+        }
+    }, [newComment]);
 
     // Link formatter and highlighter utility
     const renderFormattedComment = (text) => {
@@ -142,6 +180,11 @@ const GalleryLightbox = ({
     };
 
     if (!selectedImage) return null;
+
+    const captionText =
+        selectedImage.caption ||
+        'Hình ảnh ghi lại khoảnh khắc hoạt động vô cùng thú vị của thầy và trò tại Nhật Ngữ Sakae.';
+    const isLongDescription = captionText.length > 100;
 
     return (
         <div
@@ -263,74 +306,111 @@ const GalleryLightbox = ({
 
                 {/* Mobile Floating Detail Overlay */}
                 <div
-                    className="absolute bottom-3 left-3 right-3 bg-slate-950/50 backdrop-blur-xl border border-white/10 rounded-2xl px-3 py-2.5 text-white z-[220] flex flex-col gap-2 lg:hidden max-h-[35vh] overflow-y-auto animate-slideUp"
+                    className={`absolute bottom-3 left-3 right-3 bg-slate-950/50 backdrop-blur-xl border border-white/10 rounded-2xl px-3.5 py-3 text-white z-[220] flex flex-col gap-2.5 lg:hidden transition-all duration-300 ${
+                        isDescExpanded ? 'max-h-[60vh] h-auto' : 'max-h-[35vh]'
+                    } animate-slideUp`}
                     onClick={(e) => e.stopPropagation()}
                 >
-                    {/* Creator, Category & Date */}
-                    <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-2">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                            <div className="w-9 h-9 rounded-full overflow-hidden border border-white/10 flex-shrink-0">
-                                <img
-                                    src={
-                                        selectedImage.createdBy?.avatar ||
-                                        'https://res.cloudinary.com/sakae-academy/image/upload/v1715617260/sakae-academy/users/sakae-default-user-avatar.png'
-                                    }
-                                    alt={selectedImage.createdBy?.fullName || 'Trung tâm Sakae'}
-                                    className="w-full h-full object-cover"
-                                />
+                    {/* Scrollable Upper Area */}
+                    <div className="flex-1 min-h-0 overflow-y-auto space-y-2.5 pr-0.5 scrollbar-thin">
+                        {/* Creator, Category & Date */}
+                        <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-2">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="w-9 h-9 rounded-full overflow-hidden border border-white/10 flex-shrink-0">
+                                    <img
+                                        src={
+                                            selectedImage.createdBy?.avatar ||
+                                            'https://res.cloudinary.com/sakae-academy/image/upload/v1715617260/sakae-academy/users/sakae-default-user-avatar.png'
+                                        }
+                                        alt={selectedImage.createdBy?.fullName || 'Trung tâm Sakae'}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <div className="min-w-0">
+                                    <h4 className="font-extrabold text-sm text-white leading-tight truncate">
+                                        {selectedImage.createdBy?.fullName || 'Trung tâm Sakae'}
+                                    </h4>
+                                    <span className="text-[11px] font-black text-red-500 tracking-wider uppercase">
+                                        Ban Quản Trị
+                                    </span>
+                                </div>
                             </div>
-                            <div className="min-w-0">
-                                <h4 className="font-extrabold text-sm text-white leading-tight truncate">
-                                    {selectedImage.createdBy?.fullName || 'Trung tâm Sakae'}
-                                </h4>
-                                <span className="text-[11px] font-black text-red-500 tracking-wider uppercase">
-                                    Ban Quản Trị
+                            <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                                <span className="px-2 py-0.5 bg-red-600/90 text-white text-[11px] font-black rounded-full uppercase tracking-wider">
+                                    {selectedImage.category}
+                                </span>
+                                <span className="text-[11px] text-white/50 font-bold uppercase tracking-wider">
+                                    {selectedImage.date}
                                 </span>
                             </div>
                         </div>
-                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                            <span className="px-2 py-0.5 bg-red-600/90 text-white text-[11px] font-black rounded-full uppercase tracking-wider">
-                                {selectedImage.category}
-                            </span>
-                            <span className="text-[11px] text-white/50 font-bold uppercase tracking-wider">
-                                {selectedImage.date}
-                            </span>
+
+                        {/* Title & Caption */}
+                        <div className="space-y-1">
+                            <h2 className="font-black text-white leading-snug">{selectedImage.title}</h2>
+                            <div
+                                style={{
+                                    maxHeight: isDescExpanded ? '280px' : '48px',
+                                    transition: 'max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                                }}
+                                className="overflow-hidden relative text-sm text-white/80 whitespace-pre-line leading-snug"
+                            >
+                                {captionText}
+                                {!isDescExpanded && isLongDescription && (
+                                    <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-slate-950/60 to-transparent pointer-events-none" />
+                                )}
+                            </div>
                         </div>
                     </div>
 
-                    {/* Title & Caption */}
-                    <div className="space-y-1">
-                        <h2 className="font-black text-white leading-snug">{selectedImage.title}</h2>
-                        <p className="text-sm text-white/70 line-clamp-2 leading-relaxed">
-                            {selectedImage.caption ||
-                                'Hình ảnh ghi lại khoảnh khắc hoạt động vô cùng thú vị của thầy và trò tại Nhật Ngữ Sakae.'}
-                        </p>
-                    </div>
+                    {/* Pinned Action Footer */}
+                    <div className="flex-shrink-0 flex flex-col gap-2.5 pt-1.5 border-t border-white/10">
+                        {isLongDescription && (
+                            <button
+                                onClick={() => setIsDescExpanded(!isDescExpanded)}
+                                className="text-xs font-black text-red-400 hover:text-red-300 cursor-pointer focus:outline-none flex items-center gap-1 transition-colors self-start pb-0.5"
+                            >
+                                {isDescExpanded ? 'Thu lại ⬆️' : 'Xem thêm ⬇️'}
+                            </button>
+                        )}
+                        <div className="flex items-center gap-3">
+                            {/* Mobile Split Like Button */}
+                            <div className="inline-flex items-center rounded-2xl border border-white/15 bg-white/5 overflow-hidden shadow-md">
+                                {/* Left part: Like / Unlike */}
+                                <button
+                                    onClick={(e) => handleLike(selectedImage.id, e)}
+                                    className={`flex items-center gap-1.5 px-3 py-2 text-xs font-black transition-all cursor-pointer border-r border-white/10 ${
+                                        selectedImage.isLiked
+                                            ? 'bg-red-500/20 text-red-400'
+                                            : 'text-white hover:bg-white/10'
+                                    }`}
+                                >
+                                    <span>{selectedImage.isLiked ? '❤️ Đã thích' : '🤍 Thích'}</span>
+                                </button>
+                                {/* Right part: Count & Modal trigger */}
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleOpenLikesModal(selectedImage.id);
+                                    }}
+                                    className="flex items-center gap-1 px-3 py-2 text-xs font-extrabold text-white/80 hover:bg-white/15 transition-all cursor-pointer"
+                                    title="Xem danh sách người đã thích"
+                                >
+                                    <span>❤️</span>
+                                    <span>{selectedImage.likesCount}</span>
+                                </button>
+                            </div>
 
-                    {/* Floating Action Buttons */}
-                    <div className="flex items-center gap-3 pt-2 border-t border-white/10">
-                        <button
-                            onClick={(e) => handleLike(selectedImage.id, e)}
-                            className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-extrabold transition-all shadow-md cursor-pointer ${
-                                selectedImage.isLiked
-                                    ? 'bg-red-200 text-red-600 border border-red-300'
-                                    : 'bg-white/10 text-white border border-white/10 hover:bg-white/20'
-                            }`}
-                        >
-                            <span>{selectedImage.isLiked ? '❤️ Đã thích' : '🤍 Thích'}</span>
-                            <span className="bg-black/15 px-1.5 py-0.5 rounded-md text-[10px] font-black">
-                                {selectedImage.likesCount}
-                            </span>
-                        </button>
-                        <button
-                            onClick={() => setIsMobileCommentOpen(true)}
-                            className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-extrabold bg-white text-slate-800 hover:bg-slate-100 transition-all shadow-md cursor-pointer"
-                        >
-                            <span>💬 Bình luận</span>
-                            <span className="bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded-md text-[10px] font-black">
-                                {selectedImage.commentsCount}
-                            </span>
-                        </button>
+                            <button
+                                onClick={() => setIsMobileCommentOpen(true)}
+                                className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-extrabold bg-white text-slate-800 hover:bg-slate-100 transition-all shadow-md cursor-pointer"
+                            >
+                                <span>💬 Bình luận</span>
+                                <span className="bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded-md text-[10px] font-black">
+                                    {selectedImage.commentsCount}
+                                </span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -364,12 +444,28 @@ const GalleryLightbox = ({
                 </div>
 
                 {/* Caption details */}
-                <div className="p-3 border-b border-slate-100 bg-slate-50/50 max-h-[180px] overflow-y-auto">
+                <div className="p-3 border-b border-slate-100 bg-slate-50/50">
                     <h2 className="font-extrabold text-xl text-slate-800 leading-snug mb-1">{selectedImage.title}</h2>
-                    <p className="text-sm text-slate-600 whitespace-pre-line leading-relaxed">
-                        {selectedImage.caption ||
-                            'Hình ảnh ghi lại khoảnh khắc hoạt động vô cùng thú vị của thầy và trò tại Nhật Ngữ Sakae.'}
-                    </p>
+                    <div
+                        style={{
+                            maxHeight: isDescExpanded ? '400px' : '56px',
+                            transition: 'max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                        }}
+                        className="overflow-hidden relative text-base text-slate-600 whitespace-pre-line leading-snug"
+                    >
+                        {captionText}
+                        {!isDescExpanded && isLongDescription && (
+                            <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-slate-50 to-transparent pointer-events-none" />
+                        )}
+                    </div>
+                    {isLongDescription && (
+                        <button
+                            onClick={() => setIsDescExpanded(!isDescExpanded)}
+                            className="text-sm text-red-600 hover:text-red-500 mt-1 cursor-pointer focus:outline-none flex items-center gap-1 transition-colors"
+                        >
+                            {isDescExpanded ? 'Thu lại ⬆️' : 'Xem thêm ⬇️'}
+                        </button>
+                    )}
                     <span className="text-xs text-slate-500 font-extrabold block mt-2 tracking-wider">
                         ĐĂNG NGÀY: {selectedImage.date}
                     </span>
@@ -382,15 +478,15 @@ const GalleryLightbox = ({
                     </h3>
                     {loadingComments ? (
                         <div className="flex flex-col items-center justify-center py-10">
-                            <div className="w-6 h-6 border-2 border-slate-200 border-t-red-600 rounded-full animate-spin mb-2"></div>
-                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                            <div className="w-10 h-10 border-2 border-slate-200 border-t-red-600 rounded-full animate-spin mb-2"></div>
+                            <span className="text-sm text-slate-400 font-bold uppercase tracking-wider">
                                 Đang tải...
                             </span>
                         </div>
                     ) : comments.length === 0 ? (
                         <div className="text-center py-12">
                             <span className="text-2xl block mb-1">💬</span>
-                            <span className="text-xs text-slate-400">
+                            <span className="text-sm text-slate-400">
                                 Chưa có bình luận nào. Hãy là người đầu tiên!
                             </span>
                         </div>
@@ -461,15 +557,15 @@ const GalleryLightbox = ({
                                             ) : (
                                                 /* Display Normal Mode */
                                                 <>
-                                                    <div className="flex items-center justify-between gap-3">
-                                                        <span className="font-extrabold text-sm text-slate-800 truncate">
+                                                    <div className="flex items-center justify-between gap-3 mb-0.5">
+                                                        <span className="font-extrabold text-[15px] text-slate-800 truncate">
                                                             {comment.user?.fullName}
                                                         </span>
                                                         <span className="text-xs text-slate-400 font-bold flex-shrink-0 uppercase tracking-wider">
                                                             {new Date(comment.createdAt).toLocaleDateString('vi-VN')}
                                                         </span>
                                                     </div>
-                                                    <p className="text-sm text-slate-600 leading-normal break-words pr-1 whitespace-pre-wrap">
+                                                    <p className="text-[15px] text-slate-600 leading-snug break-words pr-1 whitespace-pre-wrap">
                                                         {renderFormattedComment(comment.content)}
                                                     </p>
                                                 </>
@@ -551,18 +647,34 @@ const GalleryLightbox = ({
                 {/* Interactive panel */}
                 <div className="p-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <button
-                            onClick={(e) => handleLike(selectedImage.id, e)}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold transition-all shadow-sm cursor-pointer ${
-                                selectedImage.isLiked
-                                    ? 'bg-red-50 text-red-600 border border-red-200'
-                                    : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-100'
-                            }`}
-                        >
-                            <span>{selectedImage.isLiked ? '❤️ Đã thích' : '🤍 Thích'}</span>
-                            <span className="font-extrabold">{selectedImage.likesCount}</span>
-                        </button>
-                        <span className="text-sm text-slate-500 font-bold">
+                        {/* Segmented Split Button for Likes */}
+                        <div className="inline-flex items-center rounded-full border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow transition-shadow">
+                            {/* Left part: Like / Unlike */}
+                            <button
+                                onClick={(e) => handleLike(selectedImage.id, e)}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-black transition-all cursor-pointer border-r border-slate-100 ${
+                                    selectedImage.isLiked
+                                        ? 'text-red-600 hover:text-red-500 bg-red-50/30'
+                                        : 'text-slate-600 hover:text-red-650 hover:bg-slate-100'
+                                }`}
+                                title={selectedImage.isLiked ? 'Bỏ thích' : 'Thích ảnh này'}
+                            >
+                                <span>{selectedImage.isLiked ? '❤️ Đã thích' : '🤍 Thích'}</span>
+                            </button>
+                            {/* Right part: Like Count & Who Liked Modal Trigger */}
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenLikesModal(selectedImage.id);
+                                }}
+                                className="flex items-center gap-1 px-3 py-1.5 text-xs font-extrabold text-slate-500 hover:text-red-650 hover:bg-red-50/30 transition-all cursor-pointer border-none bg-transparent outline-none"
+                                title="Xem danh sách người đã thích"
+                            >
+                                <span>❤️</span>
+                                <span>{selectedImage.likesCount}</span>
+                            </button>
+                        </div>
+                        <span className="text-xs text-slate-500 font-black">
                             💬 {selectedImage.commentsCount} bình luận
                         </span>
                     </div>
@@ -571,8 +683,9 @@ const GalleryLightbox = ({
                 {/* Write Comment Box */}
                 <div className="p-3 border-t border-slate-100 bg-white sticky bottom-0 z-50">
                     {user ? (
-                        <form onSubmit={handleFormSubmit} className="flex gap-2">
+                        <form onSubmit={handleFormSubmit} className="flex gap-2 items-center justify-center">
                             <textarea
+                                ref={commentInputRef}
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
                                 onKeyDown={(e) => {
@@ -584,12 +697,12 @@ const GalleryLightbox = ({
                                 placeholder="Viết bình luận công khai..."
                                 disabled={isSubmitting}
                                 rows={1}
-                                className={`flex-1 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 text-sm transition-all resize-none min-h-[38px] max-h-[120px] overflow-y-auto leading-relaxed ${isSubmitting ? 'cursor-not-allowed opacity-60' : ''}`}
+                                className={`flex-1 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 text-[15px] resize-none min-h-[38px] max-h-[106px] overflow-y-auto leading-relaxed ${isSubmitting ? 'cursor-not-allowed opacity-60' : ''}`}
                             />
                             <button
                                 type="submit"
                                 disabled={!newComment.trim() || isSubmitting}
-                                className={`px-4 py-2 cursor-pointer font-bold text-sm rounded-xl text-white transition-all shadow-sm flex items-center justify-center gap-1.5 min-w-[64px] ${
+                                className={`px-4 py-2 cursor-pointer font-bold text-sm rounded-xl text-white transition-all shadow-sm flex items-center justify-center gap-1.5 max-h-10 min-w-[64px] ${
                                     newComment.trim() && !isSubmitting
                                         ? 'bg-red-600 hover:bg-red-500 shadow-red-100'
                                         : 'bg-gray-300 cursor-not-allowed'
@@ -672,6 +785,79 @@ const GalleryLightbox = ({
                             >
                                 Xác nhận xóa
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal hiển thị danh sách người thích (Likes List Modal) */}
+            {showLikesModal && (
+                <div
+                    className="fixed inset-0 z-[280] flex items-center justify-center p-4"
+                    onClick={() => setShowLikesModal(false)}
+                >
+                    {/* Backdrop */}
+                    <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm animate-fadeIn"></div>
+
+                    {/* Modal Card */}
+                    <div
+                        className="relative bg-white dark:bg-slate-900 rounded-2xl p-3 md:p-5 max-w-xl w-full shadow-2xl z-[290] border border-slate-100 dark:border-slate-800 animate-scaleIn flex flex-col max-h-[70vh]"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Header */}
+                        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+                            <h3 className="text-slate-800 dark:text-white font-black text-lg flex items-center gap-2">
+                                <span>❤️</span> Danh sách người thích
+                            </h3>
+                            <button
+                                onClick={() => setShowLikesModal(false)}
+                                className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-850 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-all cursor-pointer focus:outline-none border-none outline-none"
+                            >
+                                <FaTimes size={14} />
+                            </button>
+                        </div>
+
+                        {/* Content list */}
+                        <div className="flex-1 overflow-y-auto py-4 space-y-3 min-h-[200px] scrollbar-thin">
+                            {loadingLikes ? (
+                                <div className="flex flex-col items-center justify-center py-10 h-full">
+                                    <div className="w-10 h-10 border-2 border-slate-200 border-t-red-600 rounded-full animate-spin mb-3"></div>
+                                    <span className="text-xs text-slate-450 font-extrabold uppercase tracking-widest">
+                                        Đang tải...
+                                    </span>
+                                </div>
+                            ) : likedUsers.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-10 text-center h-full">
+                                    <span className="text-3xl mb-2">🤍</span>
+                                    <p className="text-sm text-slate-400 font-bold">Chưa có ai thích ảnh này.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    {likedUsers.map((likedUser) => (
+                                        <div
+                                            key={likedUser.id}
+                                            className="flex items-center justify-between py-1.5 px-1.5 hover:bg-slate-100 dark:hover:bg-slate-800/40 rounded-2xl transition-all"
+                                        >
+                                            <div className="flex items-center gap-2.5 min-w-0">
+                                                <div className="w-10 h-10 rounded-full overflow-hidden border border-slate-100 dark:border-slate-800 bg-slate-50 flex-shrink-0">
+                                                    <img
+                                                        src={
+                                                            likedUser.avatar ||
+                                                            'https://res.cloudinary.com/sakae-academy/image/upload/v1715617260/sakae-academy/users/sakae-default-user-avatar.png'
+                                                        }
+                                                        alt={likedUser.fullName}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                                <span className="font-extrabold text-slate-800 text-[15px] md:text-base dark:text-white truncate">
+                                                    {likedUser.fullName}
+                                                </span>
+                                            </div>
+                                            <span className="text-red-500 text-sm flex-shrink-0">❤️</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

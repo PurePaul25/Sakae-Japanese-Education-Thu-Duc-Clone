@@ -67,7 +67,7 @@ const UserDashboard = () => {
 
     return (
         <div className="min-h-screen bg-gray-50/50 pt-22 lg:pt-28 pb-12">
-            <div className="max-w-7xl mx-auto px-4">
+            <div className="max-w-7xl mx-auto px-3 md:px-4">
                 {/* Mobile Header Toggle */}
                 <div className="lg:hidden mb-6 flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                     <div className="flex items-center gap-3">
