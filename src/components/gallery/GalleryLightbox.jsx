@@ -368,7 +368,7 @@ const GalleryLightbox = ({
                         {isLongDescription && (
                             <button
                                 onClick={() => setIsDescExpanded(!isDescExpanded)}
-                                className="text-xs font-black text-red-400 hover:text-red-300 cursor-pointer focus:outline-none flex items-center gap-1 transition-colors self-start pb-0.5"
+                                className="text-xs font-black text-red-400 cursor-pointer focus:outline-none flex items-center gap-1 transition-colors self-start py-0.5"
                             >
                                 {isDescExpanded ? 'Thu lại ⬆️' : 'Xem thêm ⬇️'}
                             </button>
@@ -393,7 +393,7 @@ const GalleryLightbox = ({
                                         e.stopPropagation();
                                         handleOpenLikesModal(selectedImage.id);
                                     }}
-                                    className="flex items-center gap-1 px-3 py-2 text-xs font-extrabold text-white/80 hover:bg-white/15 transition-all cursor-pointer"
+                                    className="flex items-center gap-1 px-3 py-2 text-xs font-extrabold text-white hover:bg-white/15 transition-all cursor-pointer"
                                     title="Xem danh sách người đã thích"
                                 >
                                     <span>❤️</span>
@@ -645,14 +645,14 @@ const GalleryLightbox = ({
                 </div>
 
                 {/* Interactive panel */}
-                <div className="p-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <div className="px-3 py-1.5 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         {/* Segmented Split Button for Likes */}
                         <div className="inline-flex items-center rounded-full border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow transition-shadow">
                             {/* Left part: Like / Unlike */}
                             <button
                                 onClick={(e) => handleLike(selectedImage.id, e)}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-black transition-all cursor-pointer border-r border-slate-100 ${
+                                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold transition-all cursor-pointer border-r border-slate-100 ${
                                     selectedImage.isLiked
                                         ? 'text-red-600 hover:text-red-500 bg-red-50/30'
                                         : 'text-slate-600 hover:text-red-650 hover:bg-slate-100'
@@ -667,14 +667,14 @@ const GalleryLightbox = ({
                                     e.stopPropagation();
                                     handleOpenLikesModal(selectedImage.id);
                                 }}
-                                className="flex items-center gap-1 px-3 py-1.5 text-xs font-extrabold text-slate-500 hover:text-red-650 hover:bg-red-50/30 transition-all cursor-pointer border-none bg-transparent outline-none"
+                                className="flex items-center gap-1 px-3 py-1.5 text-sm font-extrabold text-slate-500 hover:text-red-650 hover:bg-red-50/30 transition-all cursor-pointer border-none bg-transparent outline-none"
                                 title="Xem danh sách người đã thích"
                             >
                                 <span>❤️</span>
                                 <span>{selectedImage.likesCount}</span>
                             </button>
                         </div>
-                        <span className="text-xs text-slate-500 font-black">
+                        <span className="text-sm text-slate-500 font-bold">
                             💬 {selectedImage.commentsCount} bình luận
                         </span>
                     </div>
@@ -801,11 +801,11 @@ const GalleryLightbox = ({
 
                     {/* Modal Card */}
                     <div
-                        className="relative bg-white dark:bg-slate-900 rounded-2xl p-3 md:p-5 max-w-xl w-full shadow-2xl z-[290] border border-slate-100 dark:border-slate-800 animate-scaleIn flex flex-col max-h-[70vh]"
+                        className="relative bg-white dark:bg-slate-900 rounded-2xl p-3 md:p-5 max-w-xl w-full shadow-2xl z-[290] border border-slate-100 dark:border-slate-800 animate-scaleIn flex flex-col max-h-[80vh]"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                             <h3 className="text-slate-800 dark:text-white font-black text-lg flex items-center gap-2">
                                 <span>❤️</span> Danh sách người thích
                             </h3>
@@ -818,11 +818,11 @@ const GalleryLightbox = ({
                         </div>
 
                         {/* Content list */}
-                        <div className="flex-1 overflow-y-auto py-4 space-y-3 min-h-[200px] scrollbar-thin">
+                        <div className="flex-1 overflow-y-auto py-3 space-y-2 min-h-[350px] scrollbar-thin">
                             {loadingLikes ? (
-                                <div className="flex flex-col items-center justify-center py-10 h-full">
+                                <div className="flex flex-col items-center justify-center py-28 h-full">
                                     <div className="w-10 h-10 border-2 border-slate-200 border-t-red-600 rounded-full animate-spin mb-3"></div>
-                                    <span className="text-xs text-slate-450 font-extrabold uppercase tracking-widest">
+                                    <span className="text-sm text-slate-500 font-bold uppercase tracking-wider">
                                         Đang tải...
                                     </span>
                                 </div>
@@ -836,7 +836,7 @@ const GalleryLightbox = ({
                                     {likedUsers.map((likedUser) => (
                                         <div
                                             key={likedUser.id}
-                                            className="flex items-center justify-between py-1.5 px-1.5 hover:bg-slate-100 dark:hover:bg-slate-800/40 rounded-2xl transition-all"
+                                            className="flex items-center justify-between py-1.5 px-1.5 md:px-2 hover:bg-slate-100 dark:hover:bg-slate-800/40 rounded-2xl transition-all"
                                         >
                                             <div className="flex items-center gap-2.5 min-w-0">
                                                 <div className="w-10 h-10 rounded-full overflow-hidden border border-slate-100 dark:border-slate-800 bg-slate-50 flex-shrink-0">

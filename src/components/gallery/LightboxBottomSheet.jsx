@@ -277,7 +277,7 @@ const LightboxBottomSheet = ({
                                     {/* Bubble comment content and actions row (vertical container) */}
                                     <div className="flex-1 flex flex-col min-w-0">
                                         {/* Speech bubble */}
-                                        <div className="bg-white px-2.5 py-2  rounded-xl border border-slate-100 shadow-sm text-xs w-full relative">
+                                        <div className="bg-white px-2.5 py-1.5  rounded-xl border border-slate-100 shadow-sm text-xs w-full relative">
                                             {editingCommentId === comment.id ? (
                                                 /* Inline Comment Editor Form */
                                                 <form
