@@ -135,7 +135,7 @@ const Toast = () => {
                                 className={`mb-3 ${config.bgColor} border-2 ${config.borderColor} rounded-lg overflow-hidden shadow-lg backdrop-blur-sm`}
                             >
                                 {/* Main Content */}
-                                <div className="p-3 flex items-start gap-3">
+                                <div className="p-2 flex items-start gap-2">
                                     <Icon className={`${config.iconColor} text-xl mt-0.5 flex-shrink-0`} />
                                     <div className="flex-grow">
                                         <p className={`font-bold ${config.textColor}`}>{config.title}</p>
@@ -188,7 +188,7 @@ const Toast = () => {
                                 className={`${config.bgColor} border-2 ${config.borderColor} rounded-lg overflow-hidden shadow-xl backdrop-blur-sm`}
                             >
                                 {/* Main Content */}
-                                <div className="p-3 flex items-start gap-3">
+                                <div className="p-2 flex items-start gap-2">
                                     <Icon className={`${config.iconColor} text-xl mt-0.5 flex-shrink-0`} />
                                     <div className="flex-grow">
                                         <p className={`font-bold ${config.textColor}`}>{config.title}</p>

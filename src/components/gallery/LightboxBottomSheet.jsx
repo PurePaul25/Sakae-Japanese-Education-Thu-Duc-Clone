@@ -343,11 +343,27 @@ const LightboxBottomSheet = ({
                                         {/* Actions Row immediately below comment speech bubble */}
                                         {editingCommentId !== comment.id && (
                                             <div className="flex items-center gap-3 mt-1.5 ml-2.5 text-[13px] font-bold text-slate-400">
-                                                <button className="hover:text-red-500 transition-colors cursor-pointer focus:outline-none">
+                                                <button
+                                                    onClick={() =>
+                                                        addToast(
+                                                            'Tính năng thích bình luận sẽ được phát hành trong thời gian tới!',
+                                                            'info',
+                                                        )
+                                                    }
+                                                    className="hover:text-red-500 transition-colors cursor-pointer focus:outline-none"
+                                                >
                                                     Thích
                                                 </button>
                                                 <span className="text-[8px] text-slate-300">•</span>
-                                                <button className="hover:text-slate-600 transition-colors cursor-pointer focus:outline-none">
+                                                <button
+                                                    onClick={() =>
+                                                        addToast(
+                                                            'Tính năng phản hồi bình luận sẽ được phát hành trong thời gian tới!',
+                                                            'info',
+                                                        )
+                                                    }
+                                                    className="hover:text-slate-600 transition-colors cursor-pointer focus:outline-none"
+                                                >
                                                     Phản hồi
                                                 </button>
                                                 <span className="text-[8px] text-slate-300">•</span>
