@@ -746,7 +746,7 @@ const AdminBlog = () => {
                                 {['Bài viết', 'Danh mục', 'Trạng thái', 'Lượt xem', 'Ngày tạo', ''].map((h, i) => (
                                     <th
                                         key={i}
-                                        className="px-5 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider"
+                                        className="px-5 py-3 text-[13px] font-bold text-slate-600 uppercase tracking-wider"
                                     >
                                         {h}
                                     </th>
@@ -784,7 +784,7 @@ const AdminBlog = () => {
                                                     <img
                                                         src={post.thumbnail}
                                                         alt={post.title}
-                                                        className="w-12 h-10 object-cover rounded-lg flex-shrink-0"
+                                                        className="w-14 h-12 object-cover rounded-lg flex-shrink-0"
                                                     />
                                                 )}
                                                 <div>

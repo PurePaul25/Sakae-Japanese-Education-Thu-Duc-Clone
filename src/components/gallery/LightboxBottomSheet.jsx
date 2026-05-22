@@ -451,7 +451,7 @@ const LightboxBottomSheet = ({
                                 placeholder="Viết bình luận công khai..."
                                 disabled={isSubmitting}
                                 rows={1}
-                                className={`flex-1 px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-red-500 focus:bg-white text-[15px] shadow-inner resize-none min-h-[42px] max-h-[107px] overflow-y-auto leading-relaxed ${isSubmitting ? 'cursor-not-allowed opacity-60' : ''}`}
+                                className={`flex-1 px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-red-500 focus:bg-white text-[15px] shadow-inner resize-none min-h-[42px] max-h-[107px] overflow-y-auto leading-relaxed ${isSubmitting ? 'cursor-not-allowed opacity-60' : ''}`}
                             />
                             <button
                                 type="submit"

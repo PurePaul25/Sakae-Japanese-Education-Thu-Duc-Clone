@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Trash2, X, Edit3, Check, FileImage, Plus, Calendar, Tag, Activity, AlertTriangle } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
@@ -125,7 +125,7 @@ const MediaLibrary = () => {
         [years],
     );
 
-    const fetchGallery = async () => {
+    const fetchGallery = useCallback(async () => {
         try {
             setLoading(true);
             const response = await api.get('/gallery');
@@ -137,11 +137,11 @@ const MediaLibrary = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [addToast]);
 
     useEffect(() => {
         fetchGallery();
-    }, []);
+    }, [fetchGallery]);
 
     const handleDeleteClick = (image) => {
         setImageToDelete(image);
@@ -185,7 +185,7 @@ const MediaLibrary = () => {
             addToast('Cập nhật thành công!', 'success');
             setIsEditModalOpen(false);
             fetchGallery();
-        } catch (error) {
+        } catch {
             addToast('Lỗi khi cập nhật', 'error');
         } finally {
             setIsUpdating(false);
