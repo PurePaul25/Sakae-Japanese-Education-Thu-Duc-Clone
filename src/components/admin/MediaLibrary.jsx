@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Trash2, X, Edit3, Check, FileImage, Plus, Calendar, Tag, Activity, AlertTriangle } from 'lucide-react';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../utils/api';
 import { useToast } from '../../contexts/ToastContext';

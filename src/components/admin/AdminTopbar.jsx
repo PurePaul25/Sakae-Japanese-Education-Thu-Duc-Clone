@@ -179,7 +179,7 @@ const AdminTopbar = ({ admin, onLogout }) => {
 
                     {/* Tooltip (only if not open) */}
                     {!isProfileOpen && (
-                        <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-white text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                        <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-white text-xs font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
                             Tài khoản
                         </div>
                     )}

@@ -6,6 +6,7 @@ const HomeLazy = lazy(() => import('../pages/Home'));
 const AboutLazy = lazy(() => import('../pages/About'));
 const ClassesLazy = lazy(() => import('../pages/Classes'));
 const NewsLazy = lazy(() => import('../pages/News'));
+const NewsDetailLazy = lazy(() => import('../pages/NewsDetail'));
 const ContactLazy = lazy(() => import('../pages/Contact'));
 const OpeningScheduleLazy = lazy(() => import('../pages/OpeningSchedule'));
 const CourseDetailLazy = lazy(() => import('../features/courses/CourseDetail'));
@@ -54,6 +55,7 @@ function AppRoutes() {
                 <Route path="/gioi-thieu" element={<AboutLazy />} />
                 <Route path="/khoa-hoc" element={<ClassesLazy />} />
                 <Route path="/tin-tuc" element={<NewsLazy />} />
+                <Route path="/tin-tuc/:slug" element={<NewsDetailLazy />} />
                 <Route path="/lien-he" element={<ContactLazy />} />
                 <Route path="/lich-khai-giang" element={<OpeningScheduleLazy />} />
                 <Route path="/chi-tiet-khoa-hoc/:id" element={<CourseDetailLazy />} />

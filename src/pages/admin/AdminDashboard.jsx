@@ -8,6 +8,7 @@ import DashboardHome from '../../components/admin/DashboardHome';
 import DataTable from '../../components/admin/DataTable';
 import AdminCourses from '../../components/admin/AdminCourses';
 import AdminSettings from '../../components/admin/AdminSettings';
+import AdminBlog from '../../components/admin/AdminBlog';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import SEO from '../../hooks/useSEO';
@@ -279,12 +280,7 @@ const AdminDashboard = () => {
             case 'tin-tuc':
                 return (
                     <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
-                        <DataTable
-                            title="Quản lý tin tức"
-                            description="Tất cả bài viết, thông báo và tin tức sự kiện của trung tâm."
-                            columns={newsColumns}
-                            data={newsData}
-                        />
+                        <AdminBlog />
                     </motion.div>
                 );
             default:

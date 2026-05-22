@@ -1,52 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
 import SEO from '../hooks/useSEO';
+import blogService from '../services/blogService';
 
-const newsData = [
-    {
-        id: 1,
-        title: 'Hoạt động ngoại khóa tại Sakae',
-        image: 'http://bizweb.dktcdn.net/100/059/929/themes/76022/assets/sbbn-collec-1.jpg?1747711551525',
-        date: '18/07/2025',
-        desc: 'Học viên Sakae đã có dịp trải nghiệm không khí lễ hội văn hóa Nhật Bản với nhiều hoạt động thú vị như mặc yukata và pha trà đạo.',
-        category: 'Sự kiện',
-    },
-    {
-        id: 2,
-        title: 'Từ "gà mờ" đến thành thạo trợ từ tiếng Nhật, tham khảo bài viết dưới đây',
-        image: 'http://bizweb.dktcdn.net/100/059/929/files/315712878-5624748057608095-2146620662772535775-n.png?v=1748232115899',
-        date: '26/5/2025',
-        desc: 'Bí quyết nắm vững các trợ từ quan trọng ($wa, ga, o, ni,...) trong tiếng Nhật giúp bạn giao tiếp và viết lách trôi chảy hơn ngay từ level N5.',
-        category: 'Kiến thức',
-    },
-    {
-        id: 3,
-        title: 'TỪ VỰNG BẢNG LƯƠNG CẦN BIẾT CHO CÁC BẠN SẮP SANG NHẬT',
-        image: 'http://bizweb.dktcdn.net/100/059/929/articles/493942609-1010388567893707-7651434882821413917-n.jpg?v=1745908085917',
-        date: '29/04/2025',
-        desc: 'Tổng hợp các từ vựng chuyên ngành liên quan đến bảng lương, thu nhập tại Nhật Bản, giúp bạn dễ dàng hòa nhập và hiểu rõ quyền lợi của mình.',
-        category: 'Du học & Việc làm',
-    },
-    {
-        id: 4,
-        title: 'Lịch khai giảng các lớp N5, N4, N3 tháng 8/2025',
-        image: 'https://bizweb.dktcdn.net/100/059/929/products/n5246-t4-compressed.jpg?v=1681181600203',
-        date: '01/08/2025',
-        desc: 'Thông báo lịch khai giảng chi tiết các khóa học tiếng Nhật mọi cấp độ trong tháng 8. Đăng ký sớm để nhận ưu đãi học phí hấp dẫn!',
-        category: 'Thông báo',
-    },
-    {
-        id: 5,
-        title: 'Kinh nghiệm "săn" học bổng du học Nhật Bản thành công',
-        image: 'https://bizweb.dktcdn.net/100/059/929/products/8011face-compressed.jpg?v=1594181526853',
-        date: '15/07/2025',
-        desc: 'Chia sẻ từ cựu học viên Sakae về hành trình chuẩn bị hồ sơ, phỏng vấn và chinh phục thành công học bổng MEXT danh giá.',
-        category: 'Du học & Việc làm',
-    },
-];
-
-// Component cho nút lọc, tương tự trang Classes để đồng bộ
 const FilterButton = ({ label, active, onClick }) => (
     <button
         onClick={onClick}
@@ -60,71 +17,157 @@ const FilterButton = ({ label, active, onClick }) => (
     </button>
 );
 
-// Component cho thẻ tin tức
+import { Eye } from 'lucide-react';
+
 const NewsCard = ({ item }) => {
+    const formattedDate = new Date(item.createdAt).toLocaleDateString('vi-VN');
+
     return (
         <div className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group transform hover:-translate-y-1">
-            {/* Container flex để chia 2 cột */}
             <div className="flex flex-col md:flex-row">
-                {/* Cột trái - Ảnh */}
-                <div className="relative md:w-1/3 overflow-hidden border-r border-gray-200">
+                {/* Ảnh — wrap bằng Link để click vào ảnh cũng vào bài */}
+                <Link
+                    to={`/tin-tuc/${item.slug}`}
+                    className="relative md:w-1/3 overflow-hidden border-r border-gray-200 block"
+                >
                     <img
-                        src={item.image}
+                        src={item.thumbnail || 'https://placehold.co/600x400?text=Sakae+News'}
                         alt={item.title}
-                        className="w-full h-20 object-cover transition-transform duration-500 group-hover:scale-105 min-h-[250px]"
+                        className="w-full h-20 object-cover transition-transform duration-500 group-hover:scale-105 min-h-[200px] md:min-h-[220px]"
                     />
-                    {/* Lớp phủ mờ khi hover */}
-                    <div className="absolute inset-0 cursor-pointer bg-white/80 bg-opacity-0 group-hover:bg-opacity-60 transition-all duration-300 ease-in-out flex items-center justify-center p-4 transform translate-y-full group-hover:translate-y-0">
-                        <span className="text-red-600 text-lg font-semibold flex items-center">
-                            Xem thêm
-                            <span className="ml-1 transform transition-transform duration-300 group-hover:translate-x-1">
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
+                        <span className="text-white font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-red-600 px-4 py-2 rounded-full">
+                            Xem thêm →
+                        </span>
+                    </div>
+                    {item.category && (
+                        <span className="absolute top-3 right-3 bg-red-600 text-white text-xs font-semibold py-1 px-3 rounded-full">
+                            {item.category}
+                        </span>
+                    )}
+                </Link>
+
+                {/* Nội dung */}
+                <div className="md:w-2/3 p-3.5 md:p-5 flex flex-col justify-between">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <span className="text-sm text-gray-500">{formattedDate}</span>
+                            <span className="flex items-center gap-1 text-sm text-gray-400">
+                                <Eye size={14} className="text-gray-400" />
+                                {item.views ?? 0} Lượt xem
+                            </span>
+                        </div>
+                        <h3 className="text-lg md:text-xl font-bold text-gray-800 mb-2 hover:text-red-600 transition-colors duration-300">
+                            <Link to={`/tin-tuc/${item.slug}`}>{item.title}</Link>
+                        </h3>
+                        {item.excerpt && (
+                            <p className="text-[15px] md:text-base text-gray-600 mb-4 leading-relaxed line-clamp-3">
+                                {item.excerpt}
+                            </p>
+                        )}
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <Link
+                            to={`/tin-tuc/${item.slug}`}
+                            className="self-start text-red-600 font-semibold text-sm hover:text-red-800 transition-colors duration-300 group"
+                        >
+                            Xem chi tiết{' '}
+                            <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
                                 →
                             </span>
-                        </span>
+                        </Link>
+                        {item.author && <span className="text-xs text-gray-400">{item.author.fullName}</span>}
                     </div>
-                    <span className="absolute top-3 right-3 bg-red-600 text-white text-xs font-semibold py-1 px-3 rounded-full">
-                        {item.category}
-                    </span>
-                </div>
-                {/* Cột phải - Nội dung */}
-                <div className="md:w-2/3 p-6 flex flex-col justify-between">
-                    <div>
-                        <span className="text-sm text-gray-500 mb-2 block">{item.date}</span>
-                        <h3 className="text-xl font-bold text-gray-800 mb-3 hover:text-red-600 transition-colors duration-300">
-                            <Link to={`/tin-tuc/${item.id}`}>{item.title}</Link>
-                        </h3>
-                        <p className="text-gray-600 mb-5 leading-relaxed line-clamp-3">{item.desc}</p>
-                    </div>
-                    <Link
-                        to={`/tin-tuc/${item.id}`}
-                        className="self-start text-red-600 font-semibold text-sm hover:text-red-800 transition-colors duration-300 group"
-                    >
-                        Xem chi tiết{' '}
-                        <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
-                            →
-                        </span>
-                    </Link>
                 </div>
             </div>
         </div>
     );
 };
 
+const NewsCardSkeleton = () => (
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden animate-pulse">
+        <div className="flex flex-col md:flex-row">
+            <div className="md:w-1/3 bg-gray-200 min-h-[250px]" />
+            <div className="md:w-2/3 p-6 flex flex-col gap-4">
+                <div className="h-4 bg-gray-200 rounded w-1/4" />
+                <div className="h-6 bg-gray-200 rounded w-3/4" />
+                <div className="h-4 bg-gray-200 rounded w-full" />
+                <div className="h-4 bg-gray-200 rounded w-5/6" />
+            </div>
+        </div>
+    </div>
+);
+
 const News = () => {
+    const [posts, setPosts] = useState([]);
+    const [categories, setCategories] = useState(['Tất cả']);
     const [activeCategory, setActiveCategory] = useState('Tất cả');
+    const [search, setSearch] = useState('');
+    const [searchInput, setSearchInput] = useState('');
+    const [page, setPage] = useState(1);
+    const [meta, setMeta] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Tự động lấy các danh mục duy nhất từ newsData và thêm 'Tất cả' vào đầu
-    const categories = ['Tất cả', ...new Set(newsData.map((item) => item.category))];
+    const LIMIT = 6;
 
-    // Lọc tin tức dựa trên danh mục đang được chọn
-    const filteredNews = newsData.filter((item) => activeCategory === 'Tất cả' || item.category === activeCategory);
+    // Fetch posts khi filter/page thay đổi
+    useEffect(() => {
+        const fetchPosts = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const params = { page, limit: LIMIT };
+                if (activeCategory !== 'Tất cả') params.category = activeCategory;
+                if (search) params.search = search;
+
+                const res = await blogService.getAll(params);
+                const payload = res.data?.data ?? res.data;
+                setPosts(payload.data ?? []);
+                setMeta(payload.meta ?? null);
+            } catch {
+                setError('Không thể tải tin tức. Vui lòng thử lại sau.');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchPosts();
+    }, [page, activeCategory, search]);
+
+    // Fetch categories một lần để build filter buttons
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const res = await blogService.getAll({ limit: 100 });
+                const payload = res.data?.data ?? res.data;
+                const allPosts = payload.data ?? [];
+                const unique = ['Tất cả', ...new Set(allPosts.map((p) => p.category).filter(Boolean))];
+                setCategories(unique);
+            } catch {
+                // giữ default
+            }
+        };
+        fetchCategories();
+    }, []);
+
+    const handleCategoryChange = (cat) => {
+        setActiveCategory(cat);
+        setPage(1);
+    };
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        setSearch(searchInput);
+        setPage(1);
+    };
 
     return (
-        <div className="pt-28 pb-12 bg-gray-100 text-gray-800">
+        <div className="pt-24 pb-12 bg-gray-100 text-gray-800">
             <SEO page="news" />
+
             {/* Tiêu đề */}
-            <section className="text-center mb-6 px-4">
-                <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4">
+            <section className="text-center mb-5 px-4">
+                <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-2">
                     Tin tức & <span className="text-red-600">Sự kiện</span>
                 </h1>
                 <p className="text-lg text-gray-600 max-w-3xl mx-auto">
@@ -132,39 +175,64 @@ const News = () => {
                 </p>
             </section>
 
-            {/* Bộ lọc theo danh mục */}
-            <section className="max-w-4xl mx-auto mb-10 px-4">
+            {/* Search */}
+            <section className="max-w-2xl mx-auto mb-6 px-4">
+                <form onSubmit={handleSearch} className="flex gap-2">
+                    <input
+                        type="text"
+                        value={searchInput}
+                        onChange={(e) => setSearchInput(e.target.value)}
+                        placeholder="Tìm kiếm bài viết..."
+                        className="flex-1 px-2.5 py-2 rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-red-400 text-sm"
+                    />
+                    <button
+                        type="submit"
+                        className="px-5 py-2 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors"
+                    >
+                        Tìm
+                    </button>
+                    {search && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setSearch('');
+                                setSearchInput('');
+                                setPage(1);
+                            }}
+                            className="px-4 py-2 bg-gray-200 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-300 transition-colors"
+                        >
+                            Xóa
+                        </button>
+                    )}
+                </form>
+            </section>
+
+            {/* Bộ lọc */}
+            <section className="max-w-4xl mx-auto mb-8 px-4">
                 <div className="bg-white/90 backdrop-blur-sm p-4 rounded-xl shadow-sm border border-gray-200">
-                    {/* Giao diện cho desktop (md trở lên): các nút bấm */}
-                    <div className="hidden md:flex items-center gap-3 flex-wrap justify-evenly">
+                    <div className="hidden md:flex items-center gap-4 flex-wrap justify-start ml-2">
                         <p className="font-bold text-gray-700">Lọc theo danh mục:</p>
-                        {categories.map((category) => (
+                        {categories.map((cat) => (
                             <FilterButton
-                                key={category}
-                                label={category}
-                                active={activeCategory === category}
-                                onClick={() => setActiveCategory(category)}
+                                key={cat}
+                                label={cat}
+                                active={activeCategory === cat}
+                                onClick={() => handleCategoryChange(cat)}
                             />
                         ))}
                     </div>
-
-                    {/* Giao diện cho mobile (dưới md): dropdown */}
                     <div className="md:hidden">
-                        <label
-                            htmlFor="category-filter"
-                            className="block text-sm font-bold text-gray-700 mb-2 text-center"
-                        >
+                        <label className="block text-sm font-bold text-gray-700 mb-2 text-center">
                             Lọc theo danh mục
                         </label>
                         <select
-                            id="category-filter"
                             value={activeCategory}
-                            onChange={(e) => setActiveCategory(e.target.value)}
-                            className="w-full px-3 py-1.5 text-base border border-gray-300 transition duration-250 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
+                            onChange={(e) => handleCategoryChange(e.target.value)}
+                            className="w-full px-2.5 py-1.5 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
                         >
-                            {categories.map((category) => (
-                                <option key={category} value={category}>
-                                    {category}
+                            {categories.map((cat) => (
+                                <option key={cat} value={cat}>
+                                    {cat}
                                 </option>
                             ))}
                         </select>
@@ -172,17 +240,56 @@ const News = () => {
                 </div>
             </section>
 
-            {/* Danh sách tin tức */}
+            {/* Danh sách */}
             <section className="max-w-7xl mx-auto px-4">
-                {/* Thay grid bằng flex-col để xếp các tin tức theo hàng dọc */}
-                <div className="flex flex-col gap-8">
-                    {filteredNews.length > 0 ? (
-                        filteredNews.map((item) => <NewsCard key={item.id} item={item} />)
-                    ) : (
-                        <p className="text-center text-gray-500 py-10">Không có tin tức nào trong danh mục này.</p>
-                    )}
-                </div>
+                {error ? (
+                    <p className="text-center text-red-500 py-10">{error}</p>
+                ) : (
+                    <div className="flex flex-col gap-5 md:gap-6">
+                        {loading ? (
+                            Array.from({ length: 3 }).map((_, i) => <NewsCardSkeleton key={i} />)
+                        ) : posts.length > 0 ? (
+                            posts.map((item) => <NewsCard key={item.id} item={item} />)
+                        ) : (
+                            <p className="text-center text-gray-500 py-10">Không có tin tức nào.</p>
+                        )}
+                    </div>
+                )}
+
+                {/* Pagination */}
+                {meta && meta.totalPages > 1 && (
+                    <div className="flex justify-center items-center gap-2 mt-10">
+                        <button
+                            onClick={() => setPage((p) => Math.max(1, p - 1))}
+                            disabled={page === 1}
+                            className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-sm font-medium disabled:opacity-40 hover:bg-gray-50 transition-colors"
+                        >
+                            ← Trước
+                        </button>
+                        {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map((p) => (
+                            <button
+                                key={p}
+                                onClick={() => setPage(p)}
+                                className={`w-9 h-9 rounded-lg text-sm font-semibold transition-colors ${
+                                    p === page
+                                        ? 'bg-red-600 text-white shadow-sm'
+                                        : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                                }`}
+                            >
+                                {p}
+                            </button>
+                        ))}
+                        <button
+                            onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
+                            disabled={page === meta.totalPages}
+                            className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-sm font-medium disabled:opacity-40 hover:bg-gray-50 transition-colors"
+                        >
+                            Sau →
+                        </button>
+                    </div>
+                )}
             </section>
+
             <ScrollToTopButton />
         </div>
     );

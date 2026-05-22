@@ -8,22 +8,16 @@ const AdminLayout = ({ children, admin, onLogout }) => {
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 flex">
             {/* Sidebar */}
-            <AdminSidebar 
-                isCollapsed={isCollapsed} 
-                setIsCollapsed={setIsCollapsed} 
-                onLogout={onLogout}
-            />
+            <AdminSidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} onLogout={onLogout} />
 
             {/* Main Content Area */}
             <div className={`flex-1 transition-all duration-300 ${isCollapsed ? 'ml-20' : 'ml-64'}`}>
                 {/* Topbar */}
-                <AdminTopbar admin={admin} onLogout={onLogout}/>
+                <AdminTopbar admin={admin} onLogout={onLogout} />
 
                 {/* Page Content */}
-                <main className="py-6 px-8">
-                    <div className="max-w-7xl mx-auto">
-                        {children}
-                    </div>
+                <main className="py-5 px-8">
+                    <div className="max-w-7xl mx-auto">{children}</div>
                 </main>
             </div>
         </div>

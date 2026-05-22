@@ -326,9 +326,16 @@ const LightboxBottomSheet = ({
                                                 /* Display Normal Mode */
                                                 <>
                                                     <div className="flex items-center justify-between gap-2.5">
-                                                        <span className="font-extrabold text-[15px] text-slate-800 truncate mb-0.5">
-                                                            {comment.user?.fullName}
-                                                        </span>
+                                                        <div className="flex items-center gap-2 min-w-0">
+                                                            <span className="font-extrabold text-[15px] text-slate-800 truncate mb-0.5">
+                                                                {comment.user?.fullName}
+                                                            </span>
+                                                            {comment.user?.role === 'ADMIN' && (
+                                                                <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-black text-white bg-red-600 rounded-full">
+                                                                    Admin
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                         <span className="text-xs text-slate-400 font-bold flex-shrink-0 uppercase tracking-wider">
                                                             {new Date(comment.createdAt).toLocaleDateString('vi-VN')}
                                                         </span>

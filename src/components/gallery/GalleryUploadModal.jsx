@@ -63,7 +63,7 @@ const GalleryUploadModal = ({ isOpen, onClose, onUploadSuccess, addToast }) => {
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
-            <div className="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl animate-scaleIn">
+            <div className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-scaleIn">
                 <div className="py-4 px-6  border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-red-500 to-red-600 text-white">
                     <h3 className="text-xl font-bold flex items-center gap-2">
                         <FaCloudUploadAlt /> Đăng ảnh hoạt động
@@ -76,9 +76,9 @@ const GalleryUploadModal = ({ isOpen, onClose, onUploadSuccess, addToast }) => {
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-5 space-y-4">
+                <form onSubmit={handleSubmit} className="p-5 space-y-3">
                     <div
-                        className={`border-2 border-dashed rounded-xl p-4 transition-all flex flex-col items-center justify-center min-h-[200px] cursor-pointer
+                        className={`border-2 border-dashed rounded-xl p-4 transition-all flex flex-col items-center justify-center min-h-[240px] cursor-pointer
                             ${preview ? 'border-red-200 bg-red-50' : 'border-gray-200 hover:border-red-400 bg-gray-50'}`}
                         onClick={() => document.getElementById('gallery-file-input').click()}
                     >
@@ -113,7 +113,7 @@ const GalleryUploadModal = ({ isOpen, onClose, onUploadSuccess, addToast }) => {
                         </div>
 
                         <div className="flex w-full items-center justify-between">
-                            <div>
+                            <div className="flex-1 mr-3">
                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Danh mục
                                 </label>
@@ -130,13 +130,13 @@ const GalleryUploadModal = ({ isOpen, onClose, onUploadSuccess, addToast }) => {
                                     <option value="Thiếu nhi">Thiếu nhi</option>
                                 </select>
                             </div>
-                            <div>
+                            <div className="flex-2">
                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    Mô tả ngắn
+                                    Mô tả ngắn (không bắt buộc)
                                 </label>
                                 <input
                                     type="text"
-                                    placeholder="Không bắt buộc..."
+                                    placeholder="Nhập mô tả ngắn..."
                                     className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all text-sm"
                                     value={formData.caption}
                                     onChange={(e) => setFormData({ ...formData, caption: e.target.value })}
@@ -145,7 +145,7 @@ const GalleryUploadModal = ({ isOpen, onClose, onUploadSuccess, addToast }) => {
                         </div>
                     </div>
 
-                    <div className="pt-4 flex gap-3">
+                    <div className="pt-3 flex gap-3">
                         <button
                             type="button"
                             onClick={onClose}

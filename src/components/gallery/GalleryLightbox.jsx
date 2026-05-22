@@ -183,7 +183,7 @@ const GalleryLightbox = ({
 
     const captionText =
         selectedImage.caption ||
-        'Hình ảnh ghi lại khoảnh khắc hoạt động vô cùng thú vị của thầy và trò tại Nhật Ngữ Sakae.';
+        'Hình ảnh ghi lại khoảnh khắc hoạt động vô cùng thú vị của thầy cô và trò tại Nhật Ngữ Sakae.';
     const isLongDescription = captionText.length > 100;
 
     return (
@@ -558,9 +558,16 @@ const GalleryLightbox = ({
                                                 /* Display Normal Mode */
                                                 <>
                                                     <div className="flex items-center justify-between gap-3 mb-0.5">
-                                                        <span className="font-extrabold text-[15px] text-slate-800 truncate">
-                                                            {comment.user?.fullName}
-                                                        </span>
+                                                        <div className="flex items-center gap-2 min-w-0">
+                                                            <span className="font-extrabold text-[15px] text-slate-800 truncate">
+                                                                {comment.user?.fullName}
+                                                            </span>
+                                                            {comment.user?.role === 'ADMIN' && (
+                                                                <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-black text-white bg-red-600 rounded-full">
+                                                                    Admin
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                         <span className="text-xs text-slate-400 font-bold flex-shrink-0 uppercase tracking-wider">
                                                             {new Date(comment.createdAt).toLocaleDateString('vi-VN')}
                                                         </span>
@@ -865,9 +872,16 @@ const GalleryLightbox = ({
                                                         className="w-full h-full object-cover"
                                                     />
                                                 </div>
-                                                <span className="font-extrabold text-slate-800 text-[15px] md:text-base dark:text-white truncate">
-                                                    {likedUser.fullName}
-                                                </span>
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <span className="font-extrabold text-slate-800 text-[15px] md:text-base dark:text-white truncate">
+                                                        {likedUser.fullName}
+                                                    </span>
+                                                    {likedUser.role === 'ADMIN' && (
+                                                        <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-black text-white bg-red-600 rounded-full">
+                                                            Admin
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                             <span className="text-red-500 text-sm flex-shrink-0">❤️</span>
                                         </div>
