@@ -464,7 +464,7 @@ const GalleryLightbox = ({
                                         className="flex items-center gap-1 px-3 py-2 text-xs font-extrabold text-white hover:bg-white/15 transition-all cursor-pointer rounded-r-2xl"
                                         title="Xem danh sách người đã thích"
                                     >
-                                        <div className="flex -space-x-0.5 items-center mr-0.5">
+                                        <div className="flex items-center mr-0.5">
                                             {topReactionEmojis.map((emoji, idx) => (
                                                 <span key={idx} className="text-sm relative z-10 drop-shadow-md">
                                                     {emoji}
@@ -788,7 +788,7 @@ const GalleryLightbox = ({
                                     className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-extrabold text-slate-500 hover:text-red-650 hover:bg-red-50/30 transition-all cursor-pointer border-none bg-transparent outline-none rounded-r-full"
                                     title="Xem danh sách người đã thích"
                                 >
-                                    <div className="flex -space-x-1 items-center">
+                                    <div className="flex -space-x-0.5 items-center">
                                         {topReactionEmojis.map((emoji, idx) => (
                                             <span key={idx} className="text-[15px] relative z-10 drop-shadow-sm">
                                                 {emoji}
