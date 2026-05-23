@@ -3,8 +3,6 @@ import {
     Plus,
     Pencil,
     Trash2,
-    Eye,
-    EyeOff,
     X,
     Upload,
     Bold,
@@ -75,14 +73,15 @@ const WysiwygEditor = ({ value, onChange }) => {
     const editorRef = useRef(null);
     const isInternalChange = useRef(false);
 
-    // Normalize content: convert <strong>→<b>, <em>→<i> for consistency
+    // Normalize content: convert <strong>→<b>, <em>→<i> and preserve raw line breaks as <br>
     const normalizeContent = (html) => {
         if (!html) return '';
         return html
             .replace(/<strong>/gi, '<b>')
             .replace(/<\/strong>/gi, '</b>')
             .replace(/<em>/gi, '<i>')
-            .replace(/<\/em>/gi, '</i>');
+            .replace(/<\/em>/gi, '</i>')
+            .replace(/\r\n|\r|\n/g, '<br>');
     };
 
     // Sync value → DOM chỉ khi mount hoặc khi value thay đổi từ bên ngoài
@@ -97,7 +96,8 @@ const WysiwygEditor = ({ value, onChange }) => {
 
     const handleInput = useCallback(() => {
         isInternalChange.current = true;
-        onChange(editorRef.current?.innerHTML ?? '');
+        const content = normalizeContent(editorRef.current?.innerHTML ?? '');
+        onChange(content);
         // Reset flag sau tick
         setTimeout(() => {
             isInternalChange.current = false;
@@ -107,7 +107,8 @@ const WysiwygEditor = ({ value, onChange }) => {
     const handleBlur = useCallback(() => {
         // Ensure content is saved when focus leaves editor
         isInternalChange.current = true;
-        onChange(editorRef.current?.innerHTML ?? '');
+        const content = normalizeContent(editorRef.current?.innerHTML ?? '');
+        onChange(content);
         setTimeout(() => {
             isInternalChange.current = false;
         }, 0);
@@ -347,7 +348,7 @@ const BlogModal = ({ post, onClose, onSaved }) => {
         content: post?.content ?? '',
         category: CATEGORIES.includes(post?.category) ? (post?.category ?? '') : post?.category ? '__custom__' : '',
         customCategory: CATEGORIES.includes(post?.category) ? '' : (post?.category ?? ''),
-        isPublished: post?.isPublished ?? false,
+        isPublished: post?.isPublished ?? true,
         metaTitle: post?.metaTitle ?? '',
         metaDescription: post?.metaDescription ?? '',
     });
@@ -608,28 +609,6 @@ const BlogModal = ({ post, onClose, onSaved }) => {
                         </div>
                     </details>
 
-                    {/* Published toggle */}
-                    <label className="flex items-center gap-3 cursor-pointer select-none">
-                        <div className="relative">
-                            <input
-                                type="checkbox"
-                                name="isPublished"
-                                checked={form.isPublished}
-                                onChange={handleChange}
-                                className="sr-only"
-                            />
-                            <div
-                                className={`w-11 h-6 rounded-full transition-colors ${form.isPublished ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700'}`}
-                            />
-                            <div
-                                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${form.isPublished ? 'translate-x-5' : ''}`}
-                            />
-                        </div>
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                            {form.isPublished ? '✅ Xuất bản ngay' : '📝 Lưu nháp'}
-                        </span>
-                    </label>
-
                     {/* Actions */}
                     <div className="flex gap-3 pt-2">
                         <button
@@ -669,7 +648,6 @@ const AdminBlog = () => {
     const [modal, setModal] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [deleting, setDeleting] = useState(false);
-    const [togglingId, setTogglingId] = useState(null);
 
     const fetchPosts = useCallback(async (p = 1) => {
         setLoading(true);
@@ -702,24 +680,6 @@ const AdminBlog = () => {
             addToastRef.current('Xóa bài viết thất bại.', 'error');
         } finally {
             setDeleting(false);
-        }
-    };
-
-    const handleTogglePublish = async (post) => {
-        setTogglingId(post.id);
-        try {
-            const fd = new FormData();
-            fd.append('isPublished', post.isPublished ? 'false' : 'true');
-            await blogService.update(post.id, fd);
-            addToastRef.current(
-                post.isPublished ? `Đã chuyển "${post.title}" về nháp.` : `Đã xuất bản "${post.title}".`,
-                'success',
-            );
-            fetchPosts(page);
-        } catch {
-            addToastRef.current('Cập nhật trạng thái thất bại.', 'error');
-        } finally {
-            setTogglingId(null);
         }
     };
 
@@ -819,24 +779,6 @@ const AdminBlog = () => {
                                         </td>
                                         <td className="px-5 py-3">
                                             <div className="flex items-center gap-1 justify-end">
-                                                <button
-                                                    onClick={() => handleTogglePublish(post)}
-                                                    disabled={togglingId === post.id}
-                                                    title={post.isPublished ? 'Chuyển về nháp' : 'Xuất bản bài viết'}
-                                                    className={`p-1.5 rounded-lg cursor-pointer transition-colors disabled:opacity-40 ${
-                                                        post.isPublished
-                                                            ? 'text-green-600 bg-green-50 hover:bg-green-100 dark:bg-green-900/20'
-                                                            : 'text-slate-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'
-                                                    }`}
-                                                >
-                                                    {togglingId === post.id ? (
-                                                        <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" />
-                                                    ) : post.isPublished ? (
-                                                        <EyeOff size={16} />
-                                                    ) : (
-                                                        <Eye size={16} />
-                                                    )}
-                                                </button>
                                                 <button
                                                     onClick={() => setModal(post)}
                                                     className="p-1.5 text-slate-400 cursor-pointer hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"

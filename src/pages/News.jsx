@@ -187,7 +187,7 @@ const News = () => {
                     />
                     <button
                         type="submit"
-                        className="px-5 py-2 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors"
+                        className="px-4 py-1.5 cursor-pointer bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors"
                     >
                         Tìm
                     </button>
@@ -247,7 +247,16 @@ const News = () => {
                 ) : (
                     <div className="flex flex-col gap-5 md:gap-6">
                         {loading ? (
-                            Array.from({ length: 3 }).map((_, i) => <NewsCardSkeleton key={i} />)
+                            <>
+                                <div className="text-center py-10">
+                                    <div className="mx-auto mb-4 h-12 w-12 rounded-full border-4 border-red-600 border-t-transparent animate-spin" />
+                                    <p className="text-lg font-semibold text-gray-900">Đang tải bài viết...</p>
+                                    <p className="text-sm text-gray-500">Vui lòng chờ trong giây lát.</p>
+                                </div>
+                                {Array.from({ length: 3 }).map((_, i) => (
+                                    <NewsCardSkeleton key={i} />
+                                ))}
+                            </>
                         ) : posts.length > 0 ? (
                             posts.map((item) => <NewsCard key={item.id} item={item} />)
                         ) : (

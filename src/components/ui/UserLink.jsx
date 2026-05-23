@@ -40,7 +40,7 @@ const UserLink = ({ user, avatarSize = 'w-9 h-9', showName = true, className = '
                 </div>
             )}
             {showName && (
-                <span className="font-extrabold text-slate-800 dark:text-white text-[15px] truncate hover:underline transition-colors">
+                <span className="font-extrabold text-slate-800 dark:text-white text-[15px] truncate hover:underline hover:text-red-500 transition-colors">
                     {user.fullName}
                 </span>
             )}

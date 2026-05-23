@@ -9,9 +9,12 @@ const blogService = {
     getRelated: (slug) => api.get(`/blog/${slug}/related`),
 
     getComments: (id) => api.get(`/blog/${id}/comments`),
+    getLikes: (id) => api.get(`/blog/${id}/likes`),
 
     // Auth required
-    toggleLike: (id) => api.post(`/blog/${id}/like`),
+    toggleLike: (id, data = {}) => api.post(`/blog/${id}/like`, data),
+    updateComment: (id, data) => api.patch(`/blog/comments/${id}`, data),
+    deleteComment: (id) => api.delete(`/blog/comments/${id}`),
 
     createComment: (id, data) => api.post(`/blog/${id}/comments`, data),
 
