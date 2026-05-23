@@ -29,7 +29,9 @@ const UserLink = ({ user, avatarSize = 'w-9 h-9', showName = true, className = '
             className={`flex items-center gap-2.5 min-w-0 cursor-pointer bg-transparent border-none outline-none p-0 ${className}`}
         >
             {avatarSize !== 'w-0 h-0' && (
-                <div className={`${avatarSize} rounded-full overflow-hidden flex-shrink-0 border border-slate-200 bg-slate-50 transition-all`}>
+                <div
+                    className={`${avatarSize} rounded-full overflow-hidden flex-shrink-0 border border-slate-200 bg-slate-50 transition-all`}
+                >
                     <img
                         src={user.avatar || DEFAULT_AVATAR}
                         alt={user.fullName}
@@ -38,7 +40,7 @@ const UserLink = ({ user, avatarSize = 'w-9 h-9', showName = true, className = '
                 </div>
             )}
             {showName && (
-                <span className="font-extrabold text-slate-800 dark:text-white text-sm truncate hover:underline transition-colors">
+                <span className="font-extrabold text-slate-800 dark:text-white text-[15px] truncate hover:underline transition-colors">
                     {user.fullName}
                 </span>
             )}

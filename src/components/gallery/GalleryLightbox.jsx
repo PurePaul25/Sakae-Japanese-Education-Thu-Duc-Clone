@@ -967,7 +967,7 @@ const GalleryLightbox = ({
                                                 className={`px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5 whitespace-nowrap transition-all ${
                                                     activeLikeTab === r.type
                                                         ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900'
-                                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
+                                                        : 'bg-slate-100 cursor-pointer text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
                                                 }`}
                                             >
                                                 <span>{r.emoji}</span>
@@ -1007,7 +1007,7 @@ const GalleryLightbox = ({
                                                                 avatarSize="w-10 h-10"
                                                                 showName={false}
                                                             />
-                                                            <div className="absolute -bottom-1 -right-1 bg-white dark:bg-slate-900 rounded-full border border-slate-100 dark:border-slate-800 flex items-center justify-center text-[10px] w-5 h-5 shadow-sm pointer-events-none">
+                                                            <div className="absolute -bottom-1 -right-1 bg-white dark:bg-slate-900 rounded-full border border-slate-100 dark:border-slate-800 flex items-center justify-center text-[13px] w-5 h-5 shadow-sm pointer-events-none">
                                                                 {getReactionEmoji(likedUser.reaction)}
                                                             </div>
                                                         </div>
@@ -1017,7 +1017,7 @@ const GalleryLightbox = ({
                                                             className="!gap-0 min-w-0"
                                                         >
                                                             {likedUser.role === 'ADMIN' && (
-                                                                <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-black text-white bg-red-600 rounded-full ml-1">
+                                                                <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-black text-white bg-red-600 rounded-full ml-2">
                                                                     Admin
                                                                 </span>
                                                             )}
