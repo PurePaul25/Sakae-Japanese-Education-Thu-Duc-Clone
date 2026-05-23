@@ -85,6 +85,8 @@ const Gallerys = () => {
                 likesCount: item.likesCount || 0,
                 commentsCount: item.commentsCount || 0,
                 isLiked: item.isLiked || false,
+                userReaction: item.userReaction || null,
+                topReactions: item.topReactions || [],
                 createdBy: item.createdBy,
             }));
             setGalleryData(formattedData);
@@ -123,7 +125,7 @@ const Gallerys = () => {
     }, [selectedImage]);
 
     // Likes trigger API with Optimistic UI updates
-    const handleLike = async (postId, e) => {
+    const handleLike = async (postId, e, reactionType = 'LIKE') => {
         if (e) e.stopPropagation();
         if (!user) {
             addToast('Vui lòng đăng nhập để thả tim bài viết!', 'warning');
@@ -135,11 +137,40 @@ const Gallerys = () => {
             setGalleryData((prev) =>
                 prev.map((post) => {
                     if (post.id === postId) {
-                        const nextLiked = !post.isLiked;
+                        const isRemoving = post.isLiked && post.userReaction === reactionType;
+                        const isChanging = post.isLiked && post.userReaction !== reactionType;
+                        const nextLiked = !isRemoving;
+                        const nextLikesCount = isRemoving
+                            ? Math.max(0, post.likesCount - 1)
+                            : !post.isLiked
+                              ? post.likesCount + 1
+                              : post.likesCount;
+
+                        let newTopReactions = post.topReactions ? [...post.topReactions] : [];
+
+                        if (isRemoving) {
+                            if (nextLikesCount === 0) newTopReactions = [];
+                        } else if (isChanging) {
+                            if (nextLikesCount <= 1) {
+                                newTopReactions = [reactionType];
+                            } else {
+                                newTopReactions = [
+                                    reactionType,
+                                    ...newTopReactions.filter((r) => r !== post.userReaction),
+                                ].slice(0, 2);
+                            }
+                        } else if (nextLiked) {
+                            if (!newTopReactions.includes(reactionType)) {
+                                newTopReactions = [reactionType, ...newTopReactions].slice(0, 2);
+                            }
+                        }
+
                         return {
                             ...post,
                             isLiked: nextLiked,
-                            likesCount: nextLiked ? post.likesCount + 1 : Math.max(0, post.likesCount - 1),
+                            userReaction: nextLiked ? reactionType : null,
+                            likesCount: nextLikesCount,
+                            topReactions: newTopReactions,
                         };
                     }
                     return post;
@@ -148,16 +179,45 @@ const Gallerys = () => {
 
             if (selectedImage && selectedImage.id === postId) {
                 setSelectedImage((prev) => {
-                    const nextLiked = !prev.isLiked;
+                    const isRemoving = prev.isLiked && prev.userReaction === reactionType;
+                    const isChanging = prev.isLiked && prev.userReaction !== reactionType;
+                    const nextLiked = !isRemoving;
+                    const nextLikesCount = isRemoving
+                        ? Math.max(0, prev.likesCount - 1)
+                        : !prev.isLiked
+                          ? prev.likesCount + 1
+                          : prev.likesCount;
+
+                    let newTopReactions = prev.topReactions ? [...prev.topReactions] : [];
+
+                    if (isRemoving) {
+                        if (nextLikesCount === 0) newTopReactions = [];
+                    } else if (isChanging) {
+                        if (nextLikesCount <= 1) {
+                            newTopReactions = [reactionType];
+                        } else {
+                            newTopReactions = [
+                                reactionType,
+                                ...newTopReactions.filter((r) => r !== prev.userReaction),
+                            ].slice(0, 2);
+                        }
+                    } else if (nextLiked) {
+                        if (!newTopReactions.includes(reactionType)) {
+                            newTopReactions = [reactionType, ...newTopReactions].slice(0, 2);
+                        }
+                    }
+
                     return {
                         ...prev,
                         isLiked: nextLiked,
-                        likesCount: nextLiked ? prev.likesCount + 1 : Math.max(0, prev.likesCount - 1),
+                        userReaction: nextLiked ? reactionType : null,
+                        likesCount: nextLikesCount,
+                        topReactions: newTopReactions,
                     };
                 });
             }
 
-            await api.post(`/gallery/${postId}/like`);
+            await api.post(`/gallery/${postId}/like`, { reaction: reactionType });
         } catch (error) {
             addToast(error.message || 'Lỗi khi thích bài viết', 'error');
             fetchGallery(); // Revert on failure
@@ -313,6 +373,10 @@ const Gallerys = () => {
         } else {
             document.body.style.overflow = 'unset';
         }
+
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
     }, [selectedImage]);
 
     // Zoom handlers

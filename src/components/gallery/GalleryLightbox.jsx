@@ -9,8 +9,11 @@ import {
     FaEllipsisH,
 } from 'react-icons/fa';
 import LightboxBottomSheet from './LightboxBottomSheet';
+import ReactionPicker from './ReactionPicker';
+import { getReactionEmoji, getReactionLabel, REACTIONS } from './reactionUtils';
 import api from '../../utils/api';
 import { useToast } from '../../contexts/ToastContext';
+import UserLink from '../ui/UserLink';
 
 const GalleryLightbox = ({
     selectedImage,
@@ -56,10 +59,51 @@ const GalleryLightbox = ({
     // Description expand/collapse states
     const [isDescExpanded, setIsDescExpanded] = useState(false);
 
-    // Likes modal states
     const [showLikesModal, setShowLikesModal] = useState(false);
     const [likedUsers, setLikedUsers] = useState([]);
     const [loadingLikes, setLoadingLikes] = useState(false);
+    const [activeLikeTab, setActiveLikeTab] = useState('ALL');
+
+    const [showDesktopPicker, setShowDesktopPicker] = useState(false);
+    const [showMobilePicker, setShowMobilePicker] = useState(false);
+    const pressTimer = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = () => {
+            setShowMobilePicker(false);
+            setShowDesktopPicker(false);
+        };
+        if (showMobilePicker || showDesktopPicker) {
+            document.addEventListener('click', handleClickOutside);
+            document.addEventListener('touchstart', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+            document.removeEventListener('touchstart', handleClickOutside);
+        };
+    }, [showMobilePicker, showDesktopPicker]);
+
+    const handlePressStart = () => {
+        pressTimer.current = setTimeout(() => setShowMobilePicker(true), 800);
+    };
+
+    const handlePressEnd = () => {
+        if (pressTimer.current) {
+            clearTimeout(pressTimer.current);
+            pressTimer.current = null;
+        }
+    };
+
+    const handleSelectReaction = (type) => {
+        setShowDesktopPicker(false);
+        setShowMobilePicker(false);
+        handleLike(selectedImage.id, null, type);
+    };
+
+    const topReactionEmojis =
+        selectedImage?.topReactions && selectedImage.topReactions.length > 0
+            ? selectedImage.topReactions.slice(0, 2).map(getReactionEmoji)
+            : ['🤍'];
 
     const handleOpenLikesModal = async (imageId) => {
         setShowLikesModal(true);
@@ -257,7 +301,7 @@ const GalleryLightbox = ({
 
                 {/* Left/Right Navigation Buttons */}
                 <button
-                    className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-2xl bg-slate-950/30 text-white hover:bg-red-600 hover:border-red-500 transition-all z-[220] border border-white/10 cursor-pointer group backdrop-blur-md"
+                    className="absolute left-4 md:left-8 top-[44%] md:top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-2xl bg-slate-950/30 text-white hover:bg-red-600 hover:border-red-500 transition-all z-[220] border border-white/10 cursor-pointer group backdrop-blur-md"
                     onClick={(e) => {
                         e.stopPropagation();
                         handlePrev();
@@ -266,7 +310,7 @@ const GalleryLightbox = ({
                     <FaChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
                 </button>
                 <button
-                    className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-2xl bg-slate-950/30 text-white hover:bg-red-600 hover:border-red-500 transition-all z-[220] border border-white/10 cursor-pointer group backdrop-blur-md"
+                    className="absolute right-4 md:right-8 top-[44%] md:top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-2xl bg-slate-950/30 text-white hover:bg-red-600 hover:border-red-500 transition-all z-[220] border border-white/10 cursor-pointer group backdrop-blur-md"
                     onClick={(e) => {
                         e.stopPropagation();
                         handleNext();
@@ -277,7 +321,7 @@ const GalleryLightbox = ({
 
                 {/* Central Image Container */}
                 <div
-                    className="w-full h-full flex items-center justify-center p-4 md:p-12 touch-none overflow-hidden"
+                    className="w-full h-full flex items-center justify-center p-4 mb-30 md:mb-0 md:p-12 touch-none overflow-hidden"
                     onMouseDown={onMouseDown}
                     onMouseMove={onMouseMove}
                     onMouseUp={onMouseUp}
@@ -306,7 +350,7 @@ const GalleryLightbox = ({
 
                 {/* Mobile Floating Detail Overlay */}
                 <div
-                    className={`absolute bottom-3 left-3 right-3 bg-slate-950/50 backdrop-blur-xl border border-white/10 rounded-2xl px-3.5 py-3 text-white z-[220] flex flex-col gap-2.5 lg:hidden transition-all duration-300 ${
+                    className={`absolute bottom-3 left-3 right-3 bg-slate-950/50 backdrop-blur-xl border border-white/10 rounded-2xl px-2.5 py-3 text-white z-[220] flex flex-col gap-2.5 lg:hidden transition-all duration-300 ${
                         isDescExpanded ? 'max-h-[60vh] h-auto' : 'max-h-[35vh]'
                     } animate-slideUp`}
                     onClick={(e) => e.stopPropagation()}
@@ -375,30 +419,61 @@ const GalleryLightbox = ({
                         )}
                         <div className="flex items-center gap-3">
                             {/* Mobile Split Like Button */}
-                            <div className="inline-flex items-center rounded-2xl border border-white/15 bg-white/5 overflow-hidden shadow-md">
+                            <div className="inline-flex items-center rounded-2xl border border-white/15 bg-white/5 shadow-md">
                                 {/* Left part: Like / Unlike */}
-                                <button
-                                    onClick={(e) => handleLike(selectedImage.id, e)}
-                                    className={`flex items-center gap-1.5 px-3 py-2 text-xs font-black transition-all cursor-pointer border-r border-white/10 ${
-                                        selectedImage.isLiked
-                                            ? 'bg-red-500/20 text-red-400'
-                                            : 'text-white hover:bg-white/10'
-                                    }`}
-                                >
-                                    <span>{selectedImage.isLiked ? '❤️ Đã thích' : '🤍 Thích'}</span>
-                                </button>
+                                <div className="relative">
+                                    <ReactionPicker
+                                        isOpen={showMobilePicker}
+                                        onSelect={handleSelectReaction}
+                                        className="bottom-[120%] left-0 origin-bottom-left"
+                                    />
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleLike(selectedImage.id, e, selectedImage.userReaction || 'LIKE');
+                                        }}
+                                        onTouchStart={handlePressStart}
+                                        onTouchEnd={handlePressEnd}
+                                        onMouseDown={handlePressStart}
+                                        onMouseUp={handlePressEnd}
+                                        onMouseLeave={handlePressEnd}
+                                        className={`flex items-center gap-1.5 px-3 py-2 text-xs font-black transition-all cursor-pointer ${
+                                            selectedImage.likesCount > 0
+                                                ? 'border-r border-white/10 rounded-l-2xl'
+                                                : 'rounded-2xl'
+                                        } ${
+                                            selectedImage.isLiked
+                                                ? 'bg-red-500/20 text-red-400'
+                                                : 'text-white hover:bg-white/10'
+                                        }`}
+                                    >
+                                        <span>
+                                            {selectedImage.isLiked
+                                                ? `${getReactionEmoji(selectedImage.userReaction)} ${getReactionLabel(selectedImage.userReaction)}`
+                                                : '🤍 Thích'}
+                                        </span>
+                                    </button>
+                                </div>
                                 {/* Right part: Count & Modal trigger */}
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleOpenLikesModal(selectedImage.id);
-                                    }}
-                                    className="flex items-center gap-1 px-3 py-2 text-xs font-extrabold text-white hover:bg-white/15 transition-all cursor-pointer"
-                                    title="Xem danh sách người đã thích"
-                                >
-                                    <span>❤️</span>
-                                    <span>{selectedImage.likesCount}</span>
-                                </button>
+                                {selectedImage.likesCount > 0 && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleOpenLikesModal(selectedImage.id);
+                                        }}
+                                        className="flex items-center gap-1 px-3 py-2 text-xs font-extrabold text-white hover:bg-white/15 transition-all cursor-pointer rounded-r-2xl"
+                                        title="Xem danh sách người đã thích"
+                                    >
+                                        <div className="flex -space-x-1.5 items-center mr-0.5">
+                                            {topReactionEmojis.map((emoji, idx) => (
+                                                <span key={idx} className="text-sm relative z-10 drop-shadow-md">
+                                                    {emoji}
+                                                </span>
+                                            ))}
+                                        </div>
+                                        <span>{selectedImage.likesCount}</span>
+                                    </button>
+                                )}
                             </div>
 
                             <button
@@ -494,16 +569,9 @@ const GalleryLightbox = ({
                         <div className="space-y-3">
                             {comments.map((comment) => (
                                 <div key={comment.id} className="flex gap-2.5 items-start">
-                                    {/* Avatar outside on the left */}
-                                    <div className="w-9 h-9 rounded-full bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0 mt-0.5 shadow-sm">
-                                        <img
-                                            src={
-                                                comment.user?.avatar ||
-                                                'https://res.cloudinary.com/sakae-academy/image/upload/v1715617260/sakae-academy/users/sakae-default-user-avatar.png'
-                                            }
-                                            alt={comment.user?.fullName}
-                                            className="w-full h-full object-cover"
-                                        />
+                                    {/* Avatar outside on the left - clickable */}
+                                    <div className="flex-shrink-0 mt-0.5">
+                                        <UserLink user={comment.user} avatarSize="w-9 h-9" showName={false} />
                                     </div>
 
                                     {/* Bubble comment content and actions row (vertical container) */}
@@ -559,14 +627,18 @@ const GalleryLightbox = ({
                                                 <>
                                                     <div className="flex items-center justify-between gap-3 mb-0.5">
                                                         <div className="flex items-center gap-2 min-w-0">
-                                                            <span className="font-extrabold text-[15px] text-slate-800 truncate">
-                                                                {comment.user?.fullName}
-                                                            </span>
-                                                            {comment.user?.role === 'ADMIN' && (
-                                                                <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-black text-white bg-red-600 rounded-full">
-                                                                    Admin
-                                                                </span>
-                                                            )}
+                                                            <UserLink
+                                                                user={comment.user}
+                                                                showName
+                                                                avatarSize="w-0 h-0"
+                                                                className="!gap-0"
+                                                            >
+                                                                {comment.user?.role === 'ADMIN' && (
+                                                                    <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-black text-white bg-red-600 rounded-full ml-1.5">
+                                                                        Admin
+                                                                    </span>
+                                                                )}
+                                                            </UserLink>
                                                         </div>
                                                         <span className="text-xs text-slate-400 font-bold flex-shrink-0 uppercase tracking-wider">
                                                             {new Date(comment.createdAt).toLocaleDateString('vi-VN')}
@@ -671,31 +743,61 @@ const GalleryLightbox = ({
                 <div className="px-3 py-1.5 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         {/* Segmented Split Button for Likes */}
-                        <div className="inline-flex items-center rounded-full border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow transition-shadow">
+                        <div className="inline-flex items-center rounded-full border border-slate-200 bg-white shadow-sm hover:shadow transition-shadow">
                             {/* Left part: Like / Unlike */}
-                            <button
-                                onClick={(e) => handleLike(selectedImage.id, e)}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold transition-all cursor-pointer border-r border-slate-100 ${
-                                    selectedImage.isLiked
-                                        ? 'text-red-600 hover:text-red-500 bg-red-50/30'
-                                        : 'text-slate-600 hover:text-red-650 hover:bg-slate-100'
-                                }`}
-                                title={selectedImage.isLiked ? 'Bỏ thích' : 'Thích ảnh này'}
+                            <div
+                                className="relative"
+                                onMouseEnter={() => setShowDesktopPicker(true)}
+                                onMouseLeave={() => setShowDesktopPicker(false)}
                             >
-                                <span>{selectedImage.isLiked ? '❤️ Đã thích' : '🤍 Thích'}</span>
-                            </button>
+                                <ReactionPicker
+                                    isOpen={showDesktopPicker}
+                                    onSelect={handleSelectReaction}
+                                    className="bottom-[130%] -left-2 origin-bottom-left"
+                                />
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleLike(selectedImage.id, e, selectedImage.userReaction || 'LIKE');
+                                    }}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold transition-all cursor-pointer ${
+                                        selectedImage.likesCount > 0
+                                            ? 'border-r border-slate-100 rounded-l-full'
+                                            : 'rounded-full'
+                                    } ${
+                                        selectedImage.isLiked
+                                            ? 'text-red-600 hover:text-red-500 bg-red-50/30'
+                                            : 'text-slate-600 hover:text-red-650 hover:bg-slate-100'
+                                    }`}
+                                    title={selectedImage.isLiked ? 'Đổi biểu cảm hoặc Bỏ thích' : 'Thích ảnh này'}
+                                >
+                                    <span>
+                                        {selectedImage.isLiked
+                                            ? `${getReactionEmoji(selectedImage.userReaction)} ${getReactionLabel(selectedImage.userReaction)}`
+                                            : '🤍 Thích'}
+                                    </span>
+                                </button>
+                            </div>
                             {/* Right part: Like Count & Who Liked Modal Trigger */}
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleOpenLikesModal(selectedImage.id);
-                                }}
-                                className="flex items-center gap-1 px-3 py-1.5 text-sm font-extrabold text-slate-500 hover:text-red-650 hover:bg-red-50/30 transition-all cursor-pointer border-none bg-transparent outline-none"
-                                title="Xem danh sách người đã thích"
-                            >
-                                <span>❤️</span>
-                                <span>{selectedImage.likesCount}</span>
-                            </button>
+                            {selectedImage.likesCount > 0 && (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleOpenLikesModal(selectedImage.id);
+                                    }}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-extrabold text-slate-500 hover:text-red-650 hover:bg-red-50/30 transition-all cursor-pointer border-none bg-transparent outline-none rounded-r-full"
+                                    title="Xem danh sách người đã thích"
+                                >
+                                    <div className="flex -space-x-1.5 items-center">
+                                        {topReactionEmojis.map((emoji, idx) => (
+                                            <span key={idx} className="text-[15px] relative z-10 drop-shadow-sm">
+                                                {emoji}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <span>{selectedImage.likesCount}</span>
+                                </button>
+                            )}
                         </div>
                         <span className="text-sm text-slate-500 font-bold">
                             💬 {selectedImage.commentsCount} bình luận
@@ -841,53 +943,91 @@ const GalleryLightbox = ({
                         </div>
 
                         {/* Content list */}
-                        <div className="flex-1 overflow-y-auto py-3 space-y-2 min-h-[350px] scrollbar-thin">
-                            {loadingLikes ? (
-                                <div className="flex flex-col items-center justify-center py-28 h-full">
-                                    <div className="w-10 h-10 border-2 border-slate-200 border-t-red-600 rounded-full animate-spin mb-3"></div>
-                                    <span className="text-sm text-slate-500 font-bold uppercase tracking-wider">
-                                        Đang tải...
-                                    </span>
-                                </div>
-                            ) : likedUsers.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-10 text-center h-full">
-                                    <span className="text-3xl mb-2">🤍</span>
-                                    <p className="text-sm text-slate-400 font-bold">Chưa có ai thích ảnh này.</p>
-                                </div>
-                            ) : (
-                                <div className="space-y-2">
-                                    {likedUsers.map((likedUser) => (
-                                        <div
-                                            key={likedUser.id}
-                                            className="flex items-center justify-between py-1.5 px-1.5 md:px-2 hover:bg-slate-100 dark:hover:bg-slate-800/40 rounded-2xl transition-all"
-                                        >
-                                            <div className="flex items-center gap-2.5 min-w-0">
-                                                <div className="w-10 h-10 rounded-full overflow-hidden border border-slate-100 dark:border-slate-800 bg-slate-50 flex-shrink-0">
-                                                    <img
-                                                        src={
-                                                            likedUser.avatar ||
-                                                            'https://res.cloudinary.com/sakae-academy/image/upload/v1715617260/sakae-academy/users/sakae-default-user-avatar.png'
-                                                        }
-                                                        alt={likedUser.fullName}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                </div>
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    <span className="font-extrabold text-slate-800 text-[15px] md:text-base dark:text-white truncate">
-                                                        {likedUser.fullName}
-                                                    </span>
-                                                    {likedUser.role === 'ADMIN' && (
-                                                        <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-black text-white bg-red-600 rounded-full">
-                                                            Admin
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <span className="text-red-500 text-sm flex-shrink-0">❤️</span>
-                                        </div>
-                                    ))}
+                        <div className="flex-1 flex flex-col min-h-[350px]">
+                            {/* Tabs Filter */}
+                            {!loadingLikes && likedUsers.length > 0 && (
+                                <div className="flex gap-2 overflow-x-auto py-2 px-1 scrollbar-none border-b border-slate-100 dark:border-slate-800 shrink-0">
+                                    <button
+                                        onClick={() => setActiveLikeTab('ALL')}
+                                        className={`px-3 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-all ${
+                                            activeLikeTab === 'ALL'
+                                                ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900'
+                                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
+                                        }`}
+                                    >
+                                        Tất cả {likedUsers.length}
+                                    </button>
+                                    {REACTIONS.map((r) => {
+                                        const count = likedUsers.filter((u) => u.reaction === r.type).length;
+                                        if (count === 0) return null;
+                                        return (
+                                            <button
+                                                key={r.type}
+                                                onClick={() => setActiveLikeTab(r.type)}
+                                                className={`px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5 whitespace-nowrap transition-all ${
+                                                    activeLikeTab === r.type
+                                                        ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900'
+                                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
+                                                }`}
+                                            >
+                                                <span>{r.emoji}</span>
+                                                <span>{count}</span>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             )}
+
+                            <div className="flex-1 overflow-y-auto py-3 space-y-2 scrollbar-thin">
+                                {loadingLikes ? (
+                                    <div className="flex flex-col items-center justify-center py-28 h-full">
+                                        <div className="w-10 h-10 border-2 border-slate-200 border-t-red-600 rounded-full animate-spin mb-3"></div>
+                                        <span className="text-sm text-slate-500 font-bold uppercase tracking-wider">
+                                            Đang tải...
+                                        </span>
+                                    </div>
+                                ) : likedUsers.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center py-10 text-center h-full">
+                                        <span className="text-3xl mb-2">🤍</span>
+                                        <p className="text-sm text-slate-400 font-bold">Chưa có ai thích ảnh này.</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {likedUsers
+                                            .filter((u) => activeLikeTab === 'ALL' || u.reaction === activeLikeTab)
+                                            .map((likedUser) => (
+                                                <div
+                                                    key={likedUser.id}
+                                                    className="flex items-center justify-between py-1.5 px-1.5 md:px-2 hover:bg-slate-100 dark:hover:bg-slate-800/40 rounded-2xl transition-all"
+                                                >
+                                                    <div className="flex items-center gap-2.5 min-w-0">
+                                                        <div className="relative flex-shrink-0">
+                                                            <UserLink
+                                                                user={likedUser}
+                                                                avatarSize="w-10 h-10"
+                                                                showName={false}
+                                                            />
+                                                            <div className="absolute -bottom-1 -right-1 bg-white dark:bg-slate-900 rounded-full border border-slate-100 dark:border-slate-800 flex items-center justify-center text-[10px] w-5 h-5 shadow-sm pointer-events-none">
+                                                                {getReactionEmoji(likedUser.reaction)}
+                                                            </div>
+                                                        </div>
+                                                        <UserLink
+                                                            user={likedUser}
+                                                            avatarSize="w-0 h-0"
+                                                            className="!gap-0 min-w-0"
+                                                        >
+                                                            {likedUser.role === 'ADMIN' && (
+                                                                <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-black text-white bg-red-600 rounded-full ml-1">
+                                                                    Admin
+                                                                </span>
+                                                            )}
+                                                        </UserLink>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

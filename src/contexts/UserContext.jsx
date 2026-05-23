@@ -25,8 +25,6 @@ const getTokenExpirationMs = (token) => {
     return payload.exp * 1000 - Date.now();
 };
 
-const getAuthExpiredMessage = () => 'Phiên đăng nhập của bạn đã hết hạn. Vui lòng đăng nhập lại!';
-
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -61,15 +59,12 @@ export const UserProvider = ({ children }) => {
         }
     }, []);
 
-    const dispatchAuthExpiredEvent = useCallback((message) => {
-        if (typeof window === 'undefined') return;
-        window.__sakaeAuthExpiredDispatched = true;
-        window.dispatchEvent(
-            new CustomEvent('sakae-auth-expired', {
-                detail: { message },
-            }),
-        );
-    }, []);
+    const logout = useCallback(() => {
+        clearAuthExpiryTimer();
+        setUser(null);
+        localStorage.removeItem('sakae_user');
+        localStorage.removeItem('sakae_admin');
+    }, [clearAuthExpiryTimer]);
 
     const scheduleTokenExpiry = useCallback(
         (token) => {
@@ -77,16 +72,18 @@ export const UserProvider = ({ children }) => {
             const expiresInMs = getTokenExpirationMs(token);
             if (expiresInMs === null) return;
 
+            // Nếu token đã hết hạn rồi, logout ngay
             if (expiresInMs <= 0) {
-                dispatchAuthExpiredEvent(getAuthExpiredMessage());
+                logout();
                 return;
             }
 
+            // Schedule logout khi token hết hạn (không dispatch event, để api.js xử lý)
             authExpiredTimerRef.current = setTimeout(() => {
-                dispatchAuthExpiredEvent(getAuthExpiredMessage());
+                logout();
             }, expiresInMs + 1000);
         },
-        [clearAuthExpiryTimer, dispatchAuthExpiredEvent],
+        [clearAuthExpiryTimer, logout],
     );
 
     // Initialize user from localStorage on mount
@@ -127,13 +124,6 @@ export const UserProvider = ({ children }) => {
         },
         [clearAuthExpiryTimer, scheduleTokenExpiry],
     );
-
-    const logout = useCallback(() => {
-        clearAuthExpiryTimer();
-        setUser(null);
-        localStorage.removeItem('sakae_user');
-        localStorage.removeItem('sakae_admin');
-    }, [clearAuthExpiryTimer]);
 
     useEffect(() => {
         const handleAuthExpired = () => {

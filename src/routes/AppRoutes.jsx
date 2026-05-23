@@ -21,6 +21,7 @@ const UserDashboardLazy = lazy(() => import('../pages/user/UserDashboard'));
 const UserProfileLazy = lazy(() => import('../pages/user/UserProfile'));
 const MyCoursesLazy = lazy(() => import('../pages/user/MyCourses'));
 const UserSettingsLazy = lazy(() => import('../pages/user/UserSettings'));
+const PublicProfileLazy = lazy(() => import('../pages/user/PublicProfile'));
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 
 // Component xử lý chuyển hướng từ sessionStorage
@@ -61,6 +62,7 @@ function AppRoutes() {
                 <Route path="/chi-tiet-khoa-hoc/:id" element={<CourseDetailLazy />} />
                 <Route path="/bo-suu-tap" element={<GalleryLazy />} />
                 <Route path="/tim-kiem" element={<SearchResultsLazy />} />
+                <Route path="/nguoi-dung/:id" element={<PublicProfileLazy />} />
                 <Route path="/dang-nhap" element={<AuthLazy />} />
                 <Route path="/dang-ky" element={<AuthLazy />} />
                 <Route path="/dat-lai-mat-khau" element={<AuthLazy />} />

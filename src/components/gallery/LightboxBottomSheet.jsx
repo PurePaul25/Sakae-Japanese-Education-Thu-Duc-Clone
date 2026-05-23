@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FaTimes, FaEllipsisH } from 'react-icons/fa';
 import api from '../../utils/api';
 import { useToast } from '../../contexts/ToastContext';
+import UserLink from '../ui/UserLink';
 
 const LightboxBottomSheet = ({
     isOpen,
@@ -262,16 +263,9 @@ const LightboxBottomSheet = ({
                         <div className="space-y-4">
                             {comments.map((comment) => (
                                 <div key={comment.id} className="flex gap-2.5 items-start relative group/comment">
-                                    {/* Avatar outside on the left */}
-                                    <div className="w-9 h-9 rounded-full bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0 mt-0.5 shadow-sm">
-                                        <img
-                                            src={
-                                                comment.user?.avatar ||
-                                                'https://res.cloudinary.com/sakae-academy/image/upload/v1715617260/sakae-academy/users/sakae-default-user-avatar.png'
-                                            }
-                                            alt={comment.user?.fullName}
-                                            className="w-full h-full object-cover"
-                                        />
+                                    {/* Avatar - clickable, links to profile */}
+                                    <div className="flex-shrink-0 mt-0.5">
+                                        <UserLink user={comment.user} avatarSize="w-9 h-9" showName={false} />
                                     </div>
 
                                     {/* Bubble comment content and actions row (vertical container) */}
@@ -327,14 +321,13 @@ const LightboxBottomSheet = ({
                                                 <>
                                                     <div className="flex items-center justify-between gap-2.5">
                                                         <div className="flex items-center gap-2 min-w-0">
-                                                            <span className="font-extrabold text-[15px] text-slate-800 truncate mb-0.5">
-                                                                {comment.user?.fullName}
-                                                            </span>
-                                                            {comment.user?.role === 'ADMIN' && (
-                                                                <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-black text-white bg-red-600 rounded-full">
-                                                                    Admin
-                                                                </span>
-                                                            )}
+                                                            <UserLink user={comment.user} showName avatarSize="w-0 h-0" className="!gap-0">
+                                                                {comment.user?.role === 'ADMIN' && (
+                                                                    <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-black text-white bg-red-600 rounded-full ml-1.5">
+                                                                        Admin
+                                                                    </span>
+                                                                )}
+                                                            </UserLink>
                                                         </div>
                                                         <span className="text-xs text-slate-400 font-bold flex-shrink-0 uppercase tracking-wider">
                                                             {new Date(comment.createdAt).toLocaleDateString('vi-VN')}

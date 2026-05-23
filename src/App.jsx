@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import './App.css';
 import Footer from './components/layout/Footer';
@@ -11,6 +12,13 @@ function App() {
     const isExamPage = location.pathname.includes('/exam') || location.pathname.includes('/result');
     const isAuthPage = location.pathname.includes('/dang-nhap') || location.pathname.includes('/dang-ky');
     const isAdminPage = location.pathname.includes('/admin');
+
+    useEffect(() => {
+        document.body.style.overflow = 'unset';
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [location.pathname]);
 
     return (
         <div className="flex flex-col min-h-screen">
