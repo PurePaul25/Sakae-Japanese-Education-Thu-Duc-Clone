@@ -459,7 +459,7 @@ const Gallerys = () => {
             link.click();
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
-        } catch (error) {
+        } catch {
             window.open(selectedImage.src, '_blank');
         }
     };

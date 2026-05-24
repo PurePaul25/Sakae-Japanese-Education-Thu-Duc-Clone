@@ -11,8 +11,23 @@ const GalleryUploadModal = ({ isOpen, onClose, onUploadSuccess, addToast }) => {
         category: 'Lớp học',
     });
     const [isUploading, setIsUploading] = useState(false);
+    const [shouldRender, setShouldRender] = useState(isOpen);
+    const [active, setActive] = useState(false);
+    const modalDuration = 300;
 
-    if (!isOpen) return null;
+    // keep mounted during close transition
+    React.useEffect(() => {
+        if (isOpen) {
+            setShouldRender(true);
+            const t = setTimeout(() => setActive(true), 10);
+            return () => clearTimeout(t);
+        }
+        setActive(false);
+        const t = setTimeout(() => setShouldRender(false), modalDuration);
+        return () => clearTimeout(t);
+    }, [isOpen]);
+
+    if (!shouldRender) return null;
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
@@ -62,8 +77,19 @@ const GalleryUploadModal = ({ isOpen, onClose, onUploadSuccess, addToast }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
-            <div className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-scaleIn">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div
+                className={`absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-${modalDuration} ${
+                    active ? 'opacity-100' : 'opacity-0'
+                }`}
+                onClick={onClose}
+            />
+
+            <div
+                className={`bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl transform transition-all duration-${modalDuration} ${
+                    active ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'
+                }`}
+            >
                 <div className="py-4 px-6  border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-red-500 to-red-600 text-white">
                     <h3 className="text-xl font-bold flex items-center gap-2">
                         <FaCloudUploadAlt /> Đăng ảnh hoạt động

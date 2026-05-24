@@ -27,11 +27,16 @@ const NewsDetail = () => {
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [editingContent, setEditingContent] = useState('');
     const [commentToDelete, setCommentToDelete] = useState(null);
+    // eslint-disable-next-line no-unused-vars
     const [isDeletingComment, setIsDeletingComment] = useState(false);
+    const [commentDeleteVisible, setCommentDeleteVisible] = useState(false);
+    const commentDeleteDuration = 300; // ms
     const [likes, setLikes] = useState([]);
     const [loadingLikes, setLoadingLikes] = useState(false);
     const [likedLoading, setLikedLoading] = useState(false);
     const [openLikesModal, setOpenLikesModal] = useState(false);
+    const [showLikesModal, setShowLikesModal] = useState(false);
+    const modalTransitionDuration = 300; // ms
     const [activeMenuId, setActiveMenuId] = useState(null);
     const [isEditingLoading, setIsEditingLoading] = useState(false);
 
@@ -213,16 +218,7 @@ const NewsDetail = () => {
         }
     };
 
-    const handleConfirmDeleteComment = async () => {
-        if (!commentToDelete) return;
-        setIsDeletingComment(true);
-        try {
-            await handleDeleteComment(commentToDelete.id);
-            setCommentToDelete(null);
-        } finally {
-            setIsDeletingComment(false);
-        }
-    };
+    // (Removed unused handleConfirmDeleteComment) Deletion now handled directly from modal buttons
 
     const renderFormattedComment = (text) => {
         if (!text) return '';
@@ -307,13 +303,33 @@ const NewsDetail = () => {
                             <span className="flex items-center gap-1 text-sm text-gray-500">
                                 <Eye size={14} /> {post.views ?? 0} lượt xem
                             </span>
-                            <button
-                                type="button"
-                                onClick={() => setOpenLikesModal(true)}
-                                className="flex items-center gap-1 text-sm text-gray-500 hover:text-red-600 transition-colors"
-                            >
-                                <Heart size={14} /> {totalLikes}
-                            </button>
+                            <div className="relative group inline-block">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setOpenLikesModal(true);
+                                        // allow mount then show for transition
+                                        setTimeout(() => setShowLikesModal(true), 10);
+                                    }}
+                                    className="flex items-center cursor-pointer gap-1 text-sm text-gray-500 hover:text-red-600 transition-colors"
+                                >
+                                    <Heart size={14} /> {totalLikes}
+                                </button>
+
+                                <div
+                                    className="
+            absolute bottom-full left-1/2 -translate-x-1/2 mb-2
+            opacity-0 invisible
+            group-hover:opacity-100 group-hover:visible
+            transition duration-200
+            bg-gray-900 text-white text-xs
+            px-3 py-1.5 rounded-md shadow-lg
+            whitespace-nowrap z-50
+        "
+                                >
+                                    Xem danh sách người thích
+                                </div>
+                            </div>
                         </div>
 
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
@@ -485,6 +501,7 @@ const NewsDetail = () => {
                                                                 onClick={() => {
                                                                     setCommentToDelete(comment);
                                                                     setActiveMenuId(null);
+                                                                    setTimeout(() => setCommentDeleteVisible(true), 10);
                                                                 }}
                                                                 className="w-full cursor-pointer px-3 py-2 text-left text-sm font-semibold text-rose-600 hover:bg-rose-50"
                                                             >
@@ -537,12 +554,31 @@ const NewsDetail = () => {
                 </section>
 
                 {commentToDelete && (
-                    <div className="fixed inset-0 z-[160] flex items-center justify-center p-4">
+                    <div
+                        className="fixed inset-0 z-[160] flex items-center justify-center p-4"
+                        onClick={() => {
+                            if (isDeletingComment) return;
+                            setCommentDeleteVisible(false);
+                            setTimeout(() => setCommentToDelete(null), commentDeleteDuration);
+                        }}
+                    >
                         <div
-                            className="absolute inset-0 bg-slate-950/70"
-                            onClick={() => !isDeletingComment && setCommentToDelete(null)}
+                            className={`absolute inset-0 bg-slate-950/70 transition-opacity duration-${commentDeleteDuration} ${
+                                commentDeleteVisible ? 'opacity-100' : 'opacity-0'
+                            }`}
+                            onClick={() => {
+                                if (isDeletingComment) return;
+                                setCommentDeleteVisible(false);
+                                setTimeout(() => setCommentToDelete(null), commentDeleteDuration);
+                            }}
                         />
-                        <div className="relative w-full max-w-3xl rounded-[1rem] bg-white p-5 shadow-2xl">
+                        <div
+                            className={`relative w-full max-w-3xl rounded-[1rem] bg-white p-5 shadow-2xl transform transition-all duration-${commentDeleteDuration} ${
+                                commentDeleteVisible
+                                    ? 'opacity-100 translate-y-0 scale-100'
+                                    : 'opacity-0 translate-y-3 scale-95'
+                            }`}
+                        >
                             <h3 className="text-2xl font-bold text-slate-900 mb-3">Xác nhận xóa bình luận</h3>
                             <p className="text-[15px] text-slate-600 mb-5">
                                 Bạn có chắc chắn muốn xóa bình luận này? Hành động không thể hoàn tác.
@@ -552,10 +588,13 @@ const NewsDetail = () => {
                                     {renderFormattedComment(commentToDelete.content)}
                                 </p>
                             </div>
-                            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                            <div className="flex flex-row justify-end gap-3 sm:flex-row sm:justify-end">
                                 <button
                                     type="button"
-                                    onClick={() => setCommentToDelete(null)}
+                                    onClick={() => {
+                                        setCommentDeleteVisible(false);
+                                        setTimeout(() => setCommentToDelete(null), commentDeleteDuration);
+                                    }}
                                     disabled={isDeletingComment}
                                     className="rounded-full cursor-pointer bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition disabled:opacity-60 disabled:cursor-not-allowed"
                                 >
@@ -563,7 +602,12 @@ const NewsDetail = () => {
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={handleConfirmDeleteComment}
+                                    onClick={() => {
+                                        // start delete immediately, but keep modal visible until animation end
+                                        handleDeleteComment(commentToDelete.id);
+                                        setCommentDeleteVisible(false);
+                                        setTimeout(() => setCommentToDelete(null), commentDeleteDuration);
+                                    }}
                                     disabled={isDeletingComment}
                                     className="rounded-full cursor-pointer bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500 transition disabled:opacity-60 disabled:cursor-not-allowed"
                                 >
@@ -623,26 +667,41 @@ const NewsDetail = () => {
             <ScrollToTopButton />
 
             {openLikesModal && (
-                <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+                <div
+                    className={`fixed inset-0 z-[150] flex items-center justify-center p-4 transition-opacity duration-${modalTransitionDuration}`}
+                >
                     <div
-                        className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
-                        onClick={() => setOpenLikesModal(false)}
+                        className={`absolute inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity duration-${modalTransitionDuration} ${
+                            showLikesModal ? 'opacity-100' : 'opacity-0'
+                        }`}
+                        onClick={() => {
+                            setShowLikesModal(false);
+                            setTimeout(() => setOpenLikesModal(false), modalTransitionDuration);
+                        }}
                     />
-                    <div className="relative w-full max-w-2xl rounded-[2rem] bg-white shadow-2xl overflow-hidden">
-                        <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
-                            <div className="flex items-center gap-3 text-slate-900 font-bold text-base">
+
+                    <div
+                        className={`relative w-full max-w-3xl rounded-[1rem] bg-white shadow-2xl overflow-hidden transform transition-all duration-${modalTransitionDuration} ${
+                            showLikesModal ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-3 scale-95'
+                        }`}
+                    >
+                        <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-100 px-3 md:px-4 py-3">
+                            <div className="flex items-center gap-3 text-slate-900 font-bold text-lg">
                                 <Users size={18} />
                                 <span>Danh sách người thả tim</span>
                             </div>
                             <button
                                 type="button"
-                                onClick={() => setOpenLikesModal(false)}
-                                className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition"
+                                onClick={() => {
+                                    setShowLikesModal(false);
+                                    setTimeout(() => setOpenLikesModal(false), modalTransitionDuration);
+                                }}
+                                className="inline-flex cursor-pointer items-center justify-center w-9 h-9 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition"
                             >
                                 <X size={18} />
                             </button>
                         </div>
-                        <div className="max-h-[65vh] overflow-y-auto p-5 space-y-3">
+                        <div className="max-h-[65vh] overflow-y-auto p-3 md:p-4 space-y-3">
                             {loadingLikes ? (
                                 <div className="text-center text-slate-500">Đang tải danh sách...</div>
                             ) : likes.length === 0 ? (
@@ -651,15 +710,16 @@ const NewsDetail = () => {
                                 likes.map((like) => (
                                     <div
                                         key={like.id}
-                                        className="flex items-center gap-3 rounded-3xl border border-slate-200 bg-slate-50 p-4"
+                                        className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-2.5 md:p-4"
                                     >
-                                        <UserLink user={like.user} avatarSize="w-11 h-11" showName>
-                                            <span className="text-xs text-slate-500">
-                                                {like.reaction === 'LOVE' ? 'Đã thả tim' : like.reaction}
+                                        <UserLink user={like.user} avatarSize="w-10 h-10 md:w-11 md:h-11" showName>
+                                            <span className="text-[13px] text-slate-500">
+                                                {like.reaction === 'LOVE' ? '❤️' : like.reaction}
                                             </span>
                                         </UserLink>
+
                                         <span className="text-sm text-slate-600">
-                                            {new Date(like.createdAt).toLocaleDateString('vi-VN')} • {like.reaction}
+                                            {new Date(like.createdAt).toLocaleDateString('vi-VN')}
                                         </span>
                                     </div>
                                 ))

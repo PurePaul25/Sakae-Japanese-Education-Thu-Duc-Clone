@@ -52,6 +52,8 @@ const GalleryLightbox = ({
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [editingContent, setEditingContent] = useState('');
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+    const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
+    const confirmModalDuration = 300; // ms
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isEditingLoading, setIsEditingLoading] = useState(false);
@@ -59,10 +61,12 @@ const GalleryLightbox = ({
     // Description expand/collapse states
     const [isDescExpanded, setIsDescExpanded] = useState(false);
 
+    const [openLikesModal, setOpenLikesModal] = useState(false);
     const [showLikesModal, setShowLikesModal] = useState(false);
     const [likedUsers, setLikedUsers] = useState([]);
     const [loadingLikes, setLoadingLikes] = useState(false);
     const [activeLikeTab, setActiveLikeTab] = useState('ALL');
+    const likesModalDuration = 300; // ms
 
     const [showDesktopPicker, setShowDesktopPicker] = useState(false);
     const [showMobilePicker, setShowMobilePicker] = useState(false);
@@ -106,6 +110,8 @@ const GalleryLightbox = ({
             : ['🤍'];
 
     const handleOpenLikesModal = async (imageId) => {
+        // Show modal immediately so users see feedback, then load list async
+        setOpenLikesModal(true);
         setShowLikesModal(true);
         setLoadingLikes(true);
         try {
@@ -115,6 +121,7 @@ const GalleryLightbox = ({
         } catch (error) {
             console.error('Error fetching liked users:', error);
             addToast('Không thể lấy danh sách người thích', 'error');
+            setLikedUsers([]);
         } finally {
             setLoadingLikes(false);
         }
@@ -183,6 +190,15 @@ const GalleryLightbox = ({
         document.addEventListener('click', handleOutsideClick, { capture: true });
         return () => document.removeEventListener('click', handleOutsideClick, { capture: true });
     }, []);
+
+    useEffect(() => {
+        if (confirmDeleteId) {
+            const t = setTimeout(() => setConfirmDeleteVisible(true), 10);
+            return () => clearTimeout(t);
+        } else {
+            setConfirmDeleteVisible(false);
+        }
+    }, [confirmDeleteId]);
 
     // Clipboard copy helper
     const handleCopyComment = (content) => {
@@ -877,14 +893,25 @@ const GalleryLightbox = ({
             {confirmDeleteId && (
                 <div
                     className="fixed inset-0 z-[280] flex items-center justify-center p-4"
-                    onClick={() => setConfirmDeleteId(null)}
+                    onClick={() => {
+                        setConfirmDeleteVisible(false);
+                        setTimeout(() => setConfirmDeleteId(null), confirmModalDuration);
+                    }}
                 >
                     {/* Modal backdrop */}
-                    <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm animate-fadeIn"></div>
+                    <div
+                        className={`absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity duration-${confirmModalDuration} ${
+                            confirmDeleteVisible ? 'opacity-100' : 'opacity-0'
+                        }`}
+                    />
 
                     {/* Modal Card */}
                     <div
-                        className="relative bg-white rounded-2xl p-6 max-w-xl w-full shadow-2xl text-center z-[290] border border-slate-100 animate-scaleIn"
+                        className={`relative bg-white rounded-2xl p-6 max-w-xl w-full shadow-2xl text-center z-[290] border transition-all duration-${confirmModalDuration} transform ${
+                            confirmDeleteVisible
+                                ? 'opacity-100 translate-y-0 scale-100'
+                                : 'opacity-0 translate-y-3 scale-95'
+                        }`}
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="w-16 h-16 rounded-full bg-red-200 text-red-600 flex items-center justify-center mx-auto mb-4">
@@ -896,7 +923,10 @@ const GalleryLightbox = ({
                         </p>
                         <div className="flex gap-3 justify-center">
                             <button
-                                onClick={() => setConfirmDeleteId(null)}
+                                onClick={() => {
+                                    setConfirmDeleteVisible(false);
+                                    setTimeout(() => setConfirmDeleteId(null), confirmModalDuration);
+                                }}
                                 className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold transition-all cursor-pointer flex-1"
                             >
                                 Hủy
@@ -904,7 +934,8 @@ const GalleryLightbox = ({
                             <button
                                 onClick={() => {
                                     handleDeleteComment(confirmDeleteId);
-                                    setConfirmDeleteId(null);
+                                    setConfirmDeleteVisible(false);
+                                    setTimeout(() => setConfirmDeleteId(null), confirmModalDuration);
                                 }}
                                 className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold transition-all cursor-pointer flex-1 shadow-md shadow-red-100"
                             >
@@ -916,17 +947,26 @@ const GalleryLightbox = ({
             )}
 
             {/* Modal hiển thị danh sách người thích (Likes List Modal) */}
-            {showLikesModal && (
+            {openLikesModal && (
                 <div
                     className="fixed inset-0 z-[280] flex items-center justify-center p-4"
-                    onClick={() => setShowLikesModal(false)}
+                    onClick={() => {
+                        setShowLikesModal(false);
+                        setTimeout(() => setOpenLikesModal(false), likesModalDuration);
+                    }}
                 >
                     {/* Backdrop */}
-                    <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm animate-fadeIn"></div>
+                    <div
+                        className={`absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity duration-${likesModalDuration} ${
+                            showLikesModal ? 'opacity-100' : 'opacity-0'
+                        }`}
+                    />
 
                     {/* Modal Card */}
                     <div
-                        className="relative bg-white dark:bg-slate-900 rounded-2xl p-3 md:p-5 max-w-xl w-full shadow-2xl z-[290] border border-slate-100 dark:border-slate-800 animate-scaleIn flex flex-col max-h-[80vh]"
+                        className={`relative bg-white dark:bg-slate-900 rounded-2xl p-3 md:p-5 max-w-xl w-full shadow-2xl z-[290] border border-slate-100 dark:border-slate-800 flex flex-col max-h-[80vh] transform transition-all duration-${likesModalDuration} ${
+                            showLikesModal ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-3 scale-95'
+                        }`}
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}
@@ -935,7 +975,10 @@ const GalleryLightbox = ({
                                 <span>❤️</span> Danh sách người thích
                             </h3>
                             <button
-                                onClick={() => setShowLikesModal(false)}
+                                onClick={() => {
+                                    setShowLikesModal(false);
+                                    setTimeout(() => setOpenLikesModal(false), likesModalDuration);
+                                }}
                                 className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-850 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-all cursor-pointer focus:outline-none border-none outline-none"
                             >
                                 <FaTimes size={14} />

@@ -32,6 +32,8 @@ const LightboxBottomSheet = ({
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [editingContent, setEditingContent] = useState('');
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+    const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
+    const confirmModalDuration = 300; // ms
 
     useEffect(() => {
         if (isOpen) {
@@ -48,6 +50,16 @@ const LightboxBottomSheet = ({
             return () => clearTimeout(timer);
         }
     }, [isOpen]);
+
+    useEffect(() => {
+        if (confirmDeleteId) {
+            // mount then show
+            const t = setTimeout(() => setConfirmDeleteVisible(true), 10);
+            return () => clearTimeout(t);
+        } else {
+            setConfirmDeleteVisible(false);
+        }
+    }, [confirmDeleteId]);
 
     // Dynamic height auto-grow for mobile public comment input
     useEffect(() => {
@@ -321,7 +333,12 @@ const LightboxBottomSheet = ({
                                                 <>
                                                     <div className="flex items-center justify-between gap-2.5">
                                                         <div className="flex items-center gap-2 min-w-0">
-                                                            <UserLink user={comment.user} showName avatarSize="w-0 h-0" className="!gap-0">
+                                                            <UserLink
+                                                                user={comment.user}
+                                                                showName
+                                                                avatarSize="w-0 h-0"
+                                                                className="!gap-0"
+                                                            >
                                                                 {comment.user?.role === 'ADMIN' && (
                                                                     <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-black text-white bg-red-600 rounded-full ml-1.5">
                                                                         Admin
@@ -486,14 +503,25 @@ const LightboxBottomSheet = ({
             {confirmDeleteId && (
                 <div
                     className="fixed inset-0 z-[280] flex items-center justify-center p-4"
-                    onClick={() => setConfirmDeleteId(null)}
+                    onClick={() => {
+                        setConfirmDeleteVisible(false);
+                        setTimeout(() => setConfirmDeleteId(null), confirmModalDuration);
+                    }}
                 >
                     {/* Modal backdrop */}
-                    <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm animate-fadeIn"></div>
+                    <div
+                        className={`absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity duration-${confirmModalDuration} ${
+                            confirmDeleteVisible ? 'opacity-100' : 'opacity-0'
+                        }`}
+                    />
 
                     {/* Modal Card */}
                     <div
-                        className="relative bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl text-center z-[290] border border-slate-100 animate-scaleIn"
+                        className={`relative bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl text-center z-[290] border transition-all duration-${confirmModalDuration} transform ${
+                            confirmDeleteVisible
+                                ? 'opacity-100 translate-y-0 scale-100'
+                                : 'opacity-0 translate-y-3 scale-95'
+                        }`}
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4 text-xl">
@@ -505,7 +533,10 @@ const LightboxBottomSheet = ({
                         </p>
                         <div className="flex gap-3 justify-center">
                             <button
-                                onClick={() => setConfirmDeleteId(null)}
+                                onClick={() => {
+                                    setConfirmDeleteVisible(false);
+                                    setTimeout(() => setConfirmDeleteId(null), confirmModalDuration);
+                                }}
                                 className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-bold transition-all cursor-pointer flex-1"
                             >
                                 Hủy
@@ -513,7 +544,8 @@ const LightboxBottomSheet = ({
                             <button
                                 onClick={() => {
                                     handleDeleteComment(confirmDeleteId);
-                                    setConfirmDeleteId(null);
+                                    setConfirmDeleteVisible(false);
+                                    setTimeout(() => setConfirmDeleteId(null), confirmModalDuration);
                                 }}
                                 className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-bold transition-all cursor-pointer flex-1 shadow-md shadow-red-100"
                             >

@@ -33,10 +33,20 @@ const CATEGORIES = [
     'Khóa học',
 ];
 
-// ─── Delete Confirm Modal ────────────────────────────────────────────────────
-const DeleteConfirmModal = ({ post, onConfirm, onCancel, loading }) => (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-5">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl p-6">
+// ─── Delete Confirm Modal (supports enter/exit transition) ───────────────────
+const DeleteConfirmModal = ({ post, onConfirm, onCancel, loading, show, duration = 300 }) => (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-5">
+        <div
+            className={`absolute inset-0 bg-black/60 transition-opacity duration-${duration} ${
+                show ? 'opacity-100' : 'opacity-0'
+            }`}
+        />
+
+        <div
+            className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl p-6 transform transition-all duration-${duration} ${
+                show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'
+            }`}
+        >
             <div className="flex flex-col items-center text-center gap-4">
                 <div className="w-14 h-14 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                     <AlertTriangle size={28} className="text-red-600" />
@@ -336,7 +346,7 @@ const WysiwygEditor = ({ value, onChange }) => {
 };
 
 // ─── Blog Modal ──────────────────────────────────────────────────────────────
-const BlogModal = ({ post, onClose, onSaved }) => {
+const BlogModal = ({ post, onClose, onSaved, show, duration = 300 }) => {
     const isEdit = !!post;
     const fileRef = useRef(null);
     const { addToast } = useToast();
@@ -459,8 +469,18 @@ const BlogModal = ({ post, onClose, onSaved }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div
+                className={`absolute inset-0 bg-black/50 transition-opacity duration-${duration} ${
+                    show ? 'opacity-100' : 'opacity-0'
+                }`}
+            />
+
+            <div
+                className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto transform transition-all duration-${duration} ${
+                    show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'
+                }`}
+            >
                 {/* Header */}
                 <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
                     <h2 className="text-xl font-bold text-slate-800 dark:text-white">
@@ -646,7 +666,11 @@ const AdminBlog = () => {
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(true);
     const [modal, setModal] = useState(null);
+    const [showBlogModal, setShowBlogModal] = useState(false);
+    const blogModalDuration = 300; // ms
     const [deleteTarget, setDeleteTarget] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const deleteModalDuration = 300; // ms
     const [deleting, setDeleting] = useState(false);
 
     const fetchPosts = useCallback(async (p = 1) => {
@@ -674,7 +698,7 @@ const AdminBlog = () => {
         try {
             await blogService.remove(deleteTarget.id);
             addToastRef.current(`Đã xóa bài "${deleteTarget.title}".`, 'success');
-            setDeleteTarget(null);
+            // Keep modal closing to parent to allow transition, refresh list now
             fetchPosts(page);
         } catch {
             addToastRef.current('Xóa bài viết thất bại.', 'error');
@@ -691,7 +715,10 @@ const AdminBlog = () => {
                     <p className="text-slate-500 mt-1">Tất cả bài viết, thông báo và tin tức sự kiện.</p>
                 </div>
                 <button
-                    onClick={() => setModal('create')}
+                    onClick={() => {
+                        setModal('create');
+                        setTimeout(() => setShowBlogModal(true), 10);
+                    }}
                     className="flex items-center cursor-pointer gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-red-200 dark:shadow-none"
                 >
                     <Plus size={16} /> Tạo bài viết
@@ -780,14 +807,20 @@ const AdminBlog = () => {
                                         <td className="px-5 py-3">
                                             <div className="flex items-center gap-1 justify-end">
                                                 <button
-                                                    onClick={() => setModal(post)}
+                                                    onClick={() => {
+                                                        setModal(post);
+                                                        setTimeout(() => setShowBlogModal(true), 10);
+                                                    }}
                                                     className="p-1.5 text-slate-400 cursor-pointer hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                                                     title="Chỉnh sửa bài viết"
                                                 >
                                                     <Pencil size={16} />
                                                 </button>
                                                 <button
-                                                    onClick={() => setDeleteTarget(post)}
+                                                    onClick={() => {
+                                                        setDeleteTarget(post);
+                                                        setTimeout(() => setShowDeleteModal(true), 10);
+                                                    }}
                                                     title="Xóa bài viết"
                                                     className="p-1.5 text-slate-400 cursor-pointer hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                                 >
@@ -832,20 +865,38 @@ const AdminBlog = () => {
             {modal && (
                 <BlogModal
                     post={modal === 'create' ? null : modal}
-                    onClose={() => setModal(null)}
-                    onSaved={() => {
-                        setModal(null);
-                        fetchPosts(page);
+                    onClose={() => {
+                        setShowBlogModal(false);
+                        setTimeout(() => setModal(null), blogModalDuration);
                     }}
+                    onSaved={() => {
+                        setShowBlogModal(false);
+                        setTimeout(() => {
+                            setModal(null);
+                            fetchPosts(page);
+                        }, blogModalDuration);
+                    }}
+                    show={showBlogModal}
+                    duration={blogModalDuration}
                 />
             )}
 
             {deleteTarget && (
                 <DeleteConfirmModal
                     post={deleteTarget}
-                    onConfirm={handleDeleteConfirm}
-                    onCancel={() => setDeleteTarget(null)}
+                    onConfirm={async () => {
+                        await handleDeleteConfirm();
+                        // close with transition
+                        setShowDeleteModal(false);
+                        setTimeout(() => setDeleteTarget(null), deleteModalDuration);
+                    }}
+                    onCancel={() => {
+                        setShowDeleteModal(false);
+                        setTimeout(() => setDeleteTarget(null), deleteModalDuration);
+                    }}
                     loading={deleting}
+                    show={showDeleteModal}
+                    duration={deleteModalDuration}
                 />
             )}
         </div>

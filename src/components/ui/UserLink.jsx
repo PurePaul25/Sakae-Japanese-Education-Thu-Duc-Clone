@@ -26,7 +26,7 @@ const UserLink = ({ user, avatarSize = 'w-9 h-9', showName = true, className = '
         <button
             type="button"
             onClick={handleClick}
-            className={`flex items-center gap-2.5 min-w-0 cursor-pointer bg-transparent border-none outline-none p-0 ${className}`}
+            className={`flex items-center gap-2 min-w-0 cursor-pointer bg-transparent border-none outline-none p-0 ${className}`}
         >
             {avatarSize !== 'w-0 h-0' && (
                 <div
