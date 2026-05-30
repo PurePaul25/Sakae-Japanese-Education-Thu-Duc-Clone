@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaShieldAlt, FaEnvelope, FaClock, FaRedo } from 'react-icons/fa';
-import { verifyEmailAPI, resendCodeAPI } from '../../utils/authAPI';
+import { verifyEmailAPI, resendCodeAPI, cancelRegistrationAPI } from '../../utils/authAPI';
 import { useToast } from '../../contexts/ToastContext';
 import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
@@ -106,6 +106,21 @@ const VerificationModal = ({ isOpen, email, onClose, onSuccess }) => {
         }
     };
 
+    const handleCancel = async () => {
+        setIsLoading(true);
+        setError('');
+        setSuccessMessage('');
+        try {
+            await cancelRegistrationAPI(email);
+            addToast('Đã hủy phiên đăng ký hiện tại.', 'success');
+            onClose();
+        } catch (err) {
+            setError(err.message || 'Không thể hủy đăng ký');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
@@ -196,6 +211,15 @@ const VerificationModal = ({ isOpen, email, onClose, onSuccess }) => {
                                 }`}
                             >
                                 {isLoading ? 'Đang xác thực...' : 'Xác Nhận'}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={handleCancel}
+                                disabled={isLoading}
+                                className="w-full mt-3 py-2.5 cursor-pointer rounded-xl font-bold text-slate-500 hover:text-red-600 hover:bg-slate-50 transition-all border border-slate-200"
+                            >
+                                {isLoading ? 'Đang hủy...' : 'Hủy & Đổi email khác'}
                             </button>
 
                             <div className="mt-6 text-center">

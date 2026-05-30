@@ -726,7 +726,7 @@ const AdminBlog = () => {
             </div>
 
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto relative">
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-slate-100/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
@@ -833,6 +833,14 @@ const AdminBlog = () => {
                             )}
                         </tbody>
                     </table>
+                    {loading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-slate-950/80">
+                            <div className="flex flex-col items-center gap-3 text-slate-600 dark:text-slate-300">
+                                <div className="w-10 h-10 border-4 border-slate-300 dark:border-slate-700 border-t-red-500 rounded-full animate-spin"></div>
+                                <span>Đang tải danh sách bài viết...</span>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {meta && meta.totalPages > 1 && (

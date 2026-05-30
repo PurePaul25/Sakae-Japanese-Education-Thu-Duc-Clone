@@ -58,6 +58,16 @@ export const resendCodeAPI = async (email) => {
     }
 };
 
+// Cancel Registration API
+export const cancelRegistrationAPI = async (email) => {
+    try {
+        const response = await api.post('/auth/cancel-registration', { email });
+        return normalizeResponse(response);
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Không thể hủy đăng ký');
+    }
+};
+
 // Reset Password API
 export const resetPasswordAPI = async (email, token, password) => {
     try {
