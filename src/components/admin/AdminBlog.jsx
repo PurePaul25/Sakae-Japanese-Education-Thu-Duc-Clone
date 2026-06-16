@@ -477,7 +477,7 @@ const BlogModal = ({ post, onClose, onSaved, show, duration = 300 }) => {
             />
 
             <div
-                className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto transform transition-all duration-${duration} ${
+                className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto transform transition-all duration-${duration} ${
                     show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'
                 }`}
             >

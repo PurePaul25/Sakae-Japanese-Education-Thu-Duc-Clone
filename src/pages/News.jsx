@@ -7,7 +7,7 @@ import blogService from '../services/blogService';
 const FilterButton = ({ label, active, onClick }) => (
     <button
         onClick={onClick}
-        className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 whitespace-nowrap ${
+        className={`px-4 py-2 rounded-full text-sm font-semibold uppercase transition-all duration-300 whitespace-nowrap ${
             active
                 ? 'bg-red-600 text-white shadow-md'
                 : 'bg-white text-gray-700 hover:bg-red-100 hover:text-red-700 cursor-pointer'

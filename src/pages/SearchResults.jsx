@@ -30,9 +30,9 @@ const SearchResults = () => {
             <ScrollToTopButton />
 
             {/* Search Header Section */}
-            <div className="bg-gradient-to-r from-red-500 via-red-400 to-red-600 text-white p-8 shadow-lg">
+            <div className="bg-gradient-to-r from-red-500 via-red-400 to-red-600 text-white p-5 shadow-lg">
                 <div className="max-w-6xl mx-auto">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">Kết quả tìm kiếm</h1>
+                    <h1 className="text-3xl md:text-4xl font-bold mb-3 drop-shadow-lg">Kết quả tìm kiếm</h1>
                     <p className="text-red-100 mb-0.5">
                         Tìm kiếm cho: <span className="font-semibold text-white text-lg">"{query}"</span>
                     </p>

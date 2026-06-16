@@ -91,7 +91,7 @@ const GalleryFilter = ({
                                 setActiveCategory(category);
                                 setCurrentPage(1);
                             }}
-                            className={`px-3.5 py-2 rounded-full text-xs sm:text-sm font-black transition-all duration-300 flex-shrink-0 cursor-pointer ${
+                            className={`px-3.5 py-2 rounded-full text-xs sm:text-sm font-black uppercase transition-all duration-300 flex-shrink-0 cursor-pointer ${
                                 activeCategory === category
                                     ? 'bg-red-600 text-white shadow-md shadow-red-200 -translate-y-0.5'
                                     : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/50 shadow-sm'
