@@ -21,7 +21,7 @@ const UserCustomSelect = ({ value, onChange, options, placeholder }) => {
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full flex items-center justify-between gap-1.5 px-3 py-2 rounded-xl text-xs font-black bg-slate-50 hover:bg-slate-100 transition-all cursor-pointer text-slate-700 outline-none border border-slate-200/40 shadow-sm"
+                className="w-full flex items-center justify-between gap-1.5 px-3 py-2 rounded-xl text-sm font-black bg-slate-50 hover:bg-slate-100 transition-all cursor-pointer text-slate-700 outline-none border border-slate-200/40 shadow-sm"
             >
                 <span className="truncate">{selectedOption.label}</span>
                 <svg

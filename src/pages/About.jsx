@@ -187,6 +187,27 @@ function About() {
                     ))}
                 </div>
             </section>
+
+            {/* 5. Cơ sở vật chất & Môi trường học tập (Sử dụng List với Icon) */}
+            <section className="max-w-6xl mx-auto px-4 mt-10 border-t border-gray-200 pt-10">
+                <h2 className="text-4xl font-extrabold text-gray-800 mb-4 text-center border-b-2 border-red-300 inline-block px-4 pb-1">
+                    Tài liệu, giáo trình
+                </h2>
+
+                <div className="text-gray-700 text-lg leading-relaxed">
+                    <p>Tài liệu do giáo viên của trung tâm tự biên soạn.</p>
+                    <p>Chương trình sơ cấp và trung cấp: Giáo trình chuẩn
+                        quốc tế Minna no Nihongo (bản phát hành chính thức). 
+                    </p>
+                    <p>Lớp Luyện thi: Đào tạo theo Hệ thống Bằng Năng
+                        lực Nhật ngữ Quốc tế, luôn cập nhật thông tin mới nhất.
+                    </p>
+                </div>
+            </section>
+
+            <h3 className="max-w-6xl mx-auto text-2xl font-bold text-red-500 px-4 mt-10">
+                HÃY ĐẾN VỚI CHÚNG TÔI VÀ CẢM NHẬN!
+            </h3>
             <ScrollToTopButton />
         </div>
     );

@@ -14,6 +14,7 @@ import {
     ListOrdered,
     Quote,
     Link2,
+    ImagePlus,
     Minus,
     AlertTriangle,
     Undo,
@@ -81,18 +82,43 @@ const DeleteConfirmModal = ({ post, onConfirm, onCancel, loading, show, duration
 // ─── WYSIWYG Editor ──────────────────────────────────────────────────────────
 const WysiwygEditor = ({ value, onChange }) => {
     const editorRef = useRef(null);
+    const imageInputRef = useRef(null);
     const isInternalChange = useRef(false);
 
     // Normalize content: convert <strong>→<b>, <em>→<i> and preserve raw line breaks as <br>
-    const normalizeContent = (html) => {
+    const normalizeContent = useCallback((html) => {
         if (!html) return '';
         return html
+            .replace(/<meta[^>]*>/gi, '')
+            .replace(/<(\/?)(?:o:|mso|st1|w:|v:)[^>]*>/gi, '<$1>')
+            .replace(/<span\b[^>]*style=["'][^"']*mso-spacerun:[^"']*["'][^>]*>/gi, ' ')
+            .replace(/<font\b[^>]*>/gi, '<span>')
+            .replace(/<\/font>/gi, '</span>')
+            .replace(/&nbsp;/gi, ' ')
             .replace(/<strong>/gi, '<b>')
             .replace(/<\/strong>/gi, '</b>')
             .replace(/<em>/gi, '<i>')
             .replace(/<\/em>/gi, '</i>')
-            .replace(/\r\n|\r|\n/g, '<br>');
-    };
+            .replace(/<a\b([^>]*)>/gi, (match, attrs) => {
+                const hasClass = /class=/.test(attrs);
+                const hasTarget = /target=/.test(attrs);
+                const hasRel = /rel=/.test(attrs);
+                const classAttr = hasClass ? '' : ' class="text-red-600 underline font-semibold break-all"';
+                const targetAttr = hasTarget ? '' : ' target="_blank"';
+                const relAttr = hasRel ? '' : ' rel="noopener noreferrer"';
+                return `<a${attrs}${classAttr}${targetAttr}${relAttr}>`;
+            })
+            .replace(/<img\b([^>]*)>/gi, (match, attrs) => {
+                const hasClass = /class=/.test(attrs);
+                const hasStyle = /style=/.test(attrs);
+                const classAttr = hasClass ? '' : ' class="mx-auto my-4 max-w-full h-auto rounded-xl block"';
+                const styleAttr = hasStyle ? '' : ' style="max-width:100%; width:100%; height:auto; display:block; margin:10px 0; border-radius:10px; object-fit:cover;"';
+                return `<img${attrs}${classAttr}${styleAttr}>`;
+            })
+            .replace(/\r\n|\r|\n/g, '<br>')
+            .replace(/<div><br><\/div>/gi, '<div><br></div>')
+            .replace(/<p><br><\/p>/gi, '<p><br></p>');
+    }, []);
 
     // Sync value → DOM chỉ khi mount hoặc khi value thay đổi từ bên ngoài
     useEffect(() => {
@@ -102,17 +128,97 @@ const WysiwygEditor = ({ value, onChange }) => {
         if (el.innerHTML !== normalized) {
             el.innerHTML = normalized;
         }
-    }, [value]);
+    }, [normalizeContent, value]);
+
+    const normalizeWordContent = useCallback((html) => {
+        if (!html) return '';
+        return html
+            .replace(/<meta[^>]*>/gi, '')
+            .replace(/<(\/?)(?:o:|mso|st1|w:|v:)[^>]*>/gi, '<$1>')
+            .replace(/<span\b[^>]*style=["'][^"']*mso-spacerun:[^"']*["'][^>]*>/gi, ' ')
+            .replace(/<font\b[^>]*>/gi, '<span>')
+            .replace(/<\/font>/gi, '</span>')
+            .replace(/&nbsp;/gi, ' ')
+            .replace(/\r\n|\r|\n/g, ' ');
+    }, []);
+
+    const insertImageHtml = useCallback((src, alt = 'Hình ảnh') => {
+        const html = `<img src="${src}" alt="${alt}" class="mx-auto my-4 max-w-full h-auto rounded-xl block" style="max-width:100%; width:100%; height:auto; display:block; margin:10px 0; border-radius:10px; object-fit:cover;" />`;
+        document.execCommand('insertHTML', false, html);
+    }, []);
 
     const handleInput = useCallback(() => {
         isInternalChange.current = true;
         const content = normalizeContent(editorRef.current?.innerHTML ?? '');
         onChange(content);
-        // Reset flag sau tick
         setTimeout(() => {
             isInternalChange.current = false;
         }, 0);
-    }, [onChange]);
+    }, [normalizeContent, onChange]);
+
+    const handleImageSelect = useCallback(
+        (e) => {
+            const files = Array.from(e.target.files || []);
+            if (!files.length) return;
+            files.forEach((file) => {
+                if (!file.type.startsWith('image/')) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    insertImageHtml(reader.result, file.name);
+                    handleInput();
+                };
+                reader.readAsDataURL(file);
+            });
+            e.target.value = '';
+        },
+        [handleInput, insertImageHtml],
+    );
+
+    const handlePaste = useCallback(
+        (e) => {
+            const items = Array.from(e.clipboardData?.items || []);
+            const imageItem = items.find((item) => item.type.startsWith('image/'));
+
+            if (imageItem) {
+                e.preventDefault();
+                const file = imageItem.getAsFile();
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        insertImageHtml(reader.result, file.name);
+                        handleInput();
+                    };
+                    reader.readAsDataURL(file);
+                }
+                return;
+            }
+
+            const pastedHtml = e.clipboardData?.getData('text/html');
+            const pastedText = e.clipboardData?.getData('text/plain');
+
+            if (pastedHtml) {
+                e.preventDefault();
+                const cleanedHtml = normalizeWordContent(pastedHtml);
+                document.execCommand('insertHTML', false, cleanedHtml || pastedText || '');
+                handleInput();
+                return;
+            }
+
+            if (pastedText) {
+                e.preventDefault();
+                const trimmed = pastedText.trim();
+                const looksLikeImageUrl = /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(trimmed);
+                if (looksLikeImageUrl) {
+                    insertImageHtml(trimmed, 'Hình ảnh');
+                    handleInput();
+                    return;
+                }
+                document.execCommand('insertText', false, pastedText);
+                handleInput();
+            }
+        },
+        [handleInput, insertImageHtml, normalizeWordContent],
+    );
 
     const handleBlur = useCallback(() => {
         // Ensure content is saved when focus leaves editor
@@ -122,12 +228,30 @@ const WysiwygEditor = ({ value, onChange }) => {
         setTimeout(() => {
             isInternalChange.current = false;
         }, 0);
-    }, [onChange]);
+    }, [normalizeContent, onChange]);
 
     const exec = useCallback(
         (command, val = null) => {
-            editorRef.current?.focus();
+            const el = editorRef.current;
+            if (!el) return;
+            el.focus();
+            const selection = window.getSelection();
+            const hasSelection = selection && selection.toString().trim().length > 0;
+
+            if (command === 'foreColor' && val) {
+                document.execCommand('styleWithCSS', false, true);
+            }
+
             document.execCommand(command, false, val);
+
+            if (!hasSelection) {
+                const range = document.createRange();
+                range.selectNodeContents(el);
+                range.collapse(false);
+                selection?.removeAllRanges();
+                selection?.addRange(range);
+            }
+
             handleInput();
         },
         [handleInput],
@@ -206,6 +330,11 @@ const WysiwygEditor = ({ value, onChange }) => {
         { icon: <Quote size={14} />, title: 'Trích dẫn', cmd: 'formatBlock', val: 'blockquote' },
         null,
         { icon: <Link2 size={14} />, title: 'Chèn link (Ctrl+K)', action: insertLink },
+        {
+            icon: <ImagePlus size={14} />,
+            title: 'Chèn ảnh từ máy',
+            action: () => imageInputRef.current?.click(),
+        },
         { icon: <Minus size={14} />, title: 'Đường kẻ ngang', cmd: 'insertHorizontalRule' },
     ];
 
@@ -310,6 +439,14 @@ const WysiwygEditor = ({ value, onChange }) => {
                 <span className="ml-auto text-sm text-slate-500 pr-1 hidden lg:block">Soạn thảo văn bản</span>
             </div>
 
+            <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageSelect}
+            />
+
             {/* Editable area */}
             <div
                 ref={editorRef}
@@ -318,7 +455,8 @@ const WysiwygEditor = ({ value, onChange }) => {
                 onInput={handleInput}
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
-                className="min-h-[220px] max-h-[400px] overflow-y-auto px-2.5 py-2 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-[15px] focus:outline-none
+                onPaste={handlePaste}
+                className="min-h-[220px] max-h-[400px] overflow-y-auto px-2.5 py-2 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-[15px] focus:outline-none whitespace-pre-wrap break-words leading-7
                     prose prose-sm max-w-none
                     prose-headings:font-bold prose-headings:text-slate-800 dark:prose-headings:text-white
                     prose-h2:text-xl prose-h3:text-lg
@@ -329,8 +467,7 @@ const WysiwygEditor = ({ value, onChange }) => {
                     [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mt-2 [&_h3]:mb-1
                     [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5
                     [&_blockquote]:border-l-4 [&_blockquote]:border-red-400 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-slate-500
-                    [&_a]:text-red-600 [&_a]:underline
-                    [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_u]:underline"
+                    [&_a]:break-all"
                 data-placeholder="Bắt đầu nhập nội dung bài viết..."
             />
 

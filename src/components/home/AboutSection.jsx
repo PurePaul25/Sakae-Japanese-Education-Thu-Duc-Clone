@@ -4,7 +4,7 @@ import { ASSETS } from '../../constants/assets';
 export default function AboutSection() {
     return (
         <section className="py-16 bg-gray-100">
-            <div className="max-w-7xl mx-auto px-8 grid md:grid-cols-2 gap-8 items-center">
+            <div className="max-w-7xl mx-auto px-8 grid md:grid-cols-2 gap-8 md:gap-10 items-center">
                 {/* Ảnh */}
                 <div>
                     <img src={ASSETS.BANNERS.ABOUT} alt="About Sakae" className="rounded-2xl w-145 border-1 border-gray-300" />

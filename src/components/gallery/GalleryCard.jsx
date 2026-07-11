@@ -1,41 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
-import ReactionPicker from './ReactionPicker';
+import React from 'react';
 import { getReactionEmoji } from './reactionUtils';
 
 const GalleryCard = ({ image, handleLike, setSelectedImage }) => {
-    const [showPicker, setShowPicker] = useState(false);
-    const pressTimer = useRef(null);
-
-    useEffect(() => {
-        const handleClickOutside = () => setShowPicker(false);
-        if (showPicker) {
-            document.addEventListener('click', handleClickOutside);
-            document.addEventListener('touchstart', handleClickOutside);
-        }
-        return () => {
-            document.removeEventListener('click', handleClickOutside);
-            document.removeEventListener('touchstart', handleClickOutside);
-        };
-    }, [showPicker]);
-
-    const handlePressStart = () => {
-        pressTimer.current = setTimeout(() => {
-            setShowPicker(true);
-        }, 800);
-    };
-
-    const handlePressEnd = () => {
-        if (pressTimer.current) {
-            clearTimeout(pressTimer.current);
-            pressTimer.current = null;
-        }
-    };
-
-    const handleSelectReaction = (type) => {
-        setShowPicker(false);
-        handleLike(image.id, null, type);
-    };
-
     const topReactionEmojis =
         image.topReactions && image.topReactions.length > 0
             ? image.topReactions.slice(0, 2).map(getReactionEmoji)
@@ -72,43 +38,30 @@ const GalleryCard = ({ image, handleLike, setSelectedImage }) => {
                 </h3>
                 <div className="flex items-center justify-between border-t border-white/10 pt-1.5 md:pt-3 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500 delay-75">
                     <div className="flex items-center gap-3">
-                        <div
-                            className="relative"
-                            onMouseEnter={() => setShowPicker(true)}
-                            onMouseLeave={() => setShowPicker(false)}
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleLike(image.id, e, image.userReaction || 'LIKE');
+                            }}
+                            className="flex items-center gap-1 text-white hover:text-red-500 transition-colors focus:outline-none cursor-pointer"
                         >
-                            <ReactionPicker isOpen={showPicker} onSelect={handleSelectReaction} />
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    // Default to LIKE if no reaction, or toggle current reaction
-                                    handleLike(image.id, e, image.userReaction || 'LIKE');
-                                }}
-                                onTouchStart={handlePressStart}
-                                onTouchEnd={handlePressEnd}
-                                onMouseDown={handlePressStart}
-                                onMouseUp={handlePressEnd}
-                                onMouseLeave={handlePressEnd}
-                                className="flex items-center gap-1 text-white hover:text-red-500 transition-colors focus:outline-none cursor-pointer"
-                            >
-                                <div className="flex -space-x-1.5 items-center">
-                                    {image.likesCount > 0 ? (
-                                        topReactionEmojis.map((emoji, idx) => (
-                                            <span key={idx} className="text-base relative drop-shadow-md z-10">
-                                                {emoji}
-                                            </span>
-                                        ))
-                                    ) : (
-                                        <span className="text-base relative drop-shadow-md z-10">🤍</span>
-                                    )}
-                                </div>
-                                {image.likesCount > 0 && (
-                                    <span className={`text-xs font-black ${image.isLiked ? 'text-red-500' : ''}`}>
-                                        {image.likesCount}
-                                    </span>
+                            <div className="flex -space-x-1.5 items-center">
+                                {image.likesCount > 0 ? (
+                                    topReactionEmojis.map((emoji, idx) => (
+                                        <span key={idx} className="text-base relative drop-shadow-md z-10">
+                                            {emoji}
+                                        </span>
+                                    ))
+                                ) : (
+                                    <span className="text-base relative drop-shadow-md z-10">🤍</span>
                                 )}
-                            </button>
-                        </div>
+                            </div>
+                            {image.likesCount > 0 && (
+                                <span className={`text-xs font-black ${image.isLiked ? 'text-red-500' : ''}`}>
+                                    {image.likesCount}
+                                </span>
+                            )}
+                        </button>
                         <div className="flex items-center gap-1 text-white">
                             <span className="text-base">💬</span>
                             <span className="text-xs font-black">{image.commentsCount}</span>

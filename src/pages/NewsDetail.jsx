@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Eye, Heart, MessageCircle, Copy, Edit3, Trash2, MoreHorizontal, Users, X } from 'lucide-react';
+import { Eye, Heart, MessageCircle, Copy, Edit3, Trash2, MoreHorizontal, Users, X, LoaderCircle } from 'lucide-react';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
 import blogService from '../services/blogService';
 import { useUser } from '../contexts/UserContext';
@@ -39,6 +39,8 @@ const NewsDetail = () => {
     const modalTransitionDuration = 300; // ms
     const [activeMenuId, setActiveMenuId] = useState(null);
     const [isEditingLoading, setIsEditingLoading] = useState(false);
+    // eslint-disable-next-line no-unused-vars
+    const [isTogglingLike, setIsTogglingLike] = useState(false);
 
     useEffect(() => {
         if (!slug) return;
@@ -128,6 +130,7 @@ const NewsDetail = () => {
 
         const wasLiked = hasLiked;
         setLikedLoading(true);
+        setIsTogglingLike(true);
         try {
             await blogService.toggleLike(post.id, { reaction: 'LOVE' });
             const likesData = await fetchLikes();
@@ -142,6 +145,7 @@ const NewsDetail = () => {
             addToast(error.message || 'Lỗi khi thả tim bài viết.', 'error');
         } finally {
             setLikedLoading(false);
+            setIsTogglingLike(false);
         }
     };
 
@@ -245,6 +249,34 @@ const NewsDetail = () => {
         });
     };
 
+    const normalizeBlogContent = (html) => {
+        if (!html) return '';
+        return html
+            .replace(/<meta[^>]*>/gi, '')
+            .replace(/<(\/?)(?:o:|mso|st1|w:|v:)[^>]*>/gi, '<$1>')
+            .replace(/<span\b[^>]*style=["'][^"']*mso-spacerun:[^"']*["'][^>]*>/gi, ' ')
+            .replace(/<font\b[^>]*>/gi, '<span>')
+            .replace(/<\/font>/gi, '</span>')
+            .replace(/&nbsp;/gi, ' ')
+            .replace(/<a\b([^>]*)>/gi, (match, attrs) => {
+                const hasClass = /class=/.test(attrs);
+                const hasTarget = /target=/.test(attrs);
+                const hasRel = /rel=/.test(attrs);
+                const classAttr = hasClass ? '' : ' class="text-red-600 underline font-semibold break-all"';
+                const targetAttr = hasTarget ? '' : ' target="_blank"';
+                const relAttr = hasRel ? '' : ' rel="noopener noreferrer"';
+                return `<a${attrs}${classAttr}${targetAttr}${relAttr}>`;
+            })
+            .replace(/<img\b([^>]*)>/gi, (match, attrs) => {
+                const hasClass = /class=/.test(attrs);
+                const hasStyle = /style=/.test(attrs);
+                const classAttr = hasClass ? '' : ' class="mx-auto my-4 max-w-full h-auto rounded-xl block"';
+                const styleAttr = hasStyle ? '' : ' style="max-width:100%; width:100%; height:auto; display:block; margin:10px 0; border-radius:10px; object-fit:cover;"';
+                return `<img${attrs}${classAttr}${styleAttr}>`;
+            })
+            .replace(/\r\n|\r|\n/g, '<br>');
+    };
+
     const formattedDate = post
         ? new Date(post.createdAt).toLocaleDateString('vi-VN', {
               day: '2-digit',
@@ -336,7 +368,7 @@ const NewsDetail = () => {
                             <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">
                                 {post.title}
                             </h1>
-                            <div className="flex flex-wrap items-center gap-3">
+                            <div className="flex flex-col items-center gap-3 w-36">
                                 <button
                                     type="button"
                                     disabled={likedLoading}
@@ -347,8 +379,12 @@ const NewsDetail = () => {
                                             : 'bg-white text-red-600 border border-red-200 hover:bg-red-50'
                                     } ${likedLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                                 >
-                                    <Heart size={16} className={hasLiked ? 'text-white' : 'text-red-600'} />
-                                    {hasLiked ? 'Đã thả tim' : 'Thả tim'}
+                                    {likedLoading ? (
+                                        <LoaderCircle size={16} className="animate-spin" />
+                                    ) : (
+                                        <Heart size={16} className={hasLiked ? 'text-white' : 'text-red-600'} />
+                                    )}
+                                    {likedLoading ? 'Đang thả tim...' : hasLiked ? 'Đã thả tim' : 'Thả tim'}
                                 </button>
                                 <span className="text-sm text-slate-500">{totalLikes} lượt thả tim</span>
                             </div>
@@ -374,8 +410,9 @@ const NewsDetail = () => {
 
                         {/* Content — backend đã sanitize HTML */}
                         <div
-                            className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-a:text-red-600 prose-img:rounded-xl"
-                            dangerouslySetInnerHTML={{ __html: post.content }}
+                            className="prose prose-lg max-w-none break-words overflow-hidden prose-headings:text-gray-900 prose-a:text-red-600 prose-img:rounded-xl prose-p:whitespace-pre-wrap prose-p:leading-7 prose-li:whitespace-pre-wrap prose-li:leading-7 prose-a:break-all prose-a:font-semibold prose-a:underline [&_p]:whitespace-pre-wrap [&_p]:leading-7 [&_li]:whitespace-pre-wrap [&_li]:leading-7 [&_a]:break-all [&_a]:text-red-600 [&_a]:font-semibold [&_a]:underline"
+                            style={{ overflowWrap: 'anywhere' }}
+                            dangerouslySetInnerHTML={{ __html: normalizeBlogContent(post.content) }}
                         />
                     </div>
                 </article>
@@ -657,7 +694,7 @@ const NewsDetail = () => {
                 <div className="mt-10 text-center">
                     <Link
                         to="/tin-tuc"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all"
                     >
                         ← Quay lại tin tức
                     </Link>

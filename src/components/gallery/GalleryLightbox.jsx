@@ -9,7 +9,6 @@ import {
     FaEllipsisH,
 } from 'react-icons/fa';
 import LightboxBottomSheet from './LightboxBottomSheet';
-import ReactionPicker from './ReactionPicker';
 import { getReactionEmoji, getReactionLabel, REACTIONS } from './reactionUtils';
 import api from '../../utils/api';
 import { useToast } from '../../contexts/ToastContext';
@@ -67,42 +66,6 @@ const GalleryLightbox = ({
     const [loadingLikes, setLoadingLikes] = useState(false);
     const [activeLikeTab, setActiveLikeTab] = useState('ALL');
     const likesModalDuration = 300; // ms
-
-    const [showDesktopPicker, setShowDesktopPicker] = useState(false);
-    const [showMobilePicker, setShowMobilePicker] = useState(false);
-    const pressTimer = useRef(null);
-
-    useEffect(() => {
-        const handleClickOutside = () => {
-            setShowMobilePicker(false);
-            setShowDesktopPicker(false);
-        };
-        if (showMobilePicker || showDesktopPicker) {
-            document.addEventListener('click', handleClickOutside);
-            document.addEventListener('touchstart', handleClickOutside);
-        }
-        return () => {
-            document.removeEventListener('click', handleClickOutside);
-            document.removeEventListener('touchstart', handleClickOutside);
-        };
-    }, [showMobilePicker, showDesktopPicker]);
-
-    const handlePressStart = () => {
-        pressTimer.current = setTimeout(() => setShowMobilePicker(true), 800);
-    };
-
-    const handlePressEnd = () => {
-        if (pressTimer.current) {
-            clearTimeout(pressTimer.current);
-            pressTimer.current = null;
-        }
-    };
-
-    const handleSelectReaction = (type) => {
-        setShowDesktopPicker(false);
-        setShowMobilePicker(false);
-        handleLike(selectedImage.id, null, type);
-    };
 
     const topReactionEmojis =
         selectedImage?.topReactions && selectedImage.topReactions.length > 0
@@ -437,39 +400,27 @@ const GalleryLightbox = ({
                             {/* Mobile Split Like Button */}
                             <div className="inline-flex items-center rounded-2xl border border-white/15 bg-white/5 shadow-md">
                                 {/* Left part: Like / Unlike */}
-                                <div className="relative">
-                                    <ReactionPicker
-                                        isOpen={showMobilePicker}
-                                        onSelect={handleSelectReaction}
-                                        className="bottom-[120%] left-0 origin-bottom-left"
-                                    />
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleLike(selectedImage.id, e, selectedImage.userReaction || 'LIKE');
-                                        }}
-                                        onTouchStart={handlePressStart}
-                                        onTouchEnd={handlePressEnd}
-                                        onMouseDown={handlePressStart}
-                                        onMouseUp={handlePressEnd}
-                                        onMouseLeave={handlePressEnd}
-                                        className={`flex items-center gap-1.5 px-3 py-2 text-xs font-black transition-all cursor-pointer ${
-                                            selectedImage.likesCount > 0
-                                                ? 'border-r border-white/10 rounded-l-2xl'
-                                                : 'rounded-2xl'
-                                        } ${
-                                            selectedImage.isLiked
-                                                ? 'bg-red-500/20 text-red-400'
-                                                : 'text-white hover:bg-white/10'
-                                        }`}
-                                    >
-                                        <span>
-                                            {selectedImage.isLiked
-                                                ? `${getReactionEmoji(selectedImage.userReaction)} ${getReactionLabel(selectedImage.userReaction)}`
-                                                : '🤍 Thích'}
-                                        </span>
-                                    </button>
-                                </div>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleLike(selectedImage.id, e, selectedImage.userReaction || 'LIKE');
+                                    }}
+                                    className={`flex items-center gap-1.5 px-3 py-2 text-xs font-black transition-all cursor-pointer ${
+                                        selectedImage.likesCount > 0
+                                            ? 'border-r border-white/10 rounded-l-2xl'
+                                            : 'rounded-2xl'
+                                    } ${
+                                        selectedImage.isLiked
+                                            ? 'bg-red-500/20 text-red-400'
+                                            : 'text-white hover:bg-white/10'
+                                    }`}
+                                >
+                                    <span>
+                                        {selectedImage.isLiked
+                                            ? `${getReactionEmoji(selectedImage.userReaction)} ${getReactionLabel(selectedImage.userReaction)}`
+                                            : '🤍 Thích'}
+                                    </span>
+                                </button>
                                 {/* Right part: Count & Modal trigger */}
                                 {selectedImage.likesCount > 0 && (
                                     <button
@@ -761,39 +712,28 @@ const GalleryLightbox = ({
                         {/* Segmented Split Button for Likes */}
                         <div className="inline-flex items-center rounded-full border border-slate-200 bg-white shadow-sm hover:shadow transition-shadow">
                             {/* Left part: Like / Unlike */}
-                            <div
-                                className="relative"
-                                onMouseEnter={() => setShowDesktopPicker(true)}
-                                onMouseLeave={() => setShowDesktopPicker(false)}
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleLike(selectedImage.id, e, selectedImage.userReaction || 'LIKE');
+                                }}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold transition-all cursor-pointer ${
+                                    selectedImage.likesCount > 0
+                                        ? 'border-r border-slate-100 rounded-l-full'
+                                        : 'rounded-full'
+                                } ${
+                                    selectedImage.isLiked
+                                        ? 'text-red-600 hover:text-red-500 bg-red-50/30'
+                                        : 'text-slate-600 hover:text-red-650 hover:bg-slate-100'
+                                }`}
+                                title={selectedImage.isLiked ? 'Bỏ thích ảnh này' : 'Thích ảnh này'}
                             >
-                                <ReactionPicker
-                                    isOpen={showDesktopPicker}
-                                    onSelect={handleSelectReaction}
-                                    className="bottom-[130%] -left-2 origin-bottom-left"
-                                />
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleLike(selectedImage.id, e, selectedImage.userReaction || 'LIKE');
-                                    }}
-                                    className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold transition-all cursor-pointer ${
-                                        selectedImage.likesCount > 0
-                                            ? 'border-r border-slate-100 rounded-l-full'
-                                            : 'rounded-full'
-                                    } ${
-                                        selectedImage.isLiked
-                                            ? 'text-red-600 hover:text-red-500 bg-red-50/30'
-                                            : 'text-slate-600 hover:text-red-650 hover:bg-slate-100'
-                                    }`}
-                                    title={selectedImage.isLiked ? 'Đổi biểu cảm hoặc Bỏ thích' : 'Thích ảnh này'}
-                                >
-                                    <span>
-                                        {selectedImage.isLiked
-                                            ? `${getReactionEmoji(selectedImage.userReaction)} ${getReactionLabel(selectedImage.userReaction)}`
-                                            : '🤍 Thích'}
-                                    </span>
-                                </button>
-                            </div>
+                                <span>
+                                    {selectedImage.isLiked
+                                        ? `${getReactionEmoji(selectedImage.userReaction)} ${getReactionLabel(selectedImage.userReaction)}`
+                                        : '🤍 Thích'}
+                                </span>
+                            </button>
                             {/* Right part: Like Count & Who Liked Modal Trigger */}
                             {selectedImage.likesCount > 0 && (
                                 <button
