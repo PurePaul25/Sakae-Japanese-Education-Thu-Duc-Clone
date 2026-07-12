@@ -98,7 +98,7 @@ const PublicProfile = () => {
                                     className="w-26 h-26 rounded-2xl border-2 border-white object-cover shadow-xl relative z-10 bg-white"
                                 />
                             </motion.div>
-                            <div className="pb-4 md:pb-8 text-white">
+                            <div className="pb-4 md:pb-6 text-white">
                                 <motion.h1
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -107,7 +107,7 @@ const PublicProfile = () => {
                                 >
                                     {profile.fullName}
                                     {isAdmin && (
-                                        <span className="flex items-center gap-1 px-2 py-0.5 bg-white/20 backdrop-blur-sm text-white text-xs font-black rounded-full uppercase tracking-wider border border-white/30">
+                                        <span className="md:flex items-center hidden gap-1 px-2 py-0.5 bg-white/20 backdrop-blur-sm text-white text-xs font-black rounded-full uppercase tracking-wider border border-white/30">
                                             <FiShield size={10} /> Admin
                                         </span>
                                     )}
@@ -120,6 +120,7 @@ const PublicProfile = () => {
                                 >
                                     <FiUser size={14} />
                                     {isAdmin ? 'Quản trị viên' : 'Học viên'} • {profile.username || 'user'}
+                                    
                                 </motion.p>
                             </div>
                         </div>
