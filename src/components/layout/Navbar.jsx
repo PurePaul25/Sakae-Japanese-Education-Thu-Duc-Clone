@@ -8,6 +8,7 @@ import { useToast } from '../../contexts/ToastContext';
 
 import { FiMenu, FiX, FiChevronDown } from 'react-icons/fi';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+import { FaUser, FaGraduationCap, FaCog, FaSignOutAlt } from "react-icons/fa";
 import SearchBar from './SearchBar';
 
 const menuItems = [
@@ -392,14 +393,14 @@ function Navbar() {
                                 </div>
 
                                 {/* Menu Items */}
-                                <ul className="pb-2">
+                                <ul>
                                     <li>
                                         <Link
                                             to="/profile"
                                             onClick={() => setIsUserDropdownOpen(false)}
                                             className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
                                         >
-                                            👤 Hồ sơ cá nhân
+                                            <FaUser className="inline mr-1 mb-1" size={16}/> Hồ sơ cá nhân
                                         </Link>
                                     </li>
                                     <li>
@@ -408,7 +409,7 @@ function Navbar() {
                                             onClick={() => setIsUserDropdownOpen(false)}
                                             className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
                                         >
-                                            🎓 Khóa học của tôi
+                                            <FaGraduationCap className="inline mr-1 mb-1" size={16}/> Khóa học của tôi
                                         </Link>
                                     </li>
                                     <li>
@@ -417,7 +418,7 @@ function Navbar() {
                                             onClick={() => setIsUserDropdownOpen(false)}
                                             className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
                                         >
-                                            ⚙️ Cài đặt
+                                            <FaCog className="inline mr-1 mb-1" size={16}/> Cài đặt
                                         </Link>
                                     </li>
                                     <li className="border-t border-gray-100">
@@ -425,7 +426,7 @@ function Navbar() {
                                             onClick={handleLogout}
                                             className="block cursor-pointer w-full text-left px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
                                         >
-                                            🚪 Đăng xuất
+                                            <FaSignOutAlt className="inline mr-1 mb-1" size={16}/> Đăng xuất
                                         </button>
                                     </li>
                                 </ul>

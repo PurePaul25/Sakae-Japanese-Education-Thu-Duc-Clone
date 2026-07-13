@@ -19,6 +19,7 @@ const UserProfile = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
     const [formData, setFormData] = useState({
+        username: '',
         fullName: '',
         phoneNumber: '',
         address: '',
@@ -49,6 +50,7 @@ const UserProfile = () => {
                 if (!isMounted) return;
                 setProfile(data);
                 setFormData({
+                    username: data.username || '',
                     fullName: data.fullName || '',
                     phoneNumber: data.phoneNumber || '',
                     address: data.address || '',
@@ -285,6 +287,7 @@ const UserProfile = () => {
                                                 setSelectedFile(null);
                                                 setPreviewUrl(null);
                                                 setFormData({
+                                                    username: profile?.username || '',
                                                     fullName: profile?.fullName || '',
                                                     phoneNumber: profile?.phoneNumber || '',
                                                     address: profile?.address || '',
@@ -329,14 +332,35 @@ const UserProfile = () => {
                                 )}
                             </div>
                             <div className="space-y-1">
+                                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                                    Tên người dùng
+                                </label>
+                                {isEditing ? (
+                                    <div className="relative">
+                                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm select-none">@</span>
+                                        <input
+                                            type="text"
+                                            name="username"
+                                            value={formData.username}
+                                            onChange={handleChange}
+                                            className="w-full pl-7 pr-2.5 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
+                                            placeholder="ten_nguoi_dung"
+                                        />
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-700 font-medium flex items-center gap-1.5">
+                                        <span className="text-gray-500">@</span>{profile?.username}
+                                    </p>
+                                )}
+                            </div>
+                            <div className="space-y-1">
                                 <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
                                     Email
                                 </label>
                                 <p className="text-gray-700 font-medium flex items-center gap-2">
                                     <FiMail className="text-gray-400" /> {profile?.email}
                                 </p>
-                            </div>
-                            <div className="space-y-1">
+                            </div>                            <div className="space-y-1">
                                 <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
                                     Số điện thoại
                                 </label>
