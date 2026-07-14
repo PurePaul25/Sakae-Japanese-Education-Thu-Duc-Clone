@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
 import { FaSearchPlus } from 'react-icons/fa';
 import SEO from '../hooks/useSEO';
 import api from '../utils/api';
 import { useUser } from '../contexts/UserContext';
-import { useToast } from '../contexts/ToastContext';
+import { useGalleryLightbox } from '../hooks/useGalleryLightbox';
 
 // Import modular components
 import GalleryFilter from '../components/gallery/GalleryFilter';
@@ -13,457 +13,98 @@ import GalleryLightbox from '../components/gallery/GalleryLightbox';
 
 const Gallerys = () => {
     const { user } = useUser();
-    const { addToast } = useToast();
 
     // Core gallery list states
     const [activeCategory, setActiveCategory] = useState('Tất cả');
     const [sortOrder, setSortOrder] = useState('newest');
-    const [selectedImage, setSelectedImage] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedMonth, setSelectedMonth] = useState('Tất cả');
     const [selectedYear, setSelectedYear] = useState('Tất cả');
     const itemsPerPage = 12;
 
-    // Zoom and pan states for lightbox
-    const [zoom, setZoom] = useState(1);
-    const [pan, setPan] = useState({ x: 0, y: 0 });
-    const [isDragging, setIsDragging] = useState(false);
-    const dragStartRef = useRef({ x: 0, y: 0 });
     const [loading, setLoading] = useState(true);
     const [galleryData, setGalleryData] = useState([]);
-    const touchStartX = useRef(null);
-    const touchEndX = useRef(null);
 
-    // Comments states
-    const [comments, setComments] = useState([]);
-    const [newComment, setNewComment] = useState('');
-    const [loadingComments, setLoadingComments] = useState(false);
+    // ── fetch ─────────────────────────────────────────────────────────────────
+    function fetchGallery() {
+        setLoading(true);
+        api.get('/gallery')
+            .then((response) => {
+                const data = Array.isArray(response.data) ? response.data : response.data?.data || [];
+                setGalleryData(
+                    data.map((item) => ({
+                        id: item.id,
+                        category: item.category || 'Chung',
+                        title: item.title || 'Ảnh hoạt động',
+                        caption: item.caption,
+                        src: item.imageUrl,
+                        date: new Date(item.createdAt).toLocaleDateString('vi-VN'),
+                        rawDate: new Date(item.createdAt),
+                        likesCount: item.likesCount || 0,
+                        commentsCount: item.commentsCount || 0,
+                        isLiked: item.isLiked || false,
+                        userReaction: item.userReaction || null,
+                        topReactions: item.topReactions || [],
+                        createdBy: item.createdBy,
+                    })),
+                );
+            })
+            .catch((err) => console.error('Lỗi khi lấy dữ liệu bộ sưu tập:', err))
+            .finally(() => setLoading(false));
+    }
 
-    // Month & year computation
-    const years = useMemo(() => {
-        return [...new Set((galleryData || []).map((img) => new Date(img.rawDate).getFullYear()))].sort(
-            (a, b) => b - a,
-        );
-    }, [galleryData]);
+    useEffect(() => { fetchGallery(); }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // ── lightbox (all zoom/pan/comments/like logic lives here) ───────────────
+    const {
+        selectedImage, setSelectedImage,
+        zoom, pan, isDragging,
+        handleZoomIn, handleZoomOut,
+        onMouseDown, onMouseMove, onMouseUp, onMouseLeave,
+        onTouchStart, onTouchMove, onTouchEnd,
+        handleNext, handlePrev,
+        handleDownload, handleLike,
+        comments, setComments, newComment, setNewComment, loadingComments,
+        handleAddComment, handleDeleteComment,
+    } = useGalleryLightbox(galleryData, setGalleryData, fetchGallery);
+
+    // ── filters & pagination ──────────────────────────────────────────────────
+    const years = useMemo(
+        () => [...new Set((galleryData || []).map((img) => new Date(img.rawDate).getFullYear()))].sort((a, b) => b - a),
+        [galleryData],
+    );
 
     const monthOptions = useMemo(
         () => [
             { label: 'Tháng (Tất cả)', value: 'Tất cả' },
-            ...Array.from({ length: 12 }, (_, i) => ({
-                label: `Tháng ${i + 1}`,
-                value: String(i + 1),
-            })),
+            ...Array.from({ length: 12 }, (_, i) => ({ label: `Tháng ${i + 1}`, value: String(i + 1) })),
         ],
         [],
     );
 
     const yearOptions = useMemo(
-        () => [
-            { label: 'Năm (Tất cả)', value: 'Tất cả' },
-            ...years.map((y) => ({
-                label: `Năm ${y}`,
-                value: String(y),
-            })),
-        ],
+        () => [{ label: 'Năm (Tất cả)', value: 'Tất cả' }, ...years.map((y) => ({ label: `Năm ${y}`, value: String(y) }))],
         [years],
     );
 
-    // Fetch API handler
-    const fetchGallery = async () => {
-        try {
-            setLoading(true);
-            const response = await api.get('/gallery');
-            const data = Array.isArray(response.data) ? response.data : response.data?.data || [];
-            const formattedData = data.map((item) => ({
-                id: item.id,
-                category: item.category || 'Chung',
-                title: item.title || 'Ảnh hoạt động',
-                caption: item.caption,
-                src: item.imageUrl,
-                date: new Date(item.createdAt).toLocaleDateString('vi-VN'),
-                rawDate: new Date(item.createdAt),
-                likesCount: item.likesCount || 0,
-                commentsCount: item.commentsCount || 0,
-                isLiked: item.isLiked || false,
-                userReaction: item.userReaction || null,
-                topReactions: item.topReactions || [],
-                createdBy: item.createdBy,
-            }));
-            setGalleryData(formattedData);
-        } catch (error) {
-            console.error('Lỗi khi lấy dữ liệu bộ sưu tập:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchGallery();
-    }, [user]);
-
-    // Fetch post details / comments when selectedImage is opened
-    useEffect(() => {
-        if (!selectedImage) {
-            setComments([]);
-            return;
-        }
-
-        const fetchPostDetails = async () => {
-            try {
-                setLoadingComments(true);
-                const response = await api.get(`/gallery/${selectedImage.id}`);
-                const data = response.data?.data || response.data || {};
-                setComments(data.comments || []);
-            } catch (error) {
-                console.error('Lỗi khi lấy bình luận:', error);
-            } finally {
-                setLoadingComments(false);
-            }
-        };
-
-        fetchPostDetails();
-    }, [selectedImage]);
-
-    // Likes trigger API with Optimistic UI updates
-    const handleLike = async (postId, e, reactionType = 'LIKE') => {
-        if (e) e.stopPropagation();
-        if (!user) {
-            addToast('Vui lòng đăng nhập để thả tim bài viết!', 'warning');
-            return;
-        }
-
-        try {
-            // Optimistic UI updates
-            setGalleryData((prev) =>
-                prev.map((post) => {
-                    if (post.id === postId) {
-                        const isRemoving = post.isLiked && post.userReaction === reactionType;
-                        const isChanging = post.isLiked && post.userReaction !== reactionType;
-                        const nextLiked = !isRemoving;
-                        const nextLikesCount = isRemoving
-                            ? Math.max(0, post.likesCount - 1)
-                            : !post.isLiked
-                              ? post.likesCount + 1
-                              : post.likesCount;
-
-                        let newTopReactions = post.topReactions ? [...post.topReactions] : [];
-
-                        if (isRemoving) {
-                            if (nextLikesCount === 0) newTopReactions = [];
-                        } else if (isChanging) {
-                            if (nextLikesCount <= 1) {
-                                newTopReactions = [reactionType];
-                            } else {
-                                newTopReactions = [
-                                    reactionType,
-                                    ...newTopReactions.filter((r) => r !== post.userReaction),
-                                ].slice(0, 2);
-                            }
-                        } else if (nextLiked) {
-                            if (!newTopReactions.includes(reactionType)) {
-                                newTopReactions = [reactionType, ...newTopReactions].slice(0, 2);
-                            }
-                        }
-
-                        return {
-                            ...post,
-                            isLiked: nextLiked,
-                            userReaction: nextLiked ? reactionType : null,
-                            likesCount: nextLikesCount,
-                            topReactions: newTopReactions,
-                        };
-                    }
-                    return post;
-                }),
-            );
-
-            if (selectedImage && selectedImage.id === postId) {
-                setSelectedImage((prev) => {
-                    const isRemoving = prev.isLiked && prev.userReaction === reactionType;
-                    const isChanging = prev.isLiked && prev.userReaction !== reactionType;
-                    const nextLiked = !isRemoving;
-                    const nextLikesCount = isRemoving
-                        ? Math.max(0, prev.likesCount - 1)
-                        : !prev.isLiked
-                          ? prev.likesCount + 1
-                          : prev.likesCount;
-
-                    let newTopReactions = prev.topReactions ? [...prev.topReactions] : [];
-
-                    if (isRemoving) {
-                        if (nextLikesCount === 0) newTopReactions = [];
-                    } else if (isChanging) {
-                        if (nextLikesCount <= 1) {
-                            newTopReactions = [reactionType];
-                        } else {
-                            newTopReactions = [
-                                reactionType,
-                                ...newTopReactions.filter((r) => r !== prev.userReaction),
-                            ].slice(0, 2);
-                        }
-                    } else if (nextLiked) {
-                        if (!newTopReactions.includes(reactionType)) {
-                            newTopReactions = [reactionType, ...newTopReactions].slice(0, 2);
-                        }
-                    }
-
-                    return {
-                        ...prev,
-                        isLiked: nextLiked,
-                        userReaction: nextLiked ? reactionType : null,
-                        likesCount: nextLikesCount,
-                        topReactions: newTopReactions,
-                    };
-                });
-            }
-
-            await api.post(`/gallery/${postId}/like`, { reaction: reactionType });
-        } catch (error) {
-            addToast(error.message || 'Lỗi khi thích bài viết', 'error');
-            fetchGallery(); // Revert on failure
-        }
-    };
-
-    // Add comment handler
-    const handleAddComment = async (e) => {
-        if (e) e.preventDefault();
-        if (!newComment.trim()) return;
-
-        if (!user) {
-            addToast('Vui lòng đăng nhập để bình luận!', 'warning');
-            return;
-        }
-
-        try {
-            const tempComment = newComment;
-            setNewComment(''); // Clear input instantly
-
-            const response = await api.post(`/gallery/${selectedImage.id}/comments`, { content: tempComment });
-            const addedComment = response.data?.data || response.data;
-
-            setComments((prev) => [addedComment, ...prev]);
-
-            // Sync comments count in main list
-            setGalleryData((prev) =>
-                prev.map((post) => {
-                    if (post.id === selectedImage.id) {
-                        return { ...post, commentsCount: post.commentsCount + 1 };
-                    }
-                    return post;
-                }),
-            );
-
-            if (selectedImage) {
-                setSelectedImage((prev) => ({
-                    ...prev,
-                    commentsCount: prev.commentsCount + 1,
-                }));
-            }
-
-            addToast('Đã gửi bình luận của bạn!', 'success');
-        } catch (error) {
-            addToast(error.message || 'Lỗi khi gửi bình luận', 'error');
-        }
-    };
-
-    // Delete comment handler
-    const handleDeleteComment = async (commentId) => {
-        try {
-            await api.delete(`/gallery/comments/${commentId}`);
-
-            setComments((prev) => prev.filter((c) => c.id !== commentId));
-
-            // Sync comments count in list
-            setGalleryData((prev) =>
-                prev.map((post) => {
-                    if (post.id === selectedImage.id) {
-                        return { ...post, commentsCount: Math.max(0, post.commentsCount - 1) };
-                    }
-                    return post;
-                }),
-            );
-
-            if (selectedImage) {
-                setSelectedImage((prev) => ({
-                    ...prev,
-                    commentsCount: Math.max(0, prev.commentsCount - 1),
-                }));
-            }
-
-            addToast('Đã xóa bình luận!', 'success');
-        } catch (error) {
-            addToast(error.message || 'Lỗi khi xóa bình luận', 'error');
-        }
-    };
-
-    // Filters and sorting computations
     const filteredImages = useMemo(() => {
         let images = [...galleryData];
-
-        if (activeCategory !== 'Tất cả') {
-            images = images.filter((item) => item.category === activeCategory);
-        }
-
-        if (selectedMonth !== 'Tất cả') {
-            images = images.filter((item) => {
-                const imgMonth = new Date(item.rawDate).getMonth() + 1;
-                return String(imgMonth) === selectedMonth;
-            });
-        }
-
-        if (selectedYear !== 'Tất cả') {
-            images = images.filter((item) => {
-                const imgYear = new Date(item.rawDate).getFullYear();
-                return String(imgYear) === selectedYear;
-            });
-        }
-
-        return images.sort((a, b) => {
-            return sortOrder === 'newest' ? b.rawDate - a.rawDate : a.rawDate - b.rawDate;
-        });
+        if (activeCategory !== 'Tất cả') images = images.filter((i) => i.category === activeCategory);
+        if (selectedMonth !== 'Tất cả')
+            images = images.filter((i) => String(new Date(i.rawDate).getMonth() + 1) === selectedMonth);
+        if (selectedYear !== 'Tất cả')
+            images = images.filter((i) => String(new Date(i.rawDate).getFullYear()) === selectedYear);
+        return images.sort((a, b) => (sortOrder === 'newest' ? b.rawDate - a.rawDate : a.rawDate - b.rawDate));
     }, [galleryData, activeCategory, selectedMonth, selectedYear, sortOrder]);
 
     const paginatedImages = useMemo(() => {
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        return filteredImages.slice(startIndex, startIndex + itemsPerPage);
+        const start = (currentPage - 1) * itemsPerPage;
+        return filteredImages.slice(start, start + itemsPerPage);
     }, [filteredImages, currentPage, itemsPerPage]);
 
     const totalPages = Math.ceil(filteredImages.length / itemsPerPage);
 
-    // Slide navigation actions
-    const handleNext = useCallback(() => {
-        const currentIndex = galleryData.findIndex((img) => img.id === selectedImage?.id);
-        if (currentIndex < galleryData.length - 1) {
-            setSelectedImage(galleryData[currentIndex + 1]);
-        } else {
-            setSelectedImage(galleryData[0]);
-        }
-    }, [galleryData, selectedImage]);
-
-    const handlePrev = useCallback(() => {
-        const currentIndex = galleryData.findIndex((img) => img.id === selectedImage?.id);
-        if (currentIndex > 0) {
-            setSelectedImage(galleryData[currentIndex - 1]);
-        } else {
-            setSelectedImage(galleryData[galleryData.length - 1]);
-        }
-    }, [galleryData, selectedImage]);
-
-    // Lightbox Hotkeys
-    useEffect(() => {
-        if (!selectedImage) return;
-        const handleKeyDown = (e) => {
-            if (e.key === 'ArrowRight') handleNext();
-            if (e.key === 'ArrowLeft') handlePrev();
-            if (e.key === 'Escape') setSelectedImage(null);
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [selectedImage, handleNext, handlePrev]);
-
-    useEffect(() => {
-        setZoom(1);
-        setPan({ x: 0, y: 0 });
-    }, [selectedImage]);
-
-    // Prevent body scrolling when overlay is active
-    useEffect(() => {
-        if (selectedImage) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-
-        return () => {
-            document.body.style.overflow = 'unset';
-        };
-    }, [selectedImage]);
-
-    // Zoom handlers
-    const handleZoomIn = (e) => {
-        if (e) e.stopPropagation();
-        setZoom((prev) => Math.min(prev + 0.25, 4));
-    };
-
-    const handleZoomOut = (e) => {
-        if (e) e.stopPropagation();
-        setZoom((prev) => {
-            const newZoom = Math.max(prev - 0.25, 1);
-            if (newZoom === 1) setPan({ x: 0, y: 0 });
-            return newZoom;
-        });
-    };
-
-    // Drag-to-pan handlers
-    const onMouseDown = (e) => {
-        if (zoom <= 1) return;
-        setIsDragging(true);
-        dragStartRef.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
-    };
-
-    const onMouseMove = (e) => {
-        if (!isDragging || zoom <= 1) return;
-        setPan({
-            x: e.clientX - dragStartRef.current.x,
-            y: e.clientY - dragStartRef.current.y,
-        });
-    };
-
-    const onMouseUp = () => setIsDragging(false);
-    const onMouseLeave = () => setIsDragging(false);
-
-    // Touch swipe navigation and dragging
-    const onTouchStart = (e) => {
-        touchStartX.current = e.touches[0].clientX;
-        if (zoom > 1) {
-            setIsDragging(true);
-            dragStartRef.current = { x: e.touches[0].clientX - pan.x, y: e.touches[0].clientY - pan.y };
-        }
-    };
-
-    const onTouchMove = (e) => {
-        touchEndX.current = e.touches[0].clientX;
-        if (isDragging && zoom > 1) {
-            setPan({
-                x: e.touches[0].clientX - dragStartRef.current.x,
-                y: e.touches[0].clientY - dragStartRef.current.y,
-            });
-        }
-    };
-
-    const onTouchEnd = () => {
-        setIsDragging(false);
-        if (!touchStartX.current || !touchEndX.current) return;
-        const distance = touchStartX.current - touchEndX.current;
-        if (zoom === 1) {
-            if (distance > 50) handleNext();
-            if (distance < -50) handlePrev();
-        }
-        touchStartX.current = null;
-        touchEndX.current = null;
-    };
-
-    // Image Downloader trigger
-    const handleDownload = async (e) => {
-        e.stopPropagation();
-        if (!selectedImage) return;
-        try {
-            const response = await fetch(selectedImage.src);
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            const extension = selectedImage.src.split('.').pop().split('?')[0] || 'jpg';
-            link.download = `${selectedImage.title}.${extension}`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-        } catch {
-            window.open(selectedImage.src, '_blank');
-        }
-    };
-
+    // ── render ────────────────────────────────────────────────────────────────
     return (
         <div className="pt-28 pb-16 bg-gray-50 min-h-screen">
             <SEO
@@ -472,7 +113,7 @@ const Gallerys = () => {
             />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* Section title header */}
+                {/* Section title */}
                 <div className="text-center mb-4 md:mb-8">
                     <h1 className="text-4xl md:text-5xl font-black text-slate-800 mb-4 tracking-tight">
                         BỘ SƯU TẬP <span className="text-red-600">HÌNH ẢNH</span>
@@ -483,7 +124,7 @@ const Gallerys = () => {
                     </p>
                 </div>
 
-                {/* Filter Sub-container */}
+                {/* Filters */}
                 <GalleryFilter
                     activeCategory={activeCategory}
                     setActiveCategory={setActiveCategory}
@@ -505,7 +146,6 @@ const Gallerys = () => {
                     </div>
                 ) : (
                     <>
-                        {/* Gallery Grid items mapping */}
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                             {paginatedImages.map((image) => (
                                 <GalleryCard
@@ -517,7 +157,6 @@ const Gallerys = () => {
                             ))}
                         </div>
 
-                        {/* Blank search state */}
                         {filteredImages.length === 0 && (
                             <div className="text-center py-24 bg-white rounded-3xl shadow-sm border border-slate-100">
                                 <div className="text-slate-300 mb-4">
@@ -528,7 +167,6 @@ const Gallerys = () => {
                             </div>
                         )}
 
-                        {/* Pagination Sub-controls */}
                         {totalPages > 1 && (
                             <div className="mt-8 flex justify-center items-center gap-4">
                                 <button
@@ -566,7 +204,7 @@ const Gallerys = () => {
                 )}
             </div>
 
-            {/* Modular Lightbox Overlay Component */}
+            {/* Lightbox */}
             <GalleryLightbox
                 selectedImage={selectedImage}
                 setSelectedImage={setSelectedImage}

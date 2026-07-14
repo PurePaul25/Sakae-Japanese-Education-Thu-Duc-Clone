@@ -8,7 +8,7 @@ import { useToast } from '../../contexts/ToastContext';
 
 import { FiMenu, FiX, FiChevronDown } from 'react-icons/fi';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
-import { FaUser, FaGraduationCap, FaCog, FaSignOutAlt } from "react-icons/fa";
+import { FaUser, FaGraduationCap, FaCog, FaSignOutAlt, FaBookmark } from "react-icons/fa";
 import SearchBar from './SearchBar';
 
 const menuItems = [
@@ -410,6 +410,15 @@ function Navbar() {
                                             className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
                                         >
                                             <FaGraduationCap className="inline mr-1 mb-1" size={16}/> Khóa học của tôi
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link
+                                            to="/da-luu"
+                                            onClick={() => setIsUserDropdownOpen(false)}
+                                            className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
+                                        >
+                                            <FaBookmark className="inline mr-1 mb-1" size={16}/> Đã lưu
                                         </Link>
                                     </li>
                                     <li>

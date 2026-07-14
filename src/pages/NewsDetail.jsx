@@ -368,7 +368,7 @@ const NewsDetail = () => {
                             <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">
                                 {post.title}
                             </h1>
-                            <div className="flex flex-row md:flex-col items-center gap-2.5 w-60% md:w-40">
+                            <div className="flex flex-row md:flex-col items-center gap-2.5 w-60% md:w-55">
                                 <button
                                     type="button"
                                     disabled={likedLoading}

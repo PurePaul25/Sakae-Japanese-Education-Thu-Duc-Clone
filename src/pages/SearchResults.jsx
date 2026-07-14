@@ -122,8 +122,8 @@ const SearchResults = () => {
 
             <div className="bg-gradient-to-r from-red-500 via-red-400 to-red-600 text-white p-3.5 shadow-lg">
                 <div className="max-w-6xl mx-auto">
-                    <h1 className="text-3xl md:text-4xl font-bold mb-3 drop-shadow-lg">Kết quả tìm kiếm</h1>
-                    <p className="text-red-100 mb-0.5">
+                    <h1 className="text-3xl md:text-4xl font-bold mb-2 drop-shadow-lg">Kết quả tìm kiếm</h1>
+                    <p className="text-red-100">
                         Tìm kiếm cho: <span className="font-semibold text-white text-lg">"{query}"</span>
                     </p>
                     {results.hasResults && (
@@ -223,7 +223,7 @@ const SearchResults = () => {
                                                             }}
                                                         />
                                                         {item.category && (
-                                                            <span className="absolute top-4 left-4 bg-red-600 text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-2 shadow-md">
+                                                            <span className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2 shadow-md">
                                                                 <FaTag size={12} /> {item.category}
                                                             </span>
                                                         )}
@@ -268,21 +268,21 @@ const SearchResults = () => {
                                                     <img
                                                         src={course.image}
                                                         alt={course.name}
-                                                        className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                                                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                                                         onError={(e) => {
                                                             e.target.src = 'https://placehold.co/400x300?text=Image+Not+Found';
                                                         }}
                                                     />
-                                                    <span className="absolute top-4 left-4 bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md">
+                                                    <span className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-bold shadow-lg">
                                                         {course.level}
                                                     </span>
-                                                    <span className="absolute top-4 right-4 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
+                                                    <span className="absolute top-4 right-4 bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-md">
                                                         {course.type}
                                                     </span>
                                                 </div>
 
                                                 <div className="p-5 flex flex-1 flex-col">
-                                                    <h4 className="text-lg font-bold text-gray-800 mb-3 line-clamp-2 group-hover:text-red-600 transition">
+                                                    <h4 className="text-lg font-bold text-gray-800 mb-3 line-clamp-2 group-hover:text-red-600 transition duration-200">
                                                         {course.name}
                                                     </h4>
                                                     <p className="text-gray-600 text-sm line-clamp-2 mb-4 flex-1">{course.desc}</p>

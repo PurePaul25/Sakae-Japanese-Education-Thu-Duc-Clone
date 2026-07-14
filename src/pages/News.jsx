@@ -76,27 +76,13 @@ const NewsCard = ({ item }) => {
                                 →
                             </span>
                         </Link>
-                        {item.author && <span className="text-xs text-gray-400">{item.author.fullName}</span>}
+                        {item.author && <span className="text-sm text-gray-400">{item.author.fullName}</span>}
                     </div>
                 </div>
             </div>
         </div>
     );
 };
-
-const NewsCardSkeleton = () => (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden animate-pulse">
-        <div className="flex flex-col md:flex-row">
-            <div className="md:w-1/3 bg-gray-200 min-h-[250px]" />
-            <div className="md:w-2/3 p-6 flex flex-col gap-4">
-                <div className="h-4 bg-gray-200 rounded w-1/4" />
-                <div className="h-6 bg-gray-200 rounded w-3/4" />
-                <div className="h-4 bg-gray-200 rounded w-full" />
-                <div className="h-4 bg-gray-200 rounded w-5/6" />
-            </div>
-        </div>
-    </div>
-);
 
 const News = () => {
     const [posts, setPosts] = useState([]);
@@ -253,9 +239,6 @@ const News = () => {
                                     <p className="text-lg font-semibold text-gray-900">Đang tải bài viết...</p>
                                     <p className="text-sm text-gray-500">Vui lòng chờ trong giây lát.</p>
                                 </div>
-                                {Array.from({ length: 3 }).map((_, i) => (
-                                    <NewsCardSkeleton key={i} />
-                                ))}
                             </>
                         ) : posts.length > 0 ? (
                             posts.map((item) => <NewsCard key={item.id} item={item} />)

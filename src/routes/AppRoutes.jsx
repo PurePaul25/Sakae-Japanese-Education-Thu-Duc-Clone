@@ -21,6 +21,7 @@ const UserDashboardLazy = lazy(() => import('../pages/user/UserDashboard'));
 const UserProfileLazy = lazy(() => import('../pages/user/UserProfile'));
 const MyCoursesLazy = lazy(() => import('../pages/user/MyCourses'));
 const UserSettingsLazy = lazy(() => import('../pages/user/UserSettings'));
+const SavedItemsLazy = lazy(() => import('../pages/user/SavedItems'));
 const PublicProfileLazy = lazy(() => import('../pages/user/PublicProfile'));
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 
@@ -79,6 +80,7 @@ function AppRoutes() {
                     <Route path="/profile" element={<UserProfileLazy />} />
                     <Route path="/khoa-hoc-cua-toi" element={<MyCoursesLazy />} />
                     <Route path="/cai-dat" element={<UserSettingsLazy />} />
+                    <Route path="/da-luu" element={<SavedItemsLazy />} />
                 </Route>
 
                 {/* Admin Routes */}

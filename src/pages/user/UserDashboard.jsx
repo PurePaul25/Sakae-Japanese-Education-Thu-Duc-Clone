@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiUser, FiBook, FiSettings, FiChevronRight, FiMenu, FiX } from 'react-icons/fi';
+import { FiUser, FiBook, FiSettings, FiChevronRight, FiMenu, FiX, FiBookmark } from 'react-icons/fi';
 
 const UserDashboard = () => {
     const location = useLocation();
@@ -11,6 +11,7 @@ const UserDashboard = () => {
     const navItems = [
         { path: '/profile', label: 'Hồ sơ cá nhân', icon: <FiUser /> },
         { path: '/khoa-hoc-cua-toi', label: 'Khóa học của tôi', icon: <FiBook /> },
+        { path: '/da-luu', label: 'Đã lưu', icon: <FiBookmark /> },
         { path: '/cai-dat', label: 'Cài đặt tài khoản', icon: <FiSettings /> },
     ];
 

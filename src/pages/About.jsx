@@ -205,7 +205,7 @@ function About() {
                 </div>
             </section>
 
-            <h3 className="max-w-6xl mx-auto text-2xl font-bold text-red-500 px-4 mt-10">
+            <h3 className="max-w-6xl mx-auto text-2xl font-bold text-red-500 px-4 mt-12">
                 HÃY ĐẾN VỚI CHÚNG TÔI VÀ CẢM NHẬN!
             </h3>
             <ScrollToTopButton />
