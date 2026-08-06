@@ -33,7 +33,7 @@ const NewsCard = ({ item }) => {
                     <img
                         src={item.thumbnail || 'https://placehold.co/600x400?text=Sakae+News'}
                         alt={item.title}
-                        className="w-full h-20 object-cover transition-transform duration-500 group-hover:scale-105 min-h-[200px] md:min-h-[220px]"
+                        className="w-full h-55 object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
                         <span className="text-white font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-red-600 px-4 py-2 rounded-full">

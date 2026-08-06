@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FaCalendarAlt, FaClock, FaUserTie, FaMoneyBillWave, FaBookOpen, FaCheckCircle, FaTag, FaReceipt } from 'react-icons/fa';
 import { FiLoader, FiArrowLeft } from 'react-icons/fi';
 import { IoIosCall } from "react-icons/io";
+import ScrollToTopButton from '../../components/layout/ScrollToTopButton'
 import RegistrationModal from '../../components/ui/RegistrationModal';
 import SEO from '../../hooks/useSEO.jsx';
 import { getCourseBySlug } from '../../services/courseService';
@@ -96,6 +97,46 @@ const ScheduleCard = ({ schedule, onRegister }) => {
 };
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
+const normalizeCourseContent = (html) => {
+    if (!html) return '';
+    return html
+        .replace(/<meta[^>]*>/gi, '')
+        .replace(/<(\/?)(?:o:|mso|st1|w:|v:)[^>]*>/gi, '<$1>')
+        .replace(/<span\b[^>]*style=["'][^"']*mso-spacerun:[^"']*["'][^>]*>/gi, ' ')
+        .replace(/<font\b([^>]*)>/gi, (match, attrs) => {
+            const sizeMatch = attrs.match(/size=["']([^"']+)["']/i);
+            const faceMatch = attrs.match(/face=["']([^"']+)["']/i);
+            const styleParts = [];
+            if (sizeMatch) {
+                const sizeMap = { 1: '12px', 2: '14px', 3: '16px', 4: '18px', 5: '20px', 6: '24px', 7: '32px' };
+                styleParts.push(`font-size:${sizeMap[sizeMatch[1]] || '16px'}`);
+            }
+            if (faceMatch) {
+                styleParts.push(`font-family:${faceMatch[1]}`);
+            }
+            return styleParts.length ? `<span style="${styleParts.join(';')}">` : '<span>';
+        })
+        .replace(/<\/font>/gi, '</span>')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/<a\b([^>]*)>/gi, (match, attrs) => {
+            const hasClass = /class=/.test(attrs);
+            const hasTarget = /target=/.test(attrs);
+            const hasRel = /rel=/.test(attrs);
+            const classAttr = hasClass ? '' : ' class="text-red-600 underline font-semibold break-all"';
+            const targetAttr = hasTarget ? '' : ' target="_blank"';
+            const relAttr = hasRel ? '' : ' rel="noopener noreferrer"';
+            return `<a${attrs}${classAttr}${targetAttr}${relAttr}>`;
+        })
+        .replace(/<img\b([^>]*)>/gi, (match, attrs) => {
+            const hasClass = /class=/.test(attrs);
+            const hasStyle = /style=/.test(attrs);
+            const classAttr = hasClass ? '' : ' class="mx-auto my-4 max-w-full h-auto rounded-xl block"';
+            const styleAttr = hasStyle ? '' : ' style="max-width:100%; width:100%; height:auto; display:block; margin:12px auto; border-radius:12px; object-fit:contain;"';
+            return `<img${attrs}${classAttr}${styleAttr}>`;
+        })
+        .replace(/\r\n|\r|\n/g, '<br>');
+};
+
 const CourseDetailPage = () => {
     const { slug } = useParams();
     const navigate = useNavigate();
@@ -163,6 +204,7 @@ const CourseDetailPage = () => {
 
     return (
         <div className="pt-24 pb-14 bg-gray-50 min-h-screen">
+            <ScrollToTopButton />
             <SEO
                 customTitle={`${course.title} — Trung tâm Nhật Ngữ Sakae Thủ Đức`}
                 customDescription={
@@ -186,11 +228,12 @@ const CourseDetailPage = () => {
                         {/* Course header card */}
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                             {course.thumbnail && (
-                                <div className="bg-gray-100 flex items-center justify-center h-[400px] overflow-hidden">
+                                <div className="bg-gray-100 flex items-center justify-center overflow-hidden">
                                     <img
                                         src={course.thumbnail}
                                         alt={course.title}
-                                        className="w-full h-full object-contain max-h-[400px]"
+                                        className="w-full max-h-[420px] object-contain"
+                                        style={{ objectPosition: 'center' }}
                                     />
                                 </div>
                             )}
@@ -237,13 +280,13 @@ const CourseDetailPage = () => {
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-3.5 md:px-5 py-4">
                             {course.content ? (
                                 <div
-                                    className="prose prose-slate max-w-none dark:prose-invert leading-relaxed
+                                    className="prose prose-slate max-w-none dark:prose-invert leading-8
                                         prose-headings:font-bold prose-headings:text-slate-800 dark:prose-headings:text-white
                                         prose-h2:text-xl prose-h3:text-lg
-                                        prose-p:my-2 prose-li:my-1
+                                        prose-p:my-2 prose-p:text-[17px] prose-li:my-1 prose-li:text-[17px]
                                         prose-blockquote:border-l-4 prose-blockquote:border-red-400 prose-blockquote:pl-3 prose-blockquote:italic prose-blockquote:text-slate-500
                                         prose-a:text-red-600 prose-a:underline"
-                                    dangerouslySetInnerHTML={{ __html: course.content }}
+                                    dangerouslySetInnerHTML={{ __html: normalizeCourseContent(course.content) }}
                                 />
                             ) : (
                                 <>

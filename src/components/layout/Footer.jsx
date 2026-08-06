@@ -82,7 +82,7 @@ function Footer() {
             </div>
             <div className="max-w-7xl border-t-2 border-gray-700 mx-auto mt-8 pt-4 pb-1">
                 <p className="text-center text-gray-400 mt-1 md:text-sm text-[12px]">
-                    Copyright 2015 - {yearCurrent} © NHẬT NGỮ SAKAE THỦ ĐỨC
+                    Copyright 2015 - {yearCurrent} © NHẬT NGỮ SAKAE THỦ ĐỨC. CUNG CẤP BỞI PURE PAUL
                 </p>
             </div>
         </footer>

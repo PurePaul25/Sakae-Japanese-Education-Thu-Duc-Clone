@@ -194,7 +194,7 @@ const WysiwygEditor = ({ value, onChange }) => {
     }, []);
 
     const insertImageHtml = useCallback((src, alt = 'Hình ảnh') => {
-        const html = `<img src="${src}" alt="${alt}" class="mx-auto my-4 max-w-full h-auto rounded-xl block" style="max-width:100%; width:100%; height:auto; display:block; margin:10px 0; border-radius:10px; object-fit:cover;" />`;
+        const html = `<img src="${src}" alt="${alt}" class="mx-auto my-4 max-w-full h-auto rounded-xl block" style="max-width:100%; width:100%; height:auto; display:block; margin:10px 0; border-radius:10px; object-fit:contain;" />`;
         document.execCommand('insertHTML', false, html);
     }, []);
 
@@ -281,6 +281,42 @@ const WysiwygEditor = ({ value, onChange }) => {
         }, 0);
     }, [normalizeContent, onChange]);
 
+    const applyInlineStyle = useCallback(
+        (styleProperty, value) => {
+            const el = editorRef.current;
+            if (!el) return;
+            el.focus();
+            const selection = window.getSelection();
+            if (!selection || selection.rangeCount === 0) return;
+
+            const range = selection.getRangeAt(0);
+            const span = document.createElement('span');
+            span.style[styleProperty] = value;
+
+            if (range.collapsed) {
+                const marker = document.createTextNode('\u200B');
+                span.appendChild(marker);
+                range.insertNode(span);
+                range.setStartAfter(marker);
+                range.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            } else {
+                const fragment = range.extractContents();
+                span.appendChild(fragment);
+                range.insertNode(span);
+
+                const newRange = document.createRange();
+                newRange.selectNodeContents(span);
+                selection.removeAllRanges();
+                selection.addRange(newRange);
+            }
+
+            handleInput();
+        },
+        [handleInput],
+    );
+
     const exec = useCallback(
         (command, val = null) => {
             const el = editorRef.current;
@@ -291,6 +327,17 @@ const WysiwygEditor = ({ value, onChange }) => {
 
             if (command === 'foreColor' && val) {
                 document.execCommand('styleWithCSS', false, true);
+            }
+
+            if (command === 'fontName' && val) {
+                applyInlineStyle('fontFamily', val);
+                return;
+            }
+
+            if (command === 'fontSize' && val) {
+                const sizeMap = { 1: '12px', 2: '14px', 3: '16px', 4: '18px', 5: '20px', 6: '24px', 7: '32px' };
+                applyInlineStyle('fontSize', sizeMap[val] || '16px');
+                return;
             }
 
             document.execCommand(command, false, val);
@@ -305,7 +352,7 @@ const WysiwygEditor = ({ value, onChange }) => {
 
             handleInput();
         },
-        [handleInput],
+        [applyInlineStyle, handleInput],
     );
 
     const handleKeyDown = (e) => {
@@ -402,8 +449,24 @@ const WysiwygEditor = ({ value, onChange }) => {
         { label: 'Hồng', value: '#db2777' },
         { label: 'Trắng', value: '#ffffff' },
     ];
+    const FONT_SIZES = [
+        { label: 'Rất nhỏ', value: '1' },
+        { label: 'Nhỏ', value: '2' },
+        { label: 'Thường', value: '3' },
+        { label: 'Lớn', value: '4' },
+        { label: 'Siêu lớn', value: '7' },
+    ];
+    const FONT_FAMILIES = [
+        { label: 'Roboto', value: 'Roboto' },
+        { label: 'Open Sans', value: 'Open Sans' },
+        { label: 'Montserrat', value: 'Montserrat' },
+        { label: 'Be Vietnam Pro', value: 'Be Vietnam Pro' },
+        { label: 'Times New Roman', value: 'Times New Roman' },
+    ];
 
     const [showColorPicker, setShowColorPicker] = useState(false);
+    const [fontSizeValue, setFontSizeValue] = useState('3');
+    const [fontFamilyValue, setFontFamilyValue] = useState('Roboto');
     const colorPickerRef = useRef(null);
 
     // Đóng color picker khi click ra ngoài
@@ -420,7 +483,7 @@ const WysiwygEditor = ({ value, onChange }) => {
     return (
         <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
             {/* Toolbar */}
-            <div className="flex flex-wrap items-center gap-0.5 p-2 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex flex-wrap items-center gap-1 p-2 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
                 {tools.map((t, i) =>
                     t === null ? (
                         <div key={i} className="w-px h-5 bg-slate-200 dark:bg-slate-600 mx-1" />
@@ -439,6 +502,38 @@ const WysiwygEditor = ({ value, onChange }) => {
                         </button>
                     ),
                 )}
+
+                <select
+                    value={fontSizeValue}
+                    onChange={(e) => {
+                        setFontSizeValue(e.target.value);
+                        exec('fontSize', e.target.value);
+                    }}
+                    className="h-8 rounded-lg border border-slate-200 bg-white px-2 text-[12px] transition duration-200 focus:ring-1 focus:ring-red-500 cursor-pointer text-slate-600 outline-none"
+                    title="Cỡ chữ"
+                >
+                    {FONT_SIZES.map((size) => (
+                        <option key={size.value} value={size.value}>
+                            {size.label}
+                        </option>
+                    ))}
+                </select>
+
+                <select
+                    value={fontFamilyValue}
+                    onChange={(e) => {
+                        setFontFamilyValue(e.target.value);
+                        exec('fontName', e.target.value);
+                    }}
+                    className="h-8 rounded-lg border border-slate-200 bg-white px-2 text-[12px] transition duration-200 focus:ring-1 focus:ring-red-500 cursor-pointer text-slate-600 outline-none"
+                    title="Phông chữ"
+                >
+                    {FONT_FAMILIES.map((font) => (
+                        <option key={font.value} value={font.value}>
+                            {font.label}
+                        </option>
+                    ))}
+                </select>
 
                 {/* Color picker */}
                 <div className="relative" ref={colorPickerRef}>
@@ -501,7 +596,7 @@ const WysiwygEditor = ({ value, onChange }) => {
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
                 onPaste={handlePaste}
-                className="min-h-[200px] max-h-[400px] overflow-y-auto px-2.5 py-2 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-[15px] focus:outline-none whitespace-pre-wrap break-words leading-7
+                className="min-h-[200px] max-h-[400px] overflow-y-auto px-2.5 py-2 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-[16px] focus:outline-none whitespace-pre-wrap break-words leading-8
                     prose prose-sm max-w-none
                     prose-headings:font-bold prose-headings:text-slate-800 dark:prose-headings:text-white
                     prose-h2:text-xl prose-h3:text-lg

@@ -271,7 +271,7 @@ const NewsDetail = () => {
                 const hasClass = /class=/.test(attrs);
                 const hasStyle = /style=/.test(attrs);
                 const classAttr = hasClass ? '' : ' class="mx-auto my-4 max-w-full h-auto rounded-xl block"';
-                const styleAttr = hasStyle ? '' : ' style="max-width:100%; width:100%; height:auto; display:block; margin:10px 0; border-radius:10px; object-fit:cover;"';
+                const styleAttr = hasStyle ? '' : ' style="max-width:100%; width:100%; height:auto; display:block; margin:12px auto; border-radius:12px; object-fit:contain;"';
                 return `<img${attrs}${classAttr}${styleAttr}>`;
             })
             .replace(/\r\n|\r|\n/g, '<br>');
@@ -321,7 +321,12 @@ const NewsDetail = () => {
                 {/* Header */}
                 <article className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
                     {post.thumbnail && (
-                        <img src={post.thumbnail} alt={post.title} className="w-full h-60 md:h-72 object-cover" />
+                        <img
+                            src={post.thumbnail}
+                            alt={post.title}
+                            className="w-full max-h-[480px] object-contain bg-slate-50"
+                            style={{ objectPosition: 'center' }}
+                        />
                     )}
                     <div className="p-3.5 md:p-6">
                         {/* Meta */}
@@ -410,7 +415,7 @@ const NewsDetail = () => {
 
                         {/* Content — backend đã sanitize HTML */}
                         <div
-                            className="prose prose-lg max-w-none break-words overflow-hidden prose-headings:text-gray-900 prose-a:text-red-600 prose-img:rounded-xl prose-p:whitespace-pre-wrap prose-p:leading-7 prose-li:whitespace-pre-wrap prose-li:leading-7 prose-a:break-all prose-a:font-semibold prose-a:underline [&_p]:whitespace-pre-wrap [&_p]:leading-7 [&_li]:whitespace-pre-wrap [&_li]:leading-7 [&_a]:break-all [&_a]:text-red-600 [&_a]:font-semibold [&_a]:underline"
+                            className="prose prose-lg max-w-none break-words overflow-hidden prose-headings:text-gray-900 prose-headings:font-bold prose-headings:leading-8 prose-a:text-red-600 prose-img:rounded-xl prose-p:whitespace-pre-wrap prose-p:text-[17px] prose-p:leading-8 prose-li:whitespace-pre-wrap prose-li:text-[17px] prose-li:leading-8 prose-a:break-all prose-a:font-semibold prose-a:underline [&_p]:whitespace-pre-wrap [&_p]:text-[17px] [&_p]:leading-8 [&_li]:whitespace-pre-wrap [&_li]:text-[17px] [&_li]:leading-8 [&_a]:break-all [&_a]:text-red-600 [&_a]:font-semibold [&_a]:underline"
                             style={{ overflowWrap: 'anywhere' }}
                             dangerouslySetInnerHTML={{ __html: normalizeBlogContent(post.content) }}
                         />

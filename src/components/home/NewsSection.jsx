@@ -59,7 +59,7 @@ export default function NewsSection() {
                                 <img
                                     src={post.thumbnail || 'https://placehold.co/600x400?text=Sakae+News'}
                                     alt={post.title}
-                                    className="rounded-xl mb-5 aspect-video object-cover w-full"
+                                    className="rounded-xl mb-5 aspect-video object-contain w-full bg-slate-50 p-2"
                                     onError={(e) => {
                                         e.target.src = 'https://placehold.co/600x400?text=Image+Not+Found';
                                     }}
