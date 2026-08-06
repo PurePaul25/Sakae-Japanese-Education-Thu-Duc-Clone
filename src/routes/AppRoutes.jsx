@@ -9,7 +9,7 @@ const NewsLazy = lazy(() => import('../pages/News'));
 const NewsDetailLazy = lazy(() => import('../pages/NewsDetail'));
 const ContactLazy = lazy(() => import('../pages/Contact'));
 const OpeningScheduleLazy = lazy(() => import('../pages/OpeningSchedule'));
-const CourseDetailLazy = lazy(() => import('../features/courses/CourseDetail'));
+const CourseDetailPageLazy = lazy(() => import('../features/courses/CourseDetailPage'));
 const GalleryLazy = lazy(() => import('../pages/Gallerys'));
 const JLPTMockTestLazy = lazy(() => import('../pages/JLPTMockTest'));
 const SearchResultsLazy = lazy(() => import('../pages/SearchResults'));
@@ -55,12 +55,12 @@ function AppRoutes() {
             <Routes>
                 <Route path="/" element={<HomeLazy />} />
                 <Route path="/gioi-thieu" element={<AboutLazy />} />
-                <Route path="/khoa-hoc" element={<ClassesLazy />} />
+                <Route path="/khoa-hoc-tieng-nhat" element={<ClassesLazy />} />
                 <Route path="/tin-tuc" element={<NewsLazy />} />
                 <Route path="/tin-tuc/:slug" element={<NewsDetailLazy />} />
                 <Route path="/lien-he" element={<ContactLazy />} />
                 <Route path="/lich-khai-giang" element={<OpeningScheduleLazy />} />
-                <Route path="/chi-tiet-khoa-hoc/:id" element={<CourseDetailLazy />} />
+                <Route path="/khoa-hoc-tieng-nhat/:slug" element={<CourseDetailPageLazy />} />
                 <Route path="/bo-suu-tap" element={<GalleryLazy />} />
                 <Route path="/tim-kiem" element={<SearchResultsLazy />} />
                 <Route path="/nguoi-dung/:id" element={<PublicProfileLazy />} />

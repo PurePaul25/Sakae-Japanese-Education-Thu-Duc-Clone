@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { searchCourses } from '../utils/searchUtils';
 import { FaNewspaper, FaBook, FaCalendar, FaTag, FaArrowRight } from 'react-icons/fa';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
 import SEO from '../hooks/useSEO';
 import blogService from '../services/blogService';
+import { getCourses } from '../services/courseService';
 
 const normalizeText = (text = '') =>
     text
@@ -29,21 +29,37 @@ const filterNewsByQuery = (items, query) => {
     });
 };
 
+const normalizeCourse = (course) => ({
+    id: course.id,
+    name: course.title || course.name || 'Khóa học',
+    desc: course.description || course.summary || '',
+    level: course.level || 'Khóa học',
+    type: course.type || '',
+    image: course.thumbnail || course.image || 'https://placehold.co/400x300?text=Sakae+Course',
+    thumbnail: course.thumbnail || course.image || 'https://placehold.co/400x300?text=Sakae+Course',
+    schedule: course.nextSchedule ? `${new Date(course.nextSchedule.startDate).toLocaleDateString('vi-VN')} • ${course.nextSchedule.time || ''}` : 'Chưa có lịch khai giảng',
+    slug: course.slug,
+});
+
 const SearchResults = () => {
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') || '';
     const [activeTab, setActiveTab] = useState('all');
     const [newsResults, setNewsResults] = useState([]);
+    const [courseResults, setCourseResults] = useState([]);
     const [newsLoading, setNewsLoading] = useState(false);
+    const [courseLoading, setCourseLoading] = useState(false);
     const [newsError, setNewsError] = useState(null);
-
-    const courseResults = useMemo(() => searchCourses(query), [query]);
+    const [courseError, setCourseError] = useState(null);
 
     useEffect(() => {
         if (!query.trim()) {
             setNewsResults([]);
+            setCourseResults([]);
             setNewsLoading(false);
+            setCourseLoading(false);
             setNewsError(null);
+            setCourseError(null);
             return;
         }
 
@@ -88,7 +104,31 @@ const SearchResults = () => {
             }
         };
 
+        const fetchCourses = async () => {
+            setCourseLoading(true);
+            setCourseError(null);
+            try {
+                const res = await getCourses({ q: query.trim(), limit: 100 });
+                const items = res?.data?.items ?? res?.items ?? [];
+                const normalized = items.map(normalizeCourse);
+                if (!ignore) {
+                    setCourseResults(normalized);
+                }
+            } catch {
+                if (!ignore) {
+                    setCourseResults([]);
+                    setCourseError('Không thể tải khóa học từ API lúc này.');
+                }
+            } finally {
+                if (!ignore) {
+                    setCourseLoading(false);
+                }
+            }
+        };
+
         fetchNews();
+        fetchCourses();
+
         return () => {
             ignore = true;
         };
@@ -260,19 +300,21 @@ const SearchResults = () => {
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                         {filteredResults.courses.map((course) => (
                                             <Link
-                                                key={course.id}
-                                                to={`/chi-tiet-khoa-hoc/${course.id}`}
+                                                key={course.slug}
+                                                to={`/khoa-hoc-tieng-nhat/${course.slug}`}
                                                 className="group h-full flex flex-col bg-white rounded-lg shadow-md hover:shadow-xl overflow-hidden transition duration-300 transform hover:-translate-y-1 cursor-pointer"
                                             >
                                                 <div className="relative h-48 overflow-hidden bg-gray-200 shrink-0">
-                                                    <img
-                                                        src={course.image}
-                                                        alt={course.name}
-                                                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                                                        onError={(e) => {
-                                                            e.target.src = 'https://placehold.co/400x300?text=Image+Not+Found';
-                                                        }}
-                                                    />
+                                                    <Link to={`/khoa-hoc-tieng-nhat/${course.slug}`}>
+                                                        <img
+                                                            src={course.image}
+                                                            alt={course.name}
+                                                            className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                                                            onError={(e) => {
+                                                                e.target.src = 'https://placehold.co/400x300?text=Image+Not+Found';
+                                                            }}
+                                                        />
+                                                    </Link>
                                                     <span className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-bold shadow-lg">
                                                         {course.level}
                                                     </span>

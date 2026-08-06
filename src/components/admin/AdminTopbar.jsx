@@ -59,16 +59,6 @@ const AdminTopbar = ({ admin, onLogout }) => {
 
     return (
         <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 px-6 flex items-center justify-between transition-colors">
-            {/* Search Bar */}
-            <div className="flex-1 max-w-sm hidden md:flex items-center bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-transparent focus-within:border-red-400 focus-within:bg-white dark:focus-within:bg-slate-900 transition-all">
-                <Search className="w-4 h-4 text-slate-400" />
-                <input
-                    type="text"
-                    placeholder="Tìm kiếm..."
-                    className="bg-transparent border-none focus:ring-0 text-sm w-full ml-2 text-slate-600 dark:text-slate-300 outline-none"
-                />
-            </div>
-
             {/* Right Actions */}
             <div className="flex items-center gap-4 ml-auto">
                 {/* Date/Time */}

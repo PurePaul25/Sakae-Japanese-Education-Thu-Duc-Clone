@@ -9,6 +9,7 @@ import DataTable from '../../components/admin/DataTable';
 import AdminCourses from '../../components/admin/AdminCourses';
 import AdminSettings from '../../components/admin/AdminSettings';
 import AdminBlog from '../../components/admin/AdminBlog';
+import AdminRegistrations from '../../components/admin/AdminRegistrations';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import SEO from '../../hooks/useSEO';
@@ -316,6 +317,12 @@ const AdminDashboard = () => {
                 );
             case 'khoa-hoc':
                 return <AdminCourses />;
+            case 'dang-ky':
+                return (
+                    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
+                        <AdminRegistrations />
+                    </motion.div>
+                );
             case 'cai-dat':
                 return <AdminSettings admin={admin} />;
             case 'jlpt':

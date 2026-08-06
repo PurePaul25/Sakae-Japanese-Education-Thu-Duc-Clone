@@ -11,17 +11,19 @@ import {
     LogOut,
     ChevronLeft,
     ChevronRight,
-    GraduationCap
+    GraduationCap,
+    ClipboardList,
 } from 'lucide-react';
 
 const menuItems = [
-    { id: 'dashboard', label: 'Bảng điều khiển', icon: LayoutDashboard, path: '/admin/dashboard' },
-    { id: 'users', label: 'Người dùng', icon: Users, path: '/admin/dashboard/nguoi-dung' },
-    { id: 'courses', label: 'Khóa học', icon: BookOpen, path: '/admin/dashboard/khoa-hoc' },
-    { id: 'jlpt', label: 'Đề thi JLPT', icon: ClipboardCheck, path: '/admin/dashboard/jlpt' },
-    { id: 'news', label: 'Tin tức', icon: Newspaper, path: '/admin/dashboard/tin-tuc' },
-    { id: 'media', label: 'Thư viện media', icon: ImageIcon, path: '/admin/dashboard/thu-vien-anh' },
-    { id: 'settings', label: 'Cài đặt', icon: Settings, path: '/admin/dashboard/cai-dat' },
+    { id: 'dashboard',   label: 'Bảng điều khiển', icon: LayoutDashboard, path: '/admin/dashboard' },
+    { id: 'users',       label: 'Người dùng',       icon: Users,           path: '/admin/dashboard/nguoi-dung' },
+    { id: 'courses',     label: 'Khóa học',         icon: BookOpen,        path: '/admin/dashboard/khoa-hoc' },
+    { id: 'dang-ky',     label: 'Đăng ký tư vấn',  icon: ClipboardList,   path: '/admin/dashboard/dang-ky' },
+    { id: 'jlpt',        label: 'Đề thi JLPT',      icon: ClipboardCheck,  path: '/admin/dashboard/jlpt' },
+    { id: 'news',        label: 'Tin tức',           icon: Newspaper,       path: '/admin/dashboard/tin-tuc' },
+    { id: 'media',       label: 'Thư viện media',   icon: ImageIcon,       path: '/admin/dashboard/thu-vien-anh' },
+    { id: 'settings',    label: 'Cài đặt',          icon: Settings,        path: '/admin/dashboard/cai-dat' },
 ];
 
 const AdminSidebar = ({ isCollapsed, setIsCollapsed, onLogout }) => {
@@ -59,8 +61,8 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed, onLogout }) => {
                             to={item.path}
                             className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer ${
                                 isActive 
-                                    ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400' 
-                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+                                    ? 'bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400' 
+                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                             }`}
                         >
                             <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-red-600 dark:text-red-400' : ''}`} />

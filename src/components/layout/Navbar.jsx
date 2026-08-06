@@ -14,7 +14,7 @@ import SearchBar from './SearchBar';
 const menuItems = [
     { label: 'Trang chủ', href: '/' },
     { label: 'Giới thiệu', href: '/gioi-thieu' },
-    { label: 'Khóa học', href: '/khoa-hoc' },
+    { label: 'Khóa học', href: '/khoa-hoc-tieng-nhat' },
     { label: 'Tin tức', href: '/tin-tuc' },
     {
         label: 'Khác',
@@ -224,7 +224,7 @@ function Navbar() {
                 <div className="flex items-center gap-3 md:gap-4">
                     {/* Nút đăng ký học (luôn hiển thị) */}
                     <Link
-                        to="/khoa-hoc"
+                        to="/khoa-hoc-tieng-nhat"
                         className="hidden md:flex items-center gap-1 cursor-pointer bg-red-600 text-white py-2 px-3 rounded-md hover:bg-red-700 transition duration-200 ease-out"
                     >
                         Đăng ký học
@@ -522,7 +522,7 @@ function Navbar() {
                         </div>
                         <div className="my-1">
                             <Link
-                                to="/khoa-hoc"
+                                to="/khoa-hoc-tieng-nhat"
                                 className=" bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200 cursor-pointer"
                                 onClick={() => setIsMenuOpen(false)}
                             >

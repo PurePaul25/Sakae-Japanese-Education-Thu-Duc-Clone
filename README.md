@@ -96,8 +96,3 @@ cd Sakae-Japanese-Education-Thu-Duc-Clone
 npm install
 npm run dev
 ```
-
-📝 Ghi chú
-⚠️ Lưu ý: Dự án này được tạo ra cho mục đích học tập và trình diễn kỹ năng lập trình.
-Không có liên kết chính thức với trung tâm Nhật ngữ Sakae hoặc bất kỳ tổ chức giáo dục nào khác.
-Mọi nội dung và hình ảnh (nếu có) chỉ mang tính minh họa.

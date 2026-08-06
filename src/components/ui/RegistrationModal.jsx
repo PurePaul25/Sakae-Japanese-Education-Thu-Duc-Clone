@@ -1,281 +1,322 @@
 import React, { useState, useEffect } from 'react';
-import { FaTimes, FaCheckCircle } from 'react-icons/fa';
+import { FaTimes, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import { FiLoader } from 'react-icons/fi';
+import { IoIosCall } from "react-icons/io";
+import api from '../../utils/api';
+import DropdownSelect from './DropdownSelect';
 
-const RegistrationModal = ({ isOpen, onClose, courseName, courseId }) => {
-    const [formData, setFormData] = useState({
-        fullName: '',
-        email: '',
-        phone: '',
-        address: '',
-        notes: '',
-    });
+// ─── helpers ──────────────────────────────────────────────────────────────────
+const PHONE_RE = /^[0-9]{10,11}$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    const [errors, setErrors] = useState({});
+function validate(form) {
+    const e = {};
+    if (!form.fullName.trim()) e.fullName = 'Vui lòng nhập họ tên';
+    if (!form.email.trim()) e.email = 'Vui lòng nhập email';
+    else if (!EMAIL_RE.test(form.email)) e.email = 'Email không đúng định dạng';
+    if (!form.phone.trim()) e.phone = 'Vui lòng nhập số điện thoại';
+    else if (!PHONE_RE.test(form.phone.replace(/\s+/g, ''))) e.phone = 'Số điện thoại phải có 10–11 chữ số';
+    return e;
+}
+
+const EMPTY = { fullName: '', email: '', phone: '', zalo: '', note: '' };
+
+// ─── RegistrationModal ────────────────────────────────────────────────────────
+const RegistrationModal = ({
+    isOpen,
+    onClose,
+    courseName = '',
+    courseId = '',
+    preSelectedScheduleId = '',
+}) => {
+    const [form, setForm]           = useState(EMPTY);
+    const [errors, setErrors]       = useState({});
+    const [scheduleId, setScheduleId] = useState('');
+    const [schedules, setSchedules] = useState([]);
+    const [loadingSchedules, setLoadingSchedules] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [apiError, setApiError]   = useState('');
+    const [show, setShow]           = useState(false);
     const [isClosing, setIsClosing] = useState(false);
+
+    // Fetch schedules when courseId is available
+    useEffect(() => {
+        if (!courseId || !isOpen) return;
+        setLoadingSchedules(true);
+        api.get(`/courses/${courseId}/schedules`)
+            .then((res) => {
+                const data = res.data?.data ?? res.data ?? [];
+                // Only show upcoming / open schedules
+                const open = data.filter(
+                    (s) => s.status !== 'Đã kết thúc' && s.status !== 'Đã đầy',
+                );
+                setSchedules(open);
+                // Pre-select schedule if provided via prop
+                if (preSelectedScheduleId && open.some((s) => s.id === preSelectedScheduleId)) {
+                    setScheduleId(preSelectedScheduleId);
+                }
+            })
+            .catch(() => setSchedules([]))
+            .finally(() => setLoadingSchedules(false));
+    }, [courseId, isOpen, preSelectedScheduleId]);
+
+    // Animation
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+            const t = setTimeout(() => setShow(true), 10);
+            return () => clearTimeout(t);
+        } else {
+            setShow(false);
+            document.body.style.overflow = 'auto';
+        }
+        return () => { document.body.style.overflow = 'auto'; };
+    }, [isOpen]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-        // Clear error for this field when user starts typing
-        if (errors[name]) {
-            setErrors((prev) => ({
-                ...prev,
-                [name]: '',
-            }));
-        }
+        setForm((prev) => ({ ...prev, [name]: value }));
+        if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
+        if (apiError) setApiError('');
     };
 
-    const validate = () => {
-        const newErrors = {};
-        if (!formData.fullName.trim()) newErrors.fullName = 'Vui lòng nhập họ tên!';
-        if (!formData.email.trim()) newErrors.email = 'Vui lòng nhập email!';
-        else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email không hợp lệ!';
-        if (!formData.phone.trim()) newErrors.phone = 'Vui lòng nhập số điện thoại!';
-        else if (!/^[\d\s\-+()]{10,}$/.test(formData.phone)) newErrors.phone = 'Số điện thoại không hợp lệ!';
-        if (!formData.address.trim()) newErrors.address = 'Vui lòng nhập địa chỉ!';
-        return newErrors;
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const newErrors = validate();
-
-        if (Object.keys(newErrors).length === 0) {
-            console.log('Registration submitted:', {
-                ...formData,
-                courseId,
-                courseName,
-                submittedAt: new Date().toISOString(),
-            });
-            setSubmitted(true);
-            setTimeout(() => {
-                handleClose();
-            }, 3000);
-        } else {
-            setErrors(newErrors);
-        }
-    };
-
-    const handleReset = () => {
-        setFormData({
-            fullName: '',
-            email: '',
-            phone: '',
-            address: '',
-            notes: '',
-        });
+    const reset = () => {
+        setForm(EMPTY);
         setErrors({});
+        setScheduleId('');
+        setSchedules([]);
+        setSubmitting(false);
         setSubmitted(false);
+        setApiError('');
     };
 
     const handleClose = () => {
         setIsClosing(true);
         setTimeout(() => {
-            handleReset();
+            reset();
             setIsClosing(false);
             onClose();
-        }, 500);
+        }, 400);
     };
 
-    const [show, setShow] = useState(false);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const errs = validate(form);
+        if (Object.keys(errs).length > 0) { setErrors(errs); return; }
 
-    // Quản lý body overflow và hiệu ứng show/hide
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-            // Trigger animation sau khi mount
-            const timer = setTimeout(() => setShow(true), 10);
-            return () => clearTimeout(timer);
-        } else {
-            setShow(false);
-            document.body.style.overflow = 'auto';
+        try {
+            setSubmitting(true);
+            setApiError('');
+            await api.post('/course-registrations', {
+                courseId,
+                scheduleId: scheduleId || undefined,
+                fullName: form.fullName.trim(),
+                email: form.email.trim().toLowerCase(),
+                phone: form.phone.replace(/\s+/g, ''),
+                zalo: form.zalo.trim() || undefined,
+                note: form.note.trim() || undefined,
+            });
+            setSubmitted(true);
+            setTimeout(() => handleClose(), 3200);
+        } catch (err) {
+            const msg =
+                err?.response?.data?.message ||
+                (Array.isArray(err?.response?.data?.message)
+                    ? err.response.data.message.join(', ')
+                    : null) ||
+                'Có lỗi xảy ra, vui lòng thử lại!';
+            setApiError(msg);
+        } finally {
+            setSubmitting(false);
         }
+    };
 
-        return () => {
-            document.body.style.overflow = 'auto';
-        };
-    }, [isOpen]);
-
-    // Render logic: Giữ modal trong DOM khi đang đóng để thấy transition
     if (!isOpen && !isClosing) return null;
+
+    const visible = show && !isClosing;
 
     return (
         <div
-            className={`fixed inset-0 z-[60] flex items-center justify-center transition-opacity duration-500 ${
-                show && !isClosing ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+            className={`fixed inset-0 z-[60] flex items-center justify-center transition-opacity duration-400 ${
+                visible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
             }`}
         >
-            {/* Backdrop - hiệu ứng tối dần có transition */}
+            {/* Backdrop */}
             <div
-                className={`fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-500 ease-in-out ${
-                    show && !isClosing ? 'opacity-100' : 'opacity-0'
-                }`}
+                className={`fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-400 ${visible ? 'opacity-100' : 'opacity-0'}`}
                 onClick={handleClose}
             />
 
-            {/* Modal Container */}
+            {/* Modal */}
             <div
-                className={`relative z-[70] bg-white rounded-2xl shadow-2xl max-w-md md:max-w-xl w-full mx-4 max-h-[85vh] transform transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden pointer-events-auto flex flex-col ${
-                    show && !isClosing ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-8'
+                className={`relative z-[70] bg-white rounded-2xl shadow-2xl max-w-md md:max-w-4xl w-full mx-4 max-h-[90vh] flex flex-col overflow-hidden transform transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+                    visible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-6'
                 }`}
             >
-                {/* Header with Gradient - cố định */}
-                <div className="flex-shrink-0 bg-gradient-to-r from-red-600 via-red-500 to-orange-600 text-white p-4 md:px-6 flex justify-between items-center">
-                    <div className="flex-1">
-                        <h2 className="text-2xl font-bold text-left">🎓 Đăng ký khóa học</h2>
-                        <p className="text-red-100 text-sm mt-2 font-medium line-clamp-2 text-left">{courseName}</p>
+                {/* Header */}
+                <div className="flex-shrink-0 bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white px-5 py-4 flex items-start justify-between">
+                    <div>
+                        <h2 className="text-xl font-black">🎓 Đăng ký tư vấn</h2>
+                        {courseName && (
+                            <p className="text-red-100 text-sm mt-1 line-clamp-2 font-medium">{courseName}</p>
+                        )}
                     </div>
                     <button
                         type="button"
                         onClick={handleClose}
-                        className="text-white cursor-pointer hover:bg-red-700 p-2 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 ml-2 flex-shrink-0"
+                        className="text-white hover:bg-red-700/50 p-1.5 rounded-full transition-all cursor-pointer ml-3 flex-shrink-0"
                     >
-                        <FaTimes size={22} />
+                        <FaTimes size={18} />
                     </button>
                 </div>
 
-                {/* Content - scrollable */}
+                {/* Scrollable body */}
                 <div className="flex-1 overflow-y-auto">
-                    {/* Success Message */}
                     {submitted ? (
-                        <div className="p-8 text-center flex flex-col items-center justify-center min-h-full bg-gradient-to-br from-green-50 via-green-50 to-emerald-50 space-y-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center animate-bounce shadow-lg">
-                                <FaCheckCircle className="text-green-600" size={40} />
+                        /* Success state */
+                        <div className="flex flex-col items-center justify-center gap-4 p-10 text-center bg-gradient-to-br from-green-50 to-emerald-50 min-h-[280px]">
+                            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center animate-bounce shadow-md">
+                                <FaCheckCircle className="text-green-600" size={36} />
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-800">Đăng ký thành công! ✨</h3>
-                            <p className="text-gray-600 text-sm max-w-xs">
-                                Cảm ơn bạn đã quan tâm đến Sakae. Chúng tôi sẽ liên hệ bạn sớm.
+                            <h3 className="text-xl font-black text-gray-800">Đăng ký thành công! 🎉</h3>
+                            <p className="text-sm text-gray-500 max-w-xs leading-relaxed">
+                                Cảm ơn bạn đã quan tâm đến Sakae. Chúng tôi sẽ liên hệ bạn trong vòng
+                                <strong> 24 giờ</strong> làm việc. Vui lòng kiểm tra email để xem xác nhận.
                             </p>
                         </div>
                     ) : (
-                        /* Form */
-                        <form onSubmit={handleSubmit} className="px-4 md:px-6 py-4 space-y-4">
+                        <form onSubmit={handleSubmit} noValidate className="p-3.5 md:p-5 space-y-4">
+                            {/* API Error */}
+                            {apiError && (
+                                <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-3 py-2.5">
+                                    <FaExclamationCircle size={15} className="flex-shrink-0 mt-0.5" />
+                                    <span>{apiError}</span>
+                                </div>
+                            )}
+
                             {/* Full Name */}
-                            <div className="space-y-2 text-left">
-                                <label className="block text-gray-700 font-semibold text-sm">
-                                    Họ và tên <span className="text-red-600">*</span>
-                                </label>
+                            <Field label="Họ và tên" required error={errors.fullName}>
                                 <input
                                     type="text"
                                     name="fullName"
-                                    value={formData.fullName}
+                                    value={form.fullName}
                                     onChange={handleChange}
-                                    autoComplete="on"
-                                    className={`w-full px-3 py-2 rounded-lg border-2 focus:outline-none transition-all duration-200 focus:shadow-lg ${
-                                        errors.fullName
-                                            ? 'border-red-500 focus:border-red-600 bg-red-50'
-                                            : 'border-gray-300 focus:border-red-600'
-                                    }`}
                                     placeholder="Nguyễn Văn A"
+                                    autoComplete="name"
+                                    className={inputCls(errors.fullName)}
                                 />
-                                {errors.fullName && (
-                                    <p className="text-red-600 text-xs font-medium">❌ {errors.fullName}</p>
-                                )}
-                            </div>
+                            </Field>
 
                             {/* Email */}
-                            <div className="space-y-2 text-left">
-                                <label className="block text-gray-700 font-semibold text-sm">
-                                    Email <span className="text-red-600">*</span>
-                                </label>
+                            <Field label="Email" required error={errors.email}>
                                 <input
                                     type="email"
                                     name="email"
-                                    value={formData.email}
+                                    value={form.email}
                                     onChange={handleChange}
-                                    autoComplete="on"
-                                    className={`w-full px-3 py-2 rounded-lg border-2 focus:outline-none transition-all duration-200 focus:shadow-lg ${
-                                        errors.email
-                                            ? 'border-red-500 focus:border-red-600 bg-red-50'
-                                            : 'border-gray-300 focus:border-red-600'
-                                    }`}
                                     placeholder="your@email.com"
+                                    autoComplete="email"
+                                    className={inputCls(errors.email)}
                                 />
-                                {errors.email && <p className="text-red-600 text-xs font-medium">❌ {errors.email}</p>}
+                            </Field>
+
+                            {/* Phone + Zalo side by side */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <Field label="Điện thoại" required error={errors.phone}>
+                                    <input
+                                        type="tel"
+                                        name="phone"
+                                        value={form.phone}
+                                        onChange={handleChange}
+                                        placeholder="0901234567"
+                                        autoComplete="tel"
+                                        className={inputCls(errors.phone)}
+                                    />
+                                </Field>
+                                <Field label="Zalo (tùy chọn)">
+                                    <input
+                                        type="text"
+                                        name="zalo"
+                                        value={form.zalo}
+                                        onChange={handleChange}
+                                        placeholder="Số Zalo"
+                                        className={inputCls()}
+                                    />
+                                </Field>
                             </div>
 
-                            {/* Phone */}
-                            <div className="space-y-2 text-left">
-                                <label className="block text-gray-700 font-semibold text-sm">
-                                    Số điện thoại <span className="text-red-600">*</span>
+                            {/* Schedule picker */}
+                            <div className="space-y-1.5">
+                                <label className="block text-sm font-semibold text-gray-700">
+                                    Lịch khai giảng{' '}
+                                    <span className="text-gray-400 font-normal">(tùy chọn)</span>
                                 </label>
-                                <input
-                                    type="tel"
-                                    name="phone"
-                                    value={formData.phone}
-                                    onChange={handleChange}
-                                    autoComplete="on"
-                                    className={`w-full px-3 py-2 rounded-lg border-2 focus:outline-none transition-all duration-200 focus:shadow-lg ${
-                                        errors.phone
-                                            ? 'border-red-500 focus:border-red-600 bg-red-50'
-                                            : 'border-gray-300 focus:border-red-600'
-                                    }`}
-                                    placeholder="0123 456 789"
-                                />
-                                {errors.phone && <p className="text-red-600 text-xs font-medium">❌ {errors.phone}</p>}
+                                {loadingSchedules ? (
+                                    <div className="flex items-center gap-2 text-sm text-gray-400 py-2">
+                                        <FiLoader size={14} className="animate-spin" />
+                                        Đang tải lịch...
+                                    </div>
+                                ) : schedules.length > 0 ? (
+                                    <DropdownSelect
+                                        name="scheduleId"
+                                        value={scheduleId}
+                                        onChange={(value) => setScheduleId(value)}
+                                        options={schedules.map((s) => ({
+                                            value: s.id,
+                                            label: `${new Date(s.startDate).toLocaleDateString('vi-VN')} • ${s.time} • ${s.studyDays}${s.teacher ? ` • GV: ${s.teacher}` : ''} [${s.status}]`,
+                                        }))}
+                                        placeholder="Chọn lịch khai giảng"
+                                        buttonClassName="text-sm"
+                                        containerClassName="w-full"
+                                    />
+                                ) : courseId ? (
+                                    <p className="text-xs text-gray-400 italic py-1">
+                                        Hiện chưa có lịch khai giảng cụ thể. Chúng tôi sẽ tư vấn khi liên hệ.
+                                    </p>
+                                ) : null}
                             </div>
 
-                            {/* Address */}
-                            <div className="space-y-2 text-left">
-                                <label className="block text-gray-700 font-semibold text-sm">
-                                    Địa chỉ <span className="text-red-600">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    name="address"
-                                    value={formData.address}
-                                    onChange={handleChange}
-                                    autoComplete="on"
-                                    className={`w-full px-3 py-2 rounded-lg border-2 focus:outline-none transition-all duration-200 focus:shadow-lg ${
-                                        errors.address
-                                            ? 'border-red-500 focus:border-red-600 bg-red-50'
-                                            : 'border-gray-300 focus:border-red-600'
-                                    }`}
-                                    placeholder="123 Đường ABC, Quận XYZ, TP HCM"
-                                />
-                                {errors.address && (
-                                    <p className="text-red-600 text-xs font-medium">❌ {errors.address}</p>
-                                )}
-                            </div>
-
-                            {/* Notes */}
-                            <div className="space-y-2 text-left">
-                                <label className="block text-gray-700 font-semibold text-sm">
-                                    Ghi chú thêm (tùy chọn)
-                                </label>
+                            {/* Note */}
+                            <Field label="Ghi chú (tùy chọn)">
                                 <textarea
-                                    name="notes"
-                                    value={formData.notes}
+                                    name="note"
+                                    value={form.note}
                                     onChange={handleChange}
-                                    className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-red-600 focus:outline-none transition-all duration-200 focus:shadow-lg resize-none"
-                                    rows="3"
-                                    placeholder="Bạn có câu hỏi hoặc yêu cầu đặc biệt không?"
+                                    placeholder="Bạn có câu hỏi hoặc yêu cầu đặc biệt?"
+                                    rows={3}
+                                    className="w-full px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-red-500 focus:outline-none resize-none text-sm transition-colors"
                                 />
-                            </div>
+                            </Field>
 
                             {/* Buttons */}
-                            <div className="flex gap-4 pt-6 border-t border-gray-200">
+                            <div className="flex gap-3 pt-3 border-t border-gray-100">
                                 <button
                                     type="button"
                                     onClick={handleClose}
-                                    className="flex-1 px-4 cursor-pointer py-3 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition-all duration-200 transform hover:scale-105 active:scale-95"
+                                    disabled={submitting}
+                                    className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all cursor-pointer text-sm disabled:opacity-50"
                                 >
                                     Hủy
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 px-4 cursor-pointer py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-lg font-semibold hover:from-red-700 hover:to-orange-700 transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
+                                    disabled={submitting}
+                                    className="flex-1 py-2.5 bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white font-bold rounded-xl transition-all cursor-pointer text-sm shadow-md shadow-red-100 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                                 >
-                                    ✓ Đăng ký
+                                    {submitting ? (
+                                        <>
+                                            <FiLoader size={14} className="animate-spin" />
+                                            Đang gửi...
+                                        </>
+                                    ) : (
+                                        '✓ Đăng ký tư vấn'
+                                    )}
                                 </button>
                             </div>
 
-                            <p className="text-xs text-gray-500 text-center mt-4">
-                                📞 Chúng tôi sẽ liên hệ bạn trong vòng 24 giờ
+                            <p className="text-[13px] text-gray-400 text-center">
+                                <IoIosCall size={20} className="inline-block" /> Chúng tôi sẽ liên hệ bạn trong vòng 24 giờ làm việc
                             </p>
                         </form>
                     )}
@@ -284,5 +325,28 @@ const RegistrationModal = ({ isOpen, onClose, courseName, courseId }) => {
         </div>
     );
 };
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+const Field = ({ label, required, error, children }) => (
+    <div className="space-y-1.5">
+        <label className="block text-sm font-semibold text-gray-700">
+            {label}
+            {required && <span className="text-red-500 ml-0.5">*</span>}
+        </label>
+        {children}
+        {error && (
+            <p className="text-red-500 text-xs font-medium flex items-center gap-1">
+                <FaExclamationCircle size={11} /> {error}
+            </p>
+        )}
+    </div>
+);
+
+const inputCls = (error) =>
+    `w-full px-3 py-2 rounded-xl border-2 text-sm transition-colors focus:outline-none focus:shadow-sm ${
+        error
+            ? 'border-red-400 focus:border-red-500 bg-red-50'
+            : 'border-gray-200 focus:border-red-500'
+    }`;
 
 export default RegistrationModal;

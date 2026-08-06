@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
     Plus,
     Pencil,
@@ -19,9 +19,11 @@ import {
     AlertTriangle,
     Undo,
     Redo,
+    Search,
 } from 'lucide-react';
 import blogService from '../../services/blogService';
 import { useToast } from '../../contexts/ToastContext';
+import DropdownSelect from '../ui/DropdownSelect';
 
 const CATEGORIES = [
     'Học tiếng Nhật',
@@ -32,6 +34,11 @@ const CATEGORIES = [
     'Văn hóa Nhật Bản',
     'JLPT',
     'Khóa học',
+];
+const BLOG_STATUS_OPTIONS = [
+    { label: 'Tất cả trạng thái', value: '' },
+    { label: 'Đã đăng', value: 'published' },
+    { label: 'Nháp', value: 'draft' },
 ];
 
 // ─── Delete Confirm Modal (supports enter/exit transition) ───────────────────
@@ -112,7 +119,9 @@ const WysiwygEditor = ({ value, onChange }) => {
                 const hasClass = /class=/.test(attrs);
                 const hasStyle = /style=/.test(attrs);
                 const classAttr = hasClass ? '' : ' class="mx-auto my-4 max-w-full h-auto rounded-xl block"';
-                const styleAttr = hasStyle ? '' : ' style="max-width:100%; width:100%; height:auto; display:block; margin:10px 0; border-radius:10px; object-fit:cover;"';
+                const styleAttr = hasStyle
+                    ? ''
+                    : ' style="max-width:100%; width:100%; height:auto; display:block; margin:10px 0; border-radius:10px; object-fit:cover;"';
                 return `<img${attrs}${classAttr}${styleAttr}>`;
             })
             .replace(/\r\n|\r|\n/g, '<br>')
@@ -439,13 +448,7 @@ const WysiwygEditor = ({ value, onChange }) => {
                 <span className="ml-auto text-sm text-slate-500 pr-1 hidden lg:block">Soạn thảo văn bản</span>
             </div>
 
-            <input
-                ref={imageInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageSelect}
-            />
+            <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
 
             {/* Editable area */}
             <div
@@ -642,7 +645,31 @@ const BlogModal = ({ post, onClose, onSaved, show, duration = 300 }) => {
                             className="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-4 cursor-pointer hover:border-red-400 transition-colors flex flex-col items-center gap-2"
                         >
                             {preview ? (
-                                <img src={preview} alt="preview" className="w-full h-70 object-cover rounded-lg" />
+                                <div className="relative">
+                                    <img
+                                        src={preview}
+                                        alt="preview"
+                                        className="w-full h-auto object-contain max-h-[360px] rounded-lg"
+                                    />
+                                    {/* Nút xóa */}
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+
+                                            setPreview(null);
+
+                                            // Reset input để có thể chọn lại cùng 1 file
+                                            if (fileRef.current) {
+                                                fileRef.current.value = '';
+                                            }
+                                        }}
+                                        className="absolute top-2 right-2 w-9 h-9 cursor-pointer rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-500 transition"
+                                        title='Xóa ảnh thumbnail'
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
                             ) : (
                                 <>
                                     <Upload size={24} className="text-slate-400" />
@@ -802,6 +829,9 @@ const AdminBlog = () => {
     const [meta, setMeta] = useState(null);
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(true);
+    const [categoryFilter, setCategoryFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [search, setSearch] = useState('');
     const [modal, setModal] = useState(null);
     const [showBlogModal, setShowBlogModal] = useState(false);
     const blogModalDuration = 300; // ms
@@ -809,6 +839,22 @@ const AdminBlog = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const deleteModalDuration = 300; // ms
     const [deleting, setDeleting] = useState(false);
+
+    const filteredPosts = useMemo(() => {
+        const query = search.trim().toLowerCase();
+
+        return posts.filter((post) => {
+            if (categoryFilter && post.category !== categoryFilter) return false;
+            if (statusFilter) {
+                if (statusFilter === 'published' && !post.isPublished) return false;
+                if (statusFilter === 'draft' && post.isPublished) return false;
+            }
+            if (!query) return true;
+            return [post.title, post.slug, post.excerpt, post.category]
+                .filter(Boolean)
+                .some((field) => field.toLowerCase().includes(query));
+        });
+    }, [posts, categoryFilter, statusFilter, search]);
 
     const fetchPosts = useCallback(async (p = 1) => {
         setLoading(true);
@@ -862,7 +908,39 @@ const AdminBlog = () => {
                 </button>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+                <div className="px-4 py-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap gap-3 items-center">
+                    <div className="relative flex-1 min-w-[220px]">
+                        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                        <input
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Tìm tiêu đề, slug hoặc mô tả..."
+                            className="w-full pl-10 pr-3 py-2 transition duration-200 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                        />
+                    </div>
+                    <div className="min-w-[220px]">
+                        <DropdownSelect
+                            value={categoryFilter}
+                            onChange={setCategoryFilter}
+                            options={[
+                                { label: 'Tất cả danh mục', value: '' },
+                                ...CATEGORIES.map((c) => ({ label: c, value: c })),
+                            ]}
+                            placeholder="Danh mục"
+                            buttonClassName="text-sm"
+                        />
+                    </div>
+                    <div className="min-w-[180px]">
+                        <DropdownSelect
+                            value={statusFilter}
+                            onChange={setStatusFilter}
+                            options={BLOG_STATUS_OPTIONS}
+                            placeholder="Trạng thái"
+                            buttonClassName="text-sm"
+                        />
+                    </div>
+                </div>
                 <div className="overflow-x-auto relative">
                     <table className="w-full text-left">
                         <thead>
@@ -890,14 +968,14 @@ const AdminBlog = () => {
                                         ))}
                                     </tr>
                                 ))
-                            ) : posts.length === 0 ? (
+                            ) : filteredPosts.length === 0 ? (
                                 <tr>
                                     <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
                                         Chưa có bài viết nào. Nhấn "Tạo bài viết" để bắt đầu!
                                     </td>
                                 </tr>
                             ) : (
-                                posts.map((post) => (
+                                filteredPosts.map((post) => (
                                     <tr
                                         key={post.id}
                                         className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
@@ -980,7 +1058,7 @@ const AdminBlog = () => {
                     )}
                 </div>
 
-                {meta && meta.totalPages > 1 && (
+                {!(search || categoryFilter || statusFilter) && meta && meta.totalPages > 1 && (
                     <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                         <p className="text-sm text-slate-500">
                             Trang <span className="font-semibold">{page}</span> /{' '}

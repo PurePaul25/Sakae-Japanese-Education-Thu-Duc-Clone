@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Search, Trash2, X, Edit3, Check, FileImage, Plus, Calendar, Tag, Activity, AlertTriangle } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
@@ -44,7 +44,7 @@ const AdminCustomSelect = ({ value, onChange, options, placeholder, icon }) => {
             </button>
 
             {isOpen && (
-                <div className="absolute top-full mt-2 left-0 right-0 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl shadow-xl z-[100] max-h-60 overflow-y-auto py-1.5 animate-fadeIn">
+                <div className="absolute top-full mt-2 left-0 right-0 bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-800 rounded-xl shadow-xl z-[100] max-h-60 overflow-y-auto py-1.5 animate-fadeIn">
                     {options.map((opt) => (
                         <button
                             key={opt.value}
@@ -85,6 +85,10 @@ const MediaLibrary = () => {
     const [isUpdating, setIsUpdating] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [editData, setEditData] = useState({ id: '', title: '', caption: '', category: '' });
+    const [editImageFile, setEditImageFile] = useState(null);
+    const [editImagePreview, setEditImagePreview] = useState('');
+    const editFileRef = useRef(null);
+    const modalBodyOverflowRef = useRef('');
     const { addToast } = useToast();
 
     // Pagination states
@@ -143,6 +147,27 @@ const MediaLibrary = () => {
         fetchGallery();
     }, [fetchGallery]);
 
+    useEffect(() => {
+        const activeModal = selectedImage || isEditModalOpen || isDeleteModalOpen;
+
+        if (activeModal) {
+            if (modalBodyOverflowRef.current === '') {
+                modalBodyOverflowRef.current = document.body.style.overflow;
+            }
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = modalBodyOverflowRef.current || 'auto';
+            modalBodyOverflowRef.current = '';
+        }
+
+        return () => {
+            if (modalBodyOverflowRef.current !== '') {
+                document.body.style.overflow = modalBodyOverflowRef.current || 'auto';
+                modalBodyOverflowRef.current = '';
+            }
+        };
+    }, [selectedImage, isEditModalOpen, isDeleteModalOpen]);
+
     const handleDeleteClick = (image) => {
         setImageToDelete(image);
         setIsDeleteModalOpen(true);
@@ -174,14 +199,53 @@ const MediaLibrary = () => {
             caption: image.caption || '',
             category: image.category || 'Lớp học',
         });
+        setEditImageFile(null);
+        setEditImagePreview(image.imageUrl || '');
+        if (editFileRef.current) {
+            editFileRef.current.value = '';
+        }
         setIsEditModalOpen(true);
+    };
+
+    const handleEditImageChange = (e) => {
+        const selectedFile = e.target.files[0];
+        if (!selectedFile) return;
+
+        if (selectedFile.size > 5 * 1024 * 1024) {
+            addToast('Ảnh quá lớn (tối đa 5MB)', 'error');
+            if (editFileRef.current) {
+                editFileRef.current.value = '';
+            }
+            return;
+        }
+
+        setEditImageFile(selectedFile);
+        setEditImagePreview(URL.createObjectURL(selectedFile));
     };
 
     const handleUpdate = async (e) => {
         e.preventDefault();
         try {
             setIsUpdating(true);
-            await api.patch(`/gallery/${editData.id}`, editData);
+
+            if (editImageFile) {
+                const formData = new FormData();
+                formData.append('image', editImageFile);
+                formData.append('title', editData.title);
+                formData.append('caption', editData.caption);
+                formData.append('category', editData.category);
+
+                await api.patch(`/gallery/${editData.id}`, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
+            } else {
+                await api.patch(`/gallery/${editData.id}`, {
+                    title: editData.title,
+                    caption: editData.caption,
+                    category: editData.category,
+                });
+            }
+
             addToast('Cập nhật thành công!', 'success');
             setIsEditModalOpen(false);
             fetchGallery();
@@ -278,11 +342,12 @@ const MediaLibrary = () => {
                             {paginatedImages.map((image) => (
                                 <motion.div
                                     key={image.id}
-                                    layout
-                                    initial={{ opacity: 0, y: 20 }}
+                                    initial={{ opacity: 0, y: 16 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.9 }}
-                                    className="group relative bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-500"
+                                    exit={{ opacity: 0, scale: 0.96 }}
+                                    transition={{ duration: 0.16, ease: 'easeOut' }}
+                                    style={{ willChange: 'opacity, transform' }}
+                                    className="group relative bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-lg transition-shadow duration-200"
                                 >
                                     <div
                                         className="aspect-[16/10] overflow-hidden cursor-pointer"
@@ -291,7 +356,7 @@ const MediaLibrary = () => {
                                         <img
                                             src={image.imageUrl}
                                             alt={image.title}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200 ease-out"
                                         />
                                     </div>
 
@@ -399,13 +464,17 @@ const MediaLibrary = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+                        transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                        style={{ willChange: 'opacity' }}
+                        className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80"
                         onClick={() => setSelectedImage(null)}
                     >
                         <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
+                            initial={{ scale: 0.95, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                            style={{ willChange: 'transform, opacity' }}
                             className="bg-white dark:bg-slate-900 rounded-[1rem] max-w-5xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col md:flex-row"
                             onClick={(e) => e.stopPropagation()}
                         >
@@ -498,19 +567,23 @@ const MediaLibrary = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                        transition={{ duration: 0.16, ease: 'easeOut' }}
+                        style={{ willChange: 'opacity' }}
+                        className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70"
                         onClick={() => setIsEditModalOpen(false)}
                     >
                         <motion.div
-                            initial={{ scale: 0.9, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.9, y: 20 }}
-                            className="bg-white dark:bg-slate-900 rounded-[1rem] max-w-2xl w-full overflow-hidden shadow-2xl border border-white/20"
+                            initial={{ scale: 0.96, y: 20, opacity: 0 }}
+                            animate={{ scale: 1, y: 0, opacity: 1 }}
+                            exit={{ scale: 0.96, y: 20, opacity: 0 }}
+                            transition={{ duration: 0.16, ease: 'easeOut' }}
+                            style={{ willChange: 'transform, opacity' }}
+                            className="bg-white dark:bg-slate-900 rounded-[1rem] max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl border border-white/20"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
                                 <h3 className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-2">
-                                    <Edit3 className="text-red-600" /> Sửa thông tin
+                                    <Edit3 className="text-red-600" /> Sửa thông tin ảnh
                                 </h3>
                                 <button
                                     onClick={() => setIsEditModalOpen(false)}
@@ -520,15 +593,58 @@ const MediaLibrary = () => {
                                 </button>
                             </div>
 
-                            <form onSubmit={handleUpdate} className="p-4 space-y-5">
+                            <form onSubmit={handleUpdate} className="p-4 space-y-5 overflow-y-auto max-h-[78vh]">
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mb-2 block ml-1">
+                                        <label className="text-xs font-black text-slate-600 uppercase tracking-[0.1em] mb-2 block ml-1">
+                                            Ảnh mới (tùy chọn)
+                                        </label>
+                                        <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 mb-3 bg-slate-100 dark:bg-slate-800 p-1.5">
+                                            <img
+                                                src={editImagePreview || selectedImage?.imageUrl}
+                                                alt="Ảnh chỉnh sửa"
+                                                className="w-full h-auto object-contain max-h-[300px]"
+                                            />
+                                        </div>
+
+                                        <div className="flex flex-wrap gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => editFileRef.current?.click()}
+                                                className="px-4 py-2 bg-red-600 cursor-pointer text-white rounded-2xl font-bold hover:bg-red-700 transition-all"
+                                            >
+                                                Chọn ảnh khác
+                                            </button>
+                                            {editImageFile && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setEditImageFile(null);
+                                                        setEditImagePreview(selectedImage?.imageUrl || '');
+                                                        if (editFileRef.current) editFileRef.current.value = '';
+                                                    }}
+                                                    className="px-4 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-2xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                                                >
+                                                    Bỏ chọn ảnh
+                                                </button>
+                                            )}
+                                        </div>
+                                        <input
+                                            ref={editFileRef}
+                                            type="file"
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={handleEditImageChange}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs font-black text-slate-600 uppercase tracking-[0.1em] mb-2 block ml-1">
                                             Tiêu đề ảnh
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-1 focus:ring-red-500 outline-none dark:text-white transition-all font-medium"
+                                            className="w-full px-3.5 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-2xl focus:ring-1 focus:ring-red-500 outline-none dark:text-white transition-all font-medium"
                                             value={editData.title}
                                             onChange={(e) => setEditData({ ...editData, title: e.target.value })}
                                             required
@@ -536,11 +652,11 @@ const MediaLibrary = () => {
                                     </div>
 
                                     <div>
-                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mb-2 block ml-1">
+                                        <label className="text-xs font-black text-slate-600 uppercase tracking-[0.1em] mb-2 block ml-1">
                                             Danh mục
                                         </label>
                                         <select
-                                            className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-1 focus:ring-red-500 outline-none dark:text-white transition-all font-medium cursor-pointer"
+                                            className="w-full px-3.5 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-2xl focus:ring-1 focus:ring-red-500 outline-none dark:text-white transition-all font-medium cursor-pointer"
                                             value={editData.category}
                                             onChange={(e) => setEditData({ ...editData, category: e.target.value })}
                                         >
@@ -555,11 +671,11 @@ const MediaLibrary = () => {
                                     </div>
 
                                     <div>
-                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mb-2 block ml-1">
+                                        <label className="text-xs font-black text-slate-600 uppercase tracking-[0.1em] mb-2 block ml-1">
                                             Mô tả ảnh
                                         </label>
                                         <textarea
-                                            className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-1 focus:ring-red-500 outline-none dark:text-white transition-all font-medium min-h-[100px]"
+                                            className="w-full px-3.5 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-2xl focus:ring-1 focus:ring-red-500 outline-none dark:text-white transition-all font-medium min-h-[100px]"
                                             value={editData.caption}
                                             onChange={(e) => setEditData({ ...editData, caption: e.target.value })}
                                         />
@@ -570,14 +686,14 @@ const MediaLibrary = () => {
                                     <button
                                         type="button"
                                         onClick={() => setIsEditModalOpen(false)}
-                                        className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold rounded-2xl hover:bg-slate-200 transition-all cursor-pointer"
+                                        className="flex-1 py-2 bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold rounded-2xl hover:bg-slate-200 transition-all cursor-pointer"
                                     >
                                         Hủy
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={isUpdating}
-                                        className={`flex-2 py-3 rounded-2xl font-black text-white transition-all shadow-lg
+                                        className={`flex-2 py-2 rounded-2xl font-black text-white transition-all shadow-lg
                                             ${isUpdating ? 'bg-slate-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700 shadow-red-200 dark:shadow-none cursor-pointer'}`}
                                     >
                                         {isUpdating ? 'ĐANG LƯU...' : 'LƯU THAY ĐỔI'}
@@ -596,13 +712,17 @@ const MediaLibrary = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md"
+                        transition={{ duration: 0.16, ease: 'easeOut' }}
+                        style={{ willChange: 'opacity' }}
+                        className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/70"
                         onClick={() => setIsDeleteModalOpen(false)}
                     >
                         <motion.div
-                            initial={{ scale: 0.9, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.9, y: 20 }}
+                            initial={{ scale: 0.96, y: 20, opacity: 0 }}
+                            animate={{ scale: 1, y: 0, opacity: 1 }}
+                            exit={{ scale: 0.96, y: 20, opacity: 0 }}
+                            transition={{ duration: 0.16, ease: 'easeOut' }}
+                            style={{ willChange: 'transform, opacity' }}
                             className="bg-white dark:bg-slate-900 rounded-[1.5rem] max-w-xl w-full overflow-hidden shadow-2xl border border-white/20 p-8 text-center"
                             onClick={(e) => e.stopPropagation()}
                         >
@@ -619,11 +739,11 @@ const MediaLibrary = () => {
                                 ? Hành động này không thể hoàn tác.
                             </p>
 
-                            <div className="flex flex-col gap-3">
+                            <div className="flex flex-row-reverse gap-3">
                                 <button
                                     onClick={confirmDelete}
                                     disabled={isDeleting}
-                                    className={`w-full py-3 rounded-2xl font-black text-white transition-all shadow-lg shadow-red-200 dark:shadow-none flex items-center justify-center gap-2
+                                    className={`w-full py-2 rounded-2xl font-black text-white transition-all shadow-lg shadow-red-200 dark:shadow-none flex items-center justify-center gap-2
                                         ${isDeleting ? 'bg-slate-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700 cursor-pointer'}`}
                                 >
                                     {isDeleting ? (
@@ -637,7 +757,7 @@ const MediaLibrary = () => {
                                 </button>
                                 <button
                                     onClick={() => setIsDeleteModalOpen(false)}
-                                    className="w-full py-3 text-slate-500 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-all cursor-pointer"
+                                    className="w-full py-2 text-slate-500 font-bold bg-slate-100 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-2xl transition-all cursor-pointer"
                                 >
                                     HỦY BỎ
                                 </button>
