@@ -113,7 +113,7 @@ const CourseCard = ({ course, onRegister }) => {
                             {next.maxStudents && (
                                 <div className="flex items-center gap-1.5">
                                     <FiUsers size={13} className="text-red-400 flex-shrink-0" />
-                                    <span>{next.currentStudents}/{next.maxStudents} học viên</span>
+                                    <span>{next.maxStudents} học viên</span>
                                 </div>
                             )}
                         </>
