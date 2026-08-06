@@ -157,7 +157,7 @@ const RegistrationModal = ({
                 {/* Header */}
                 <div className="flex-shrink-0 bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white px-5 py-4 flex items-start justify-between">
                     <div>
-                        <h2 className="text-xl font-black">🎓 Đăng ký tư vấn</h2>
+                        <h2 className="text-2xl font-black text-start">🎓 Đăng ký tư vấn</h2>
                         {courseName && (
                             <p className="text-red-100 text-sm mt-1 line-clamp-2 font-medium">{courseName}</p>
                         )}
@@ -247,7 +247,7 @@ const RegistrationModal = ({
                             </div>
 
                             {/* Schedule picker */}
-                            <div className="space-y-1.5">
+                            <div className="space-y-1.5 text-start">
                                 <label className="block text-sm font-semibold text-gray-700">
                                     Lịch khai giảng{' '}
                                     <span className="text-gray-400 font-normal">(tùy chọn)</span>
@@ -328,7 +328,7 @@ const RegistrationModal = ({
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 const Field = ({ label, required, error, children }) => (
-    <div className="space-y-1.5">
+    <div className="space-y-1.5 text-start">
         <label className="block text-sm font-semibold text-gray-700">
             {label}
             {required && <span className="text-red-500 ml-0.5">*</span>}

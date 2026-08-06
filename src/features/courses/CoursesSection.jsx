@@ -19,30 +19,25 @@ const CourseCard = ({ course, onRegister }) => {
     return (
         <div className="cursor-pointer flex flex-col bg-gray-100 p-4 rounded-xl shadow hover:shadow-xl transition transform hover:translate-y-[-4px] ease-in-out duration-300">
             <img
-                src={
-                    course.thumbnail ||
-                    'https://bizweb.dktcdn.net/thumb/grande/100/059/929/products/z4597684243362-15d5a906850cb4f06c5cdfbac8ed5003-compressed.jpg'
-                }
+                src={course.thumbnail}
                 alt={course.title}
-                className="rounded-lg mb-3 h-48 object-cover w-full"
+                className="rounded-lg mb-3 h-50 object-cover w-full"
                 loading="lazy"
             />
 
             <div className="flex-grow">
                 <h3 className="text-xl font-semibold mb-2 line-clamp-2">{course.title}</h3>
-                {course.description && (
-                    <p className="text-gray-600 mb-3 text-sm line-clamp-2">{course.description}</p>
-                )}
-                <div className="text-xs text-gray-500 space-y-1 mb-3">
+                {course.description && <p className="text-gray-600 mb-3 text-sm line-clamp-2">{course.description}</p>}
+                <div className="text-[13px] text-gray-500 space-y-1 mb-3">
                     {course.duration && (
                         <p className="flex items-center gap-1">
-                            <FiClock size={11} className="text-red-400" />
+                            <FiClock size={13} className="text-red-400" />
                             {course.duration}
                         </p>
                     )}
                     {next ? (
                         <p className="flex items-center gap-1">
-                            <FiCalendar size={11} className="text-red-400" />
+                            <FiCalendar size={13} className="text-red-400" />
                             Khai giảng: {new Date(next.startDate).toLocaleDateString('vi-VN')}
                             {next.time && ` • ${next.time}`}
                         </p>

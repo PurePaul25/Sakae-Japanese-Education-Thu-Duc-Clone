@@ -409,7 +409,7 @@ const AdminRegistrations = () => {
                             : registrations.map((reg) => {
                                 const schedule = reg.schedule ?? null;
                                 return (
-                                    <tr key={reg.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                                    <tr key={reg.id} className="hover:bg-slate-100/80 dark:hover:bg-slate-800/40 transition-colors">
                                         <td className="px-4 py-2.5">
                                             <p className="font-semibold text-slate-700 dark:text-white text-sm">{reg.fullName}</p>
                                             <p className="text-xs text-slate-400 mt-0.5">{reg.email}</p>
