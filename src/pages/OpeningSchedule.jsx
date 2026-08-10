@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { FiCalendar, FiClock, FiUsers, FiFilter, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import { GraduationCap } from "lucide-react";
+import { GraduationCap } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
 import RegistrationModal from '../components/ui/RegistrationModal';
 import SEO from '../hooks/useSEO';
@@ -27,6 +28,13 @@ const LEVEL_COLORS = {
     'Kaiwa & Luyện thi': 'bg-yellow-100 text-yellow-700',
 };
 
+const STATUS_TEXT_COLORS = {
+    'Sắp khai giảng': 'text-blue-700',
+    'Đang nhận học viên': 'text-emerald-600',
+    'Đã đầy': 'text-red-700',
+    'Đã kết thúc': 'text-gray-500',
+};
+
 const ITEMS_PER_PAGE = 8;
 
 // ─── spinner loading ─────────────────────────────────────────────────────────
@@ -42,6 +50,7 @@ const ScheduleCard = ({ s, onRegister }) => {
     const course = s.course ?? {};
     const levelColor = LEVEL_COLORS[course.level] ?? 'bg-gray-100 text-gray-600';
     const statusStyle = STATUS_STYLES[s.status] ?? 'bg-gray-100 text-gray-600';
+    const statusTextColor = STATUS_TEXT_COLORS[s.status] ?? 'text-gray-600';
     const spotsLeft = s.maxStudents - s.currentStudents;
     const isFull = spotsLeft <= 0;
 
@@ -49,14 +58,16 @@ const ScheduleCard = ({ s, onRegister }) => {
         <div className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-red-100 transition-all duration-300 overflow-hidden">
             <div className="flex gap-0 md:gap-4">
                 {/* thumbnail strip */}
-                <div className="hidden flex-2 md:block w-24 flex-shrink-0 relative overflow-hidden bg-gradient-to-br from-red-50 to-rose-100">
+                <div className="hidden flex-1 md:block w-24 flex-shrink-0 relative overflow-hidden bg-gradient-to-br from-red-50 to-rose-100">
                     {course.thumbnail ? (
-                        <img
-                            src={course.thumbnail}
-                            alt={course.title}
-                            className="w-full h-full object-contain max-h-[175px]"
-                            loading="lazy"
-                        />
+                        <Link to={`/khoa-hoc-tieng-nhat/${course.slug}`}>
+                            <img
+                                src={course.thumbnail}
+                                alt={course.title}
+                                className="w-full h-full object-contain max-h-[175px]"
+                                loading="lazy"
+                            />
+                        </Link>
                     ) : (
                         <div className="w-full h-full flex items-center justify-center text-4xl opacity-20">🎌</div>
                     )}
@@ -84,11 +95,14 @@ const ScheduleCard = ({ s, onRegister }) => {
                         </span>
                     </div>
 
-                    <h3 className="font-extrabold text-gray-800 text-base leading-snug mb-2 group-hover:text-red-600 transition-colors">
+                    <Link
+                        to={`/khoa-hoc-tieng-nhat/${course.slug}`}
+                        className="font-extrabold text-gray-800 text-base leading-snug mb-2 group-hover:text-red-600 transition-colors duration-200"
+                    >
                         {course.title ?? 'Khóa học'}
-                    </h3>
+                    </Link>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[13px] text-gray-500 font-medium mb-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[13px] text-gray-500 font-medium mb-1.5">
                         <span className="flex items-center gap-1.5">
                             <FiCalendar size={13} className="text-red-400 flex-shrink-0" />
                             Khai giảng:{' '}
@@ -113,9 +127,9 @@ const ScheduleCard = ({ s, onRegister }) => {
                             </span>
                         )}
                         <span className="flex items-center gap-1.5">
-                            <FiUsers size={13} className="text-red-400 flex-shrink-0" />
-                            {s.currentStudents}/{s.maxStudents} học viên
-                            {!isFull && <span className="text-emerald-600 font-bold">({spotsLeft} chỗ trống)</span>}
+                            {' '}
+                            <FiUsers size={13} className="text-red-400 flex-shrink-0" />{' '}
+                            <span className={`font-bold ${statusTextColor}`}> {s.maxStudents} học viên </span>{' '}
                         </span>
                     </div>
 

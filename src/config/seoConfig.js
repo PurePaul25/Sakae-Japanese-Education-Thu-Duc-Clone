@@ -75,10 +75,10 @@ const seoConfig = {
             'Quản lý thông tin cá nhân, cập nhật dữ liệu tài khoản và theo dõi hoạt động học tập tại Nhật ngữ Sakae Thủ Đức.',
         keywords: 'hồ sơ học viên, tài khoản, Sakae',
     },
-    myCourses: {
-        title: 'Khóa học của tôi - Nhật ngữ Sakae Thủ Đức',
-        description: 'Theo dõi các khóa học đã đăng ký và tiến độ học tập của bạn tại Nhật ngữ Sakae Thủ Đức.',
-        keywords: 'khóa học của tôi, học tiếng Nhật, Sakae',
+    myNotifications: {
+        title: 'Thông báo của tôi - Nhật ngữ Sakae Thủ Đức',
+        description: 'Xem và quản lý thông báo cá nhân tại Nhật ngữ Sakae Thủ Đức.',
+        keywords: 'thông báo, học viên, Sakae',
     },
     userSettings: {
         title: 'Cài đặt tài khoản - Nhật ngữ Sakae Thủ Đức',

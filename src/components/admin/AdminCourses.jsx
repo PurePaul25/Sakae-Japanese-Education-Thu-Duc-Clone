@@ -911,7 +911,6 @@ const ScheduleModal = ({ courseId, schedule, onClose, onSaved, show, duration = 
     useBodyScrollLock(show);
 
     const isEdit = !!schedule;
-    const fileRef = useRef(null);
     const { addToast } = useToast();
 
     const [form, setForm] = useState({
@@ -925,20 +924,11 @@ const ScheduleModal = ({ courseId, schedule, onClose, onSaved, show, duration = 
         tuitionOverride: schedule?.tuitionOverride ?? '',
         status: schedule?.status ?? 'Sắp khai giảng',
     });
-    const [file, setFile] = useState(null);
-    const [preview, setPreview] = useState(schedule?.thumbnail ?? null);
     const [saving, setSaving] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setForm((f) => ({ ...f, [name]: value }));
-    };
-
-    const handleFile = (e) => {
-        const f = e.target.files[0];
-        if (!f) return;
-        setFile(f);
-        setPreview(URL.createObjectURL(f));
     };
 
     const handleSubmit = async (e) => {
@@ -958,26 +948,25 @@ const ScheduleModal = ({ courseId, schedule, onClose, onSaved, show, duration = 
 
         setSaving(true);
         try {
-            const fd = new FormData();
-            if (form.title.trim()) fd.append('title', form.title.trim());
-            // Convert date input (YYYY-MM-DD) to ISO string
-            fd.append('startDate', new Date(form.startDate).toISOString());
-            if (form.endDate) fd.append('endDate', new Date(form.endDate).toISOString());
-            fd.append('time', form.time.trim());
-            fd.append('studyDays', form.studyDays.trim());
-            if (form.teacher.trim()) fd.append('teacher', form.teacher.trim());
-            fd.append('maxStudents', Number(form.maxStudents));
+            const payload = {
+                startDate: new Date(form.startDate).toISOString(),
+                time: form.time.trim(),
+                studyDays: form.studyDays.trim(),
+                maxStudents: Number(form.maxStudents),
+                status: form.status,
+            };
+            if (form.title.trim()) payload.title = form.title.trim();
+            if (form.endDate) payload.endDate = new Date(form.endDate).toISOString();
+            if (form.teacher.trim()) payload.teacher = form.teacher.trim();
             if (form.tuitionOverride !== '' && form.tuitionOverride != null) {
-                fd.append('tuitionOverride', Number(form.tuitionOverride));
+                payload.tuitionOverride = Number(form.tuitionOverride);
             }
-            fd.append('status', form.status);
-            if (file) fd.append('thumbnail', file);
 
             if (isEdit) {
-                await api.patch(`/course-schedules/${schedule.id}`, fd);
+                await api.patch(`/course-schedules/${schedule.id}`, payload);
                 addToast('Đã cập nhật lịch khai giảng!', 'success');
             } else {
-                await api.post(`/courses/${courseId}/schedules`, fd);
+                await api.post(`/courses/${courseId}/schedules`, payload);
                 addToast('Đã thêm lịch khai giảng!', 'success');
             }
             onSaved();
@@ -1013,31 +1002,6 @@ const ScheduleModal = ({ courseId, schedule, onClose, onSaved, show, duration = 
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-5 space-y-4">
-                    {/* Thumbnail */}
-                    <div>
-                        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                            Ảnh lịch (tuỳ chọn)
-                        </label>
-                        <div
-                            onClick={() => fileRef.current?.click()}
-                            className="border-2 border-dashed min-h-[100px] border-slate-200 dark:border-slate-700 rounded-xl p-3 cursor-pointer hover:border-red-400 transition-colors flex flex-col items-center justify-center gap-2"
-                        >
-                            {preview ? (
-                                <img
-                                    src={preview}
-                                    alt="preview"
-                                    className="w-full h-auto object-contain rounded-lg max-h-[360px]"
-                                />
-                            ) : (
-                                <>
-                                    <Upload size={20} className="text-slate-400" />
-                                    <span className="text-sm text-slate-400">Click để chọn ảnh</span>
-                                </>
-                            )}
-                        </div>
-                        <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
-                    </div>
-
                     {/* Title */}
                     <div>
                         <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">

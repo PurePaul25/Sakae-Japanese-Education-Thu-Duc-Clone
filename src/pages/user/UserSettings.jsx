@@ -51,38 +51,28 @@ const UserSettings = () => {
             label: 'Thông báo',
             content: (
                 <div className="space-y-1">
-                    {[
-                        { key: 'email', label: 'Thông báo qua Email', desc: 'Nhận tin tức và cập nhật qua hòm thư' },
-                        {
-                            key: 'reminders',
-                            label: 'Lời nhắc học tập',
-                            desc: 'Nhắc nhở bạn hoàn thành mục tiêu hàng ngày',
-                        },
-                        {
-                            key: 'courseUpdates',
-                            label: 'Cập nhật khóa học',
-                            desc: 'Thông báo khi lớp học có tài liệu mới',
-                        },
-                    ].map((item) => (
-                        <div
-                            key={item.key}
-                            className="flex justify-between items-center py-4 border-b border-gray-100 last:border-0 px-2"
-                        >
-                            <div>
-                                <p className="font-bold text-gray-700">{item.label}</p>
-                                <p className="text-sm text-gray-500">{item.desc}</p>
+                    {[{ key: 'email', label: 'Thông báo qua Email', desc: 'Nhận tin tức và cập nhật qua hòm thư' }].map(
+                        (item) => (
+                            <div
+                                key={item.key}
+                                className="flex justify-between items-center py-4 border-b border-gray-100 last:border-0 px-2"
+                            >
+                                <div>
+                                    <p className="font-bold text-gray-700">{item.label}</p>
+                                    <p className="text-sm text-gray-500">{item.desc}</p>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        className="sr-only peer"
+                                        checked={notifications[item.key]}
+                                        onChange={() => toggleNotification(item.key)}
+                                    />
+                                    <div className="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                </label>
                             </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    className="sr-only peer"
-                                    checked={notifications[item.key]}
-                                    onChange={() => toggleNotification(item.key)}
-                                />
-                                <div className="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
-                            </label>
-                        </div>
-                    ))}
+                        ),
+                    )}
                 </div>
             ),
         },
@@ -109,8 +99,8 @@ const UserSettings = () => {
                     <div className="p-4 rounded-2xl bg-red-50 border border-red-100">
                         <h3 className="text-lg font-bold text-red-700 mb-2">Vùng nguy hiểm</h3>
                         <p className="text-sm text-red-600/80 mb-4">
-                            Việc xóa tài khoản sẽ làm mất vĩnh viễn tất cả dữ liệu học tập, tiến độ khóa học và các
-                            chứng chỉ của bạn. Hành động này không thể hoàn tác.
+                            Việc xóa tài khoản sẽ làm mất vĩnh viễn tất cả dữ liệu và các chứng chỉ của bạn. Hành động
+                            này không thể hoàn tác.
                         </p>
                         <button className="px-6 py-2.5 cursor-pointer bg-white text-red-600 border border-red-200 rounded-xl text-sm font-black hover:bg-red-600 hover:text-white transition-all shadow-sm">
                             XÓA TÀI KHOẢN VĨNH VIỄN

@@ -1,9 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { FaCalendarAlt, FaClock, FaUserTie, FaMoneyBillWave, FaBookOpen, FaCheckCircle, FaTag, FaReceipt } from 'react-icons/fa';
+import {
+    FaCalendarAlt,
+    FaClock,
+    FaUserTie,
+    FaMoneyBillWave,
+    FaBookOpen,
+    FaCheckCircle,
+    FaTag,
+    FaReceipt,
+} from 'react-icons/fa';
 import { FiLoader, FiArrowLeft } from 'react-icons/fi';
-import { IoIosCall } from "react-icons/io";
-import ScrollToTopButton from '../../components/layout/ScrollToTopButton'
+import { IoIosCall } from 'react-icons/io';
+import ScrollToTopButton from '../../components/layout/ScrollToTopButton';
 import RegistrationModal from '../../components/ui/RegistrationModal';
 import SEO from '../../hooks/useSEO.jsx';
 import { getCourseBySlug } from '../../services/courseService';
@@ -76,7 +85,7 @@ const ScheduleCard = ({ schedule, onRegister }) => {
                     {schedule.teacher && (
                         <span className="flex items-center gap-1">
                             <FaUserTie size={12} className="text-red-400" />
-                            GV: {schedule.teacher}
+                            Giáo viên: {schedule.teacher}
                         </span>
                     )}
                 </div>
@@ -131,7 +140,9 @@ const normalizeCourseContent = (html) => {
             const hasClass = /class=/.test(attrs);
             const hasStyle = /style=/.test(attrs);
             const classAttr = hasClass ? '' : ' class="mx-auto my-4 max-w-full h-auto rounded-xl block"';
-            const styleAttr = hasStyle ? '' : ' style="max-width:100%; width:100%; height:auto; display:block; margin:12px auto; border-radius:12px; object-fit:contain;"';
+            const styleAttr = hasStyle
+                ? ''
+                : ' style="max-width:100%; width:100%; height:auto; display:block; margin:12px auto; border-radius:12px; object-fit:contain;"';
             return `<img${attrs}${classAttr}${styleAttr}>`;
         })
         .replace(/\r\n|\r|\n/g, '<br>');
@@ -376,7 +387,8 @@ const CourseDetailPage = () => {
                             </button>
 
                             <p className="text-[13px] text-center text-gray-500">
-                                <IoIosCall size={20} className="inline-block" /> Chúng tôi sẽ liên hệ trong vòng 24 giờ làm việc
+                                <IoIosCall size={20} className="inline-block" /> Chúng tôi sẽ liên hệ trong vòng 24 giờ
+                                làm việc
                             </p>
                         </div>
                     </div>

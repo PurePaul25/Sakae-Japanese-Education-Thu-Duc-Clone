@@ -8,7 +8,7 @@ import { useToast } from '../../contexts/ToastContext';
 
 import { FiMenu, FiX, FiChevronDown } from 'react-icons/fi';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
-import { FaUser, FaGraduationCap, FaCog, FaSignOutAlt, FaBookmark } from "react-icons/fa";
+import { FaUser, FaBell, FaCog, FaSignOutAlt, FaBookmark } from 'react-icons/fa';
 import SearchBar from './SearchBar';
 
 const menuItems = [
@@ -126,7 +126,6 @@ function Navbar() {
         window.addEventListener('sakae-auth-expired', handleAuthExpired);
         return () => window.removeEventListener('sakae-auth-expired', handleAuthExpired);
     }, [addToast, navigate]);
-
 
     const handleLoginClick = () => {
         setIsLoggingIn(true);
@@ -400,16 +399,16 @@ function Navbar() {
                                             onClick={() => setIsUserDropdownOpen(false)}
                                             className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
                                         >
-                                            <FaUser className="inline mr-1 mb-1" size={16}/> Hồ sơ cá nhân
+                                            <FaUser className="inline mr-1 mb-1" size={16} /> Hồ sơ cá nhân
                                         </Link>
                                     </li>
                                     <li>
                                         <Link
-                                            to="/khoa-hoc-cua-toi"
+                                            to="/thong-bao-cua-toi"
                                             onClick={() => setIsUserDropdownOpen(false)}
                                             className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
                                         >
-                                            <FaGraduationCap className="inline mr-1 mb-1" size={16}/> Khóa học của tôi
+                                            <FaBell className="inline mr-1 mb-1" size={16} /> Thông báo của tôi
                                         </Link>
                                     </li>
                                     <li>
@@ -418,7 +417,7 @@ function Navbar() {
                                             onClick={() => setIsUserDropdownOpen(false)}
                                             className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
                                         >
-                                            <FaBookmark className="inline mr-1 mb-1" size={16}/> Đã lưu
+                                            <FaBookmark className="inline mr-1 mb-1" size={16} /> Đã lưu
                                         </Link>
                                     </li>
                                     <li>
@@ -427,15 +426,15 @@ function Navbar() {
                                             onClick={() => setIsUserDropdownOpen(false)}
                                             className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
                                         >
-                                            <FaCog className="inline mr-1 mb-1" size={16}/> Cài đặt
+                                            <FaCog className="inline mr-1 mb-1" size={16} /> Cài đặt
                                         </Link>
                                     </li>
                                     <li className="border-t border-gray-100">
                                         <button
                                             onClick={handleLogout}
-                                            className="block cursor-pointer w-full text-left px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
+                                            className="block cursor-pointer w-full text-left px-3 py-2.5 text-gray-700 hover:bg-red-50 rounded-b-lg hover:text-red-600 transition duration-200"
                                         >
-                                            <FaSignOutAlt className="inline mr-1 mb-1" size={16}/> Đăng xuất
+                                            <FaSignOutAlt className="inline mr-1 mb-1" size={16} /> Đăng xuất
                                         </button>
                                     </li>
                                 </ul>
