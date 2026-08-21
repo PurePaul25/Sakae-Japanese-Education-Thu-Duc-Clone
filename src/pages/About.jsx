@@ -2,17 +2,19 @@ import React from 'react';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
 import SEO from '../hooks/useSEO.jsx';
 import { ASSETS } from '../constants/assets';
+import { Link } from 'react-router-dom';
+import { FiFileText, FiBookOpen, FiAward } from 'react-icons/fi';
 
 function About() {
     return (
-        <div className="pt-30 pb-16 bg-gray-50 text-gray-800">
+        <div className="pt-26 pb-8 bg-gray-50 text-gray-800">
             <SEO page="about" />
             {/* 1. Giới thiệu Chính (Header Section) */}
-            <section className="max-w-6xl mx-auto px-4 text-center mb-8 border-b border-gray-200 pb-8">
-                <h1 className="text-5xl font-extrabold text-red-600 mb-6 border-b-4 border-red-100 inline-block px-4 pb-1">
+            <section className="max-w-6xl mx-auto px-4 text-center mb-3 border-b border-gray-200 pb-3">
+                <h1 className="text-3xl md:text-5xl font-extrabold text-red-600 mb-6 border-b-4 border-red-100 inline-block px-4 pb-1">
                     Về Trung tâm Nhật ngữ Sakae
                 </h1>
-                <p className="text-lg md:text-xl font-medium text-gray-700 leading-relaxed max-w-5xl mx-auto mb-4">
+                <p className="md:text-lg font-medium text-gray-700 leading-relaxed max-w-5xl mx-auto mb-4">
                     Trung tâm Nhật ngữ Sakae là nơi đào tạo tiếng Nhật chuyên sâu với đội ngũ giảng viên tận tâm và
                     chương trình học chất lượng, giúp học viên đạt được mục tiêu du học, làm việc và phát triển bản
                     thân.
@@ -20,8 +22,8 @@ function About() {
             </section>
 
             {/* 2. Ảnh + Sứ mệnh */}
-            <section className="max-w-6xl mx-auto px-4 py-8">
-                <div className="grid md:grid-cols-2 gap-12 items-center bg-white p-6 md:p-10 rounded-2xl shadow-xl border border-red-300">
+            <section className="max-w-6xl mx-auto px-4 py-6">
+                <div className="grid md:grid-cols-2 gap-12 items-center bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-red-300">
                     {/* Cột 1: Nội dung Sứ mệnh */}
                     <div className="order-1">
                         <h2 className="text-3xl font-extrabold mb-5 text-red-600 leading-tight border-b-2 border-red-300 pb-2">
@@ -51,8 +53,8 @@ function About() {
             </section>
 
             {/* 3. Giá trị cốt lõi (Sử dụng Divider và Border nổi bật) */}
-            <section className="max-w-6xl mx-auto px-4 mt-10 text-center border-t border-gray-200 pt-10">
-                <h2 className="text-4xl font-extrabold text-gray-800 mb-12 border-b-2 border-red-300 inline-block px-4 pb-1">
+            <section className="max-w-6xl mx-auto px-4 mt-4 text-center border-t border-gray-200 pt-6">
+                <h2 className="text-4xl font-extrabold text-gray-800 mb-8 border-b-2 border-red-300 inline-block px-4 pb-1">
                     Giá trị cốt lõi
                 </h2>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -90,7 +92,7 @@ function About() {
             </section>
 
             {/* 4. Đội ngũ Giảng viên Chuyên nghiệp (Sử dụng Card và chia 3 cột) */}
-            <section className="max-w-6xl mx-auto px-4 mt-10 text-center border-t border-gray-200 pt-10">
+            <section className="max-w-6xl mx-auto px-4 mt-10 text-center border-t border-gray-200 pt-6">
                 <h2 className="text-4xl font-extrabold text-gray-800 mb-4 border-b-2 border-red-300 inline-block px-4 pb-1">
                     Đội ngũ Giảng viên
                 </h2>
@@ -146,8 +148,8 @@ function About() {
             </section>
 
             {/* 5. Cơ sở vật chất & Môi trường học tập (Sử dụng List với Icon) */}
-            <section className="max-w-6xl mx-auto px-4 mt-10 border-t border-gray-200 pt-10">
-                <h2 className="text-4xl font-extrabold text-gray-800 mb-12 text-center border-b-2 border-red-300 inline-block px-4 pb-1">
+            <section className="max-w-6xl mx-auto px-4 mt-10 border-t border-gray-200 pt-6">
+                <h2 className="text-4xl font-extrabold text-gray-800 mb-6 text-center border-b-2 border-red-300 inline-block px-4 pb-1">
                     Cơ sở vật chất
                 </h2>
 
@@ -188,26 +190,60 @@ function About() {
                 </div>
             </section>
 
-            {/* 5. Cơ sở vật chất & Môi trường học tập (Sử dụng List với Icon) */}
-            <section className="max-w-6xl mx-auto px-4 mt-10 border-t border-gray-200 pt-10">
-                <h2 className="text-4xl font-extrabold text-gray-800 mb-4 text-center border-b-2 border-red-300 inline-block px-4 pb-1">
-                    Tài liệu, giáo trình
-                </h2>
+            {/* 5. Tài liệu, giáo trình */}
+            <section className="max-w-6xl mx-auto px-4 mt-10 border-t border-gray-200 pt-6">
+                <div className="mb-6">
+                    <h2 className="text-3xl font-bold text-gray-800">Tài liệu, giáo trình</h2>
 
-                <div className="text-gray-700 text-lg leading-relaxed">
-                    <p>Tài liệu do giáo viên của trung tâm tự biên soạn.</p>
-                    <p>Chương trình sơ cấp và trung cấp: Giáo trình chuẩn
-                        quốc tế Minna no Nihongo (bản phát hành chính thức). 
-                    </p>
-                    <p>Lớp Luyện thi: Đào tạo theo Hệ thống Bằng Năng
-                        lực Nhật ngữ Quốc tế, luôn cập nhật thông tin mới nhất.
-                    </p>
+                    <div className="w-12 h-1 bg-red-500 rounded-full mt-2"></div>
+                </div>
+
+                <div className="space-y-4 text-gray-700 md:text-lg leading-relaxed">
+                    <div className="flex items-start gap-3">
+                        <FiFileText className="text-red-500 mt-1.5 shrink-0" size={19} />
+                        <p>Tài liệu do giáo viên của trung tâm tự biên soạn.</p>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                        <FiBookOpen className="text-red-500 mt-1.5 shrink-0" size={19} />
+                        <p>
+                            Chương trình sơ cấp và trung cấp: Giáo trình chuẩn quốc tế Minna no Nihongo (bản phát hành
+                            chính thức).
+                        </p>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                        <FiAward className="text-red-500 mt-1.5 shrink-0" size={19} />
+                        <p>
+                            Lớp luyện thi: Đào tạo theo Hệ thống Bằng năng lực Nhật ngữ Quốc tế, luôn cập nhật thông tin
+                            mới nhất.
+                        </p>
+                    </div>
                 </div>
             </section>
 
-            <h3 className="max-w-6xl mx-auto text-2xl font-bold text-red-500 px-4 mt-12">
-                HÃY ĐẾN VỚI CHÚNG TÔI VÀ CẢM NHẬN!
-            </h3>
+            {/* CTA */}
+            <section className="max-w-6xl mx-auto px-4 mt-10 mb-8">
+                <div className="relative overflow-hidden rounded-2xl bg-red-50 border border-red-100 px-6 py-8 text-center">
+                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-red-100 rounded-full opacity-60"></div>
+                    <div className="absolute -bottom-12 -left-8 w-28 h-28 bg-red-100 rounded-full opacity-60"></div>
+
+                    <div className="relative">
+                        <h3 className="text-xl md:text-2xl font-bold text-red-600">
+                            Hãy đến với chúng tôi và cảm nhận!
+                        </h3>
+
+                        <p className="text-gray-600 mt-2">Cùng Sakae xây dựng hành trình học tiếng Nhật hiệu quả.</p>
+
+                        <Link
+                            to="/khoa-hoc-tieng-nhat"
+                            className="inline-block mt-5 bg-red-600 text-white font-medium px-6 py-2.5 rounded-lg hover:bg-red-700 transition-colors duration-200"
+                        >
+                            Xem khóa học
+                        </Link>
+                    </div>
+                </div>
+            </section>
             <ScrollToTopButton />
         </div>
     );

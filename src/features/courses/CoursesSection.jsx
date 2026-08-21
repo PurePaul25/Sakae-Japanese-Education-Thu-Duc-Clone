@@ -17,16 +17,22 @@ const CourseCard = ({ course, onRegister }) => {
     const next = course.nextSchedule;
 
     return (
-        <div className="cursor-pointer flex flex-col bg-gray-100 p-4 rounded-xl shadow hover:shadow-xl transition transform hover:translate-y-[-4px] ease-in-out duration-300">
-            <img
-                src={course.thumbnail}
-                alt={course.title}
-                className="rounded-lg mb-3 h-50 object-cover w-full"
-                loading="lazy"
-            />
+        <div className="flex flex-col bg-gray-100 p-4 rounded-xl shadow hover:shadow-xl transition transform hover:translate-y-[-4px] ease-in-out duration-300">
+            <Link to={`/khoa-hoc-tieng-nhat/${course.slug}`}>
+                <img
+                    src={course.thumbnail}
+                    alt={course.title}
+                    className="rounded-lg mb-3 h-50 object-cover w-full"
+                    loading="lazy"
+                />
+            </Link>
 
             <div className="flex-grow">
-                <h3 className="text-xl font-semibold mb-2 line-clamp-2">{course.title}</h3>
+                <Link to={`/khoa-hoc-tieng-nhat/${course.slug}`}>
+                    <h3 className="text-xl font-semibold mb-2 line-clamp-2 hover:text-red-500 hover:underline transition duration-200">
+                        {course.title}
+                    </h3>
+                </Link>
                 {course.description && <p className="text-gray-600 mb-3 text-sm line-clamp-2">{course.description}</p>}
                 <div className="text-[13px] text-gray-500 space-y-1 mb-3">
                     {course.duration && (

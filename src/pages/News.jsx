@@ -162,14 +162,14 @@ const News = () => {
             </section>
 
             {/* Search */}
-            <section className="max-w-2xl mx-auto mb-6 px-4">
+            <section className="max-w-5xl mx-auto mb-6 px-4">
                 <form onSubmit={handleSearch} className="flex gap-2">
                     <input
                         type="text"
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
                         placeholder="Tìm kiếm bài viết..."
-                        className="flex-1 px-2.5 py-2 rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-red-400 text-sm"
+                        className="flex-1 px-2.5 py-2 transition duration-200 rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-red-400 text-sm"
                     />
                     <button
                         type="submit"
@@ -194,7 +194,7 @@ const News = () => {
             </section>
 
             {/* Bộ lọc */}
-            <section className="max-w-4xl mx-auto mb-8 px-4">
+            <section className="max-w-5xl mx-auto mb-8 px-4">
                 <div className="bg-white/90 backdrop-blur-sm p-4 rounded-xl shadow-sm border border-gray-200">
                     <div className="hidden md:flex items-center gap-4 flex-wrap justify-start ml-2">
                         <p className="font-bold text-gray-700">Lọc theo danh mục:</p>
@@ -265,7 +265,7 @@ const News = () => {
                                 className={`w-9 h-9 rounded-lg text-sm font-semibold transition-colors ${
                                     p === page
                                         ? 'bg-red-600 text-white shadow-sm'
-                                        : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                                        : 'bg-white border cursor-pointer border-gray-200 text-gray-600 hover:bg-gray-50'
                                 }`}
                             >
                                 {p}

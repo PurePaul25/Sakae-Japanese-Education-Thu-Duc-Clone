@@ -63,6 +63,12 @@ const seoConfig = {
             'Cập nhật lịch khai giảng mới nhất các lớp tiếng Nhật từ sơ cấp đến nâng cao tại Nhật ngữ Sakae Thủ Đức.',
         keywords: 'lịch khai giảng, lớp tiếng Nhật, học tiếng Nhật',
     },
+    classRules: {
+        title: 'Nội quy lớp học & Chính sách khen thưởng - Nhật ngữ Sakae Thủ Đức',
+        description:
+            'Xem nội quy lớp học và chính sách khen thưởng dành cho học viên tại Trung tâm Nhật Ngữ Sakae Thủ Đức.',
+        keywords: 'nội quy lớp học, khen thưởng học viên, Sakae Thủ Đức',
+    },
     auth: {
         title: 'Đăng nhập / đăng ký - Nhật ngữ Sakae Thủ Đức',
         description:

@@ -271,7 +271,9 @@ const NewsDetail = () => {
                 const hasClass = /class=/.test(attrs);
                 const hasStyle = /style=/.test(attrs);
                 const classAttr = hasClass ? '' : ' class="mx-auto my-4 max-w-full h-auto rounded-xl block"';
-                const styleAttr = hasStyle ? '' : ' style="max-width:100%; width:100%; height:auto; display:block; margin:12px auto; border-radius:12px; object-fit:contain;"';
+                const styleAttr = hasStyle
+                    ? ''
+                    : ' style="max-width:100%; width:100%; height:auto; display:block; margin:12px auto; border-radius:12px; object-fit:contain;"';
                 return `<img${attrs}${classAttr}${styleAttr}>`;
             })
             .replace(/\r\n|\r|\n/g, '<br>');
@@ -663,6 +665,7 @@ const NewsDetail = () => {
                 {/* Related posts */}
                 {related.length > 0 && (
                     <section>
+                        <hr className="mb-4" />
                         <h2 className="text-2xl font-bold text-gray-900 mb-4">
                             Bài viết <span className="text-red-600">liên quan</span>
                         </h2>

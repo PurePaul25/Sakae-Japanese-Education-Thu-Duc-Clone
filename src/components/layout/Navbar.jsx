@@ -22,6 +22,7 @@ const menuItems = [
             { label: 'Thư viện ảnh', href: '/bo-suu-tap' },
             { label: 'Lịch khai giảng', href: '/lich-khai-giang' },
             { label: 'Thi thử JLPT', href: '/thi-thu-JLPT' },
+            { label: 'Nội quy - Khen thưởng', href: '/noi-quy-khen-thuong' },
             { label: 'Liên hệ', href: '/lien-he' },
         ],
     },
@@ -459,7 +460,7 @@ function Navbar() {
             {/* Menu Mobile */}
             <div
                 className={`lg:hidden transition-all duration-500 overflow-hidden ${
-                    isMenuOpen ? 'max-h-[100vh]' : 'max-h-0'
+                    isMenuOpen ? 'max-h-[1000px]' : 'max-h-0'
                 }`}
             >
                 <div className="flex flex-col items-center pb-4 bg-white shadow-md border-t-2 border-b-1 border-gray-800/20">
@@ -483,7 +484,7 @@ function Navbar() {
                                 </button>
                                 <div
                                     className={`w-full bg-gray-50 overflow-hidden transition-all duration-300 ease-in-out ${
-                                        mobileSubmenuOpen ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'
+                                        mobileSubmenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
                                     }`}
                                 >
                                     {item.children.map((child) => (

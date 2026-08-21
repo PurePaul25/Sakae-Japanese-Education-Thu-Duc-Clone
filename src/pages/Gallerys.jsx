@@ -53,19 +53,37 @@ const Gallerys = () => {
             .finally(() => setLoading(false));
     }
 
-    useEffect(() => { fetchGallery(); }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => {
+        fetchGallery();
+    }, [user]);
 
     // ── lightbox (all zoom/pan/comments/like logic lives here) ───────────────
     const {
-        selectedImage, setSelectedImage,
-        zoom, pan, isDragging,
-        handleZoomIn, handleZoomOut,
-        onMouseDown, onMouseMove, onMouseUp, onMouseLeave,
-        onTouchStart, onTouchMove, onTouchEnd,
-        handleNext, handlePrev,
-        handleDownload, handleLike,
-        comments, setComments, newComment, setNewComment, loadingComments,
-        handleAddComment, handleDeleteComment,
+        selectedImage,
+        setSelectedImage,
+        zoom,
+        pan,
+        isDragging,
+        handleZoomIn,
+        handleZoomOut,
+        onMouseDown,
+        onMouseMove,
+        onMouseUp,
+        onMouseLeave,
+        onTouchStart,
+        onTouchMove,
+        onTouchEnd,
+        handleNext,
+        handlePrev,
+        handleDownload,
+        handleLike,
+        comments,
+        setComments,
+        newComment,
+        setNewComment,
+        loadingComments,
+        handleAddComment,
+        handleDeleteComment,
     } = useGalleryLightbox(galleryData, setGalleryData, fetchGallery);
 
     // ── filters & pagination ──────────────────────────────────────────────────
@@ -83,7 +101,10 @@ const Gallerys = () => {
     );
 
     const yearOptions = useMemo(
-        () => [{ label: 'Năm (Tất cả)', value: 'Tất cả' }, ...years.map((y) => ({ label: `Năm ${y}`, value: String(y) }))],
+        () => [
+            { label: 'Năm (Tất cả)', value: 'Tất cả' },
+            ...years.map((y) => ({ label: `Năm ${y}`, value: String(y) })),
+        ],
         [years],
     );
 

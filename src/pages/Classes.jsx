@@ -8,7 +8,7 @@ import api from '../utils/api';
 
 // ─── Design tokens (shared với Courses.jsx) ───────────────────────────────────
 const LEVELS = ['Tất cả', 'N5', 'N4', 'N3', 'N2', 'N1', 'Thiếu nhi', 'Kèm 1:1', 'Kaiwa & Luyện thi'];
-const TYPES  = ['Tất cả', 'Cấp tốc', 'Siêu tốc', 'Online'];
+const TYPES = ['Tất cả', 'Cấp tốc', 'Siêu tốc', 'Online'];
 
 const LEVEL_COLORS = {
     N5: 'bg-emerald-100 text-emerald-700',
@@ -64,10 +64,14 @@ const CourseCard = ({ course, onRegister }) => {
                 )}
                 {/* Badge level + type */}
                 <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
-                    <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm ${LEVEL_COLORS[course.level] ?? 'bg-gray-100 text-gray-600'}`}>
+                    <span
+                        className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm ${LEVEL_COLORS[course.level] ?? 'bg-gray-100 text-gray-600'}`}
+                    >
                         {course.level}
                     </span>
-                    <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm ${TYPE_COLORS[course.type] ?? 'bg-gray-100 text-gray-600'}`}>
+                    <span
+                        className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm ${TYPE_COLORS[course.type] ?? 'bg-gray-100 text-gray-600'}`}
+                    >
                         {course.type}
                     </span>
                 </div>
@@ -75,7 +79,7 @@ const CourseCard = ({ course, onRegister }) => {
 
             {/* Nội dung */}
             <div className="p-4 flex-grow flex flex-col">
-                <Link to ={`/khoa-hoc-tieng-nhat/${course.slug}`}>
+                <Link to={`/khoa-hoc-tieng-nhat/${course.slug}`}>
                     <h3 className="text-xl font-bold text-red-500 mb-1 hover:text-red-700 hover:underline transition-colors duration-300 line-clamp-2">
                         {course.title}
                     </h3>
@@ -95,19 +99,28 @@ const CourseCard = ({ course, onRegister }) => {
                     {course.duration && (
                         <div className="flex items-center gap-1.5">
                             <FiClock size={13} className="text-red-400 flex-shrink-0" />
-                            <span>Thời lượng: <strong>{course.duration}</strong></span>
+                            <span>
+                                Thời lượng: <strong>{course.duration}</strong>
+                            </span>
                         </div>
                     )}
                     {next ? (
                         <>
                             <div className="flex items-center gap-1.5">
                                 <FiCalendar size={13} className="text-red-400 flex-shrink-0" />
-                                <span>Khai giảng: <strong className="text-gray-700">{new Date(next.startDate).toLocaleDateString('vi-VN')}</strong></span>
+                                <span>
+                                    Khai giảng:{' '}
+                                    <strong className="text-gray-700">
+                                        {new Date(next.startDate).toLocaleDateString('vi-VN')}
+                                    </strong>
+                                </span>
                             </div>
                             {next.time && (
                                 <div className="flex items-center gap-1.5">
                                     <FiClock size={13} className="text-red-400 flex-shrink-0" />
-                                    <span>{next.time} • {next.studyDays}</span>
+                                    <span>
+                                        {next.time} • {next.studyDays}
+                                    </span>
                                 </div>
                             )}
                             {next.maxStudents && (
@@ -149,7 +162,7 @@ const CourseCard = ({ course, onRegister }) => {
 const FilterButton = ({ label, active, onClick }) => (
     <button
         onClick={onClick}
-        className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 whitespace-nowrap cursor-pointer ${
+        className={`px-4 py-2 uppercase rounded-full text-sm font-semibold transition-all duration-300 whitespace-nowrap cursor-pointer ${
             active ? 'bg-red-600 text-white shadow-md' : 'bg-white text-gray-700 hover:bg-red-100 hover:text-red-700'
         }`}
     >
@@ -166,14 +179,14 @@ const Classes = () => {
 
     // filters
     const [levelFilter, setLevelFilter] = useState('Tất cả');
-    const [typeFilter, setTypeFilter]   = useState('Tất cả');
-    const [search, setSearch]           = useState('');
+    const [typeFilter, setTypeFilter] = useState('Tất cả');
+    const [search, setSearch] = useState('');
     const [searchInput, setSearchInput] = useState('');
-    const [page, setPage]               = useState(1);
+    const [page, setPage] = useState(1);
     const limit = 12;
 
     // modal
-    const [isModalOpen, setIsModalOpen]   = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedClass, setSelectedClass] = useState(null);
 
     const fetchCourses = useCallback(async () => {
@@ -182,7 +195,7 @@ const Classes = () => {
             const params = { page, limit, sort: 'newest' };
             if (search) params.q = search;
             if (levelFilter !== 'Tất cả') params.level = levelFilter;
-            if (typeFilter  !== 'Tất cả') params.type  = typeFilter;
+            if (typeFilter !== 'Tất cả') params.type = typeFilter;
 
             const res = await api.get('/courses', { params });
             const body = res.data?.data ?? res.data ?? {};
@@ -196,11 +209,21 @@ const Classes = () => {
         }
     }, [search, levelFilter, typeFilter, page]);
 
-    useEffect(() => { fetchCourses(); }, [fetchCourses]);
-    useEffect(() => { setPage(1); }, [search, levelFilter, typeFilter]);
+    useEffect(() => {
+        fetchCourses();
+    }, [fetchCourses]);
+    useEffect(() => {
+        setPage(1);
+    }, [search, levelFilter, typeFilter]);
 
-    const handleSearch = (e) => { e.preventDefault(); setSearch(searchInput.trim()); };
-    const clearSearch  = () => { setSearch(''); setSearchInput(''); };
+    const handleSearch = (e) => {
+        e.preventDefault();
+        setSearch(searchInput.trim());
+    };
+    const clearSearch = () => {
+        setSearch('');
+        setSearchInput('');
+    };
 
     const handleCardAction = (course, action) => {
         if (action === 'register') {
@@ -215,18 +238,18 @@ const Classes = () => {
             <SEO page="classes" />
 
             {/* Header */}
-            <section className="text-center mb-10 px-4">
+            <section className="text-center mb-6 px-4">
                 <h1 className="text-3xl md:text-5xl font-black text-gray-800 tracking-tight mb-3">
-                        KHÓA HỌC <span className="text-red-600">TIẾNG NHẬT</span>
-                    </h1>
+                    KHÓA HỌC <span className="text-red-600">TIẾNG NHẬT</span>
+                </h1>
                 <p className="text-gray-600 max-w-5xl mx-auto sm:text-lg">
-                    Trung tâm Sakae cung cấp nhiều khóa học tiếng Nhật phù hợp với từng trình độ,
-                    từ cơ bản đến nâng cao, giúp học viên đạt được mục tiêu học tập nhanh nhất.
+                    Trung tâm Sakae cung cấp nhiều khóa học tiếng Nhật phù hợp với từng trình độ, từ cơ bản đến nâng
+                    cao, giúp học viên đạt được mục tiêu học tập nhanh nhất.
                 </p>
             </section>
 
             {/* Bộ lọc */}
-            <section className="max-w-4xl mx-auto mb-4 px-4 space-y-3">
+            <section className="max-w-5xl mx-auto mb-4 px-4 space-y-3">
                 {/* Search */}
                 <form onSubmit={handleSearch} className="flex gap-2">
                     <div className="relative flex-1">
@@ -239,12 +262,19 @@ const Classes = () => {
                             className="w-full pl-9 pr-9 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-red-500 transition-all"
                         />
                         {searchInput && (
-                            <button type="button" onClick={clearSearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer">
+                            <button
+                                type="button"
+                                onClick={clearSearch}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                            >
                                 <FiX size={14} />
                             </button>
                         )}
                     </div>
-                    <button type="submit" className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-xl transition-all cursor-pointer shadow-sm">
+                    <button
+                        type="submit"
+                        className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-xl transition-all cursor-pointer shadow-sm"
+                    >
                         Tìm
                     </button>
                 </form>
@@ -253,17 +283,29 @@ const Classes = () => {
                 <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl shadow-sm border border-gray-200 space-y-3">
                     <div className="md:flex md:items-center md:gap-3">
                         <span className="font-bold text-gray-700 w-24 flex-shrink-0 block mb-2 md:mb-0">Khóa học:</span>
-                        <div className="flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:bg-red-400 [&::-webkit-scrollbar-thumb]:rounded-full">
+                        <div className="flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-red-400 [&::-webkit-scrollbar-thumb]:rounded-full">
                             {LEVELS.map((l) => (
-                                <FilterButton key={l} label={l} active={levelFilter === l} onClick={() => setLevelFilter(l)} />
+                                <FilterButton
+                                    key={l}
+                                    label={l}
+                                    active={levelFilter === l}
+                                    onClick={() => setLevelFilter(l)}
+                                />
                             ))}
                         </div>
                     </div>
                     <div className="md:flex md:items-center md:gap-3">
-                        <span className="font-bold text-gray-700 w-24 flex-shrink-0 block mb-2 md:mb-0">Loại hình:</span>
-                        <div className="flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:bg-red-400 [&::-webkit-scrollbar-thumb]:rounded-full">
+                        <span className="font-bold text-gray-700 w-24 flex-shrink-0 block mb-2 md:mb-0">
+                            Loại hình:
+                        </span>
+                        <div className="flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-red-400 [&::-webkit-scrollbar-thumb]:rounded-full">
                             {TYPES.map((t) => (
-                                <FilterButton key={t} label={t} active={typeFilter === t} onClick={() => setTypeFilter(t)} />
+                                <FilterButton
+                                    key={t}
+                                    label={t}
+                                    active={typeFilter === t}
+                                    onClick={() => setTypeFilter(t)}
+                                />
                             ))}
                         </div>
                     </div>
@@ -283,7 +325,7 @@ const Classes = () => {
                     <SpinnerLoading />
                 ) : courses.length === 0 ? (
                     <div className="text-center py-16 bg-white rounded-xl shadow-md">
-                        <p className="text-xl text-gray-500">Không tìm thấy khóa học phù hợp.</p>
+                        <p className="md:text-xl text-gray-500">Không tìm thấy khóa học phù hợp.</p>
                     </div>
                 ) : (
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 bg-white rounded-xl shadow-md py-4 px-4 md:px-5">
@@ -309,7 +351,9 @@ const Classes = () => {
                             key={p}
                             onClick={() => setPage(p)}
                             className={`w-10 h-10 rounded-xl text-sm font-bold transition-all cursor-pointer ${
-                                page === p ? 'bg-red-600 text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:border-red-300 hover:text-red-600'
+                                page === p
+                                    ? 'bg-red-600 text-white shadow-md'
+                                    : 'bg-white border border-gray-200 text-gray-600 hover:border-red-300 hover:text-red-600'
                             }`}
                         >
                             {p}
@@ -328,7 +372,10 @@ const Classes = () => {
             {/* Registration Modal */}
             <RegistrationModal
                 isOpen={isModalOpen}
-                onClose={() => { setIsModalOpen(false); setSelectedClass(null); }}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setSelectedClass(null);
+                }}
                 courseName={selectedClass?.title || ''}
                 courseId={selectedClass?.id || ''}
             />

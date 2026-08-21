@@ -37,7 +37,7 @@ export default function NewsSection() {
 
     return (
         <section className="py-16 bg-gray-100">
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+            <div className="max-w-7xl mx-auto px-5 md:px-6 lg:px-8 text-center">
                 <h2 className="text-4xl font-extrabold text-gray-800 mb-12 border-b-4 border-red-500 inline-block pb-1">
                     Tin tức & Sự kiện Nổi bật
                 </h2>
@@ -59,7 +59,7 @@ export default function NewsSection() {
                                 <img
                                     src={post.thumbnail || 'https://placehold.co/600x400?text=Sakae+News'}
                                     alt={post.title}
-                                    className="rounded-xl mb-5 aspect-video object-contain w-full bg-slate-50 p-2"
+                                    className="rounded-xl mb-5 aspect-video object-contain w-full bg-slate-50"
                                     onError={(e) => {
                                         e.target.src = 'https://placehold.co/600x400?text=Image+Not+Found';
                                     }}
@@ -75,7 +75,8 @@ export default function NewsSection() {
                                         </time>
                                     </p>
                                     <p className="text-gray-600 mb-4 text-base line-clamp-3">
-                                        {post.excerpt || 'Đọc thêm bài viết này để cập nhật thông tin mới nhất từ Sakae.'}
+                                        {post.excerpt ||
+                                            'Đọc thêm bài viết này để cập nhật thông tin mới nhất từ Sakae.'}
                                     </p>
                                 </div>
 

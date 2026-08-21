@@ -23,6 +23,7 @@ const MyNotificationsLazy = lazy(() => import('../pages/user/MyNotifications'));
 const UserSettingsLazy = lazy(() => import('../pages/user/UserSettings'));
 const SavedItemsLazy = lazy(() => import('../pages/user/SavedItems'));
 const PublicProfileLazy = lazy(() => import('../pages/user/PublicProfile'));
+const ClassRuleLazy = lazy(() => import('../pages/class-rules'));
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 
 // Component xử lý chuyển hướng từ sessionStorage
@@ -68,6 +69,7 @@ function AppRoutes() {
                 <Route path="/dang-ky" element={<AuthLazy />} />
                 <Route path="/dat-lai-mat-khau" element={<AuthLazy />} />
                 <Route path="/thi-thu-JLPT/*" element={<JLPTMockTestLazy />} />
+                <Route path="/noi-quy-khen-thuong" element={<ClassRuleLazy />} />
 
                 {/* User Routes */}
                 <Route

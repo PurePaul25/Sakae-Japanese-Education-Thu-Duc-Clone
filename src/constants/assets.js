@@ -19,4 +19,9 @@ export const ASSETS = {
 
 
     DEFAULT_AVATAR: 'https://res.cloudinary.com/dp3gvvsen/image/upload/v1778731268/sakae-academy/users/sakae-default-user-avatar.jpg',
+
+    CLASS_RULES: {
+        SAKAE_CLASS_RULES: `${CLOUDINARY_BASE_URL}/v1787288318/sakae-academy/classrule-rewards/sakae-class-rules.jpg`,
+        SAKAE_AWARDS: `${CLOUDINARY_BASE_URL}/v1787288319/sakae-academy/classrule-rewards/sakae-awards.webp`,
+    },
 };
