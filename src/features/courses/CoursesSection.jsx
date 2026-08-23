@@ -33,7 +33,11 @@ const CourseCard = ({ course, onRegister }) => {
                         {course.title}
                     </h3>
                 </Link>
-                {course.description && <p className="text-gray-600 mb-3 text-sm line-clamp-2">{course.description}</p>}
+                {course.description && (
+                    <p className="text-gray-600 mb-3 text-sm leading-snug text-justify line-clamp-3 overflow-hidden break-words">
+                        {course.description.replace(/\s+/g, ' ').trim()}
+                    </p>
+                )}
                 <div className="text-[13px] text-gray-500 space-y-1 mb-3">
                     {course.duration && (
                         <p className="flex items-center gap-1">

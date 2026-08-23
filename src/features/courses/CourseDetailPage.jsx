@@ -296,7 +296,12 @@ const CourseDetailPage = () => {
                                         prose-h2:text-xl prose-h3:text-lg
                                         prose-p:my-2 prose-p:text-[17px] prose-li:my-1 prose-li:text-[17px]
                                         prose-blockquote:border-l-4 prose-blockquote:border-red-400 prose-blockquote:pl-3 prose-blockquote:italic prose-blockquote:text-slate-500
-                                        prose-a:text-red-600 prose-a:underline"
+                                        prose-a:text-red-600 prose-a:underline
+                                        
+                                        [&_img]:max-w-full
+                                        [&_img]:h-auto
+                                        [&_img]:object-contain
+                                        [&_img]:rounded-xl"
                                     dangerouslySetInnerHTML={{ __html: normalizeCourseContent(course.content) }}
                                 />
                             ) : (

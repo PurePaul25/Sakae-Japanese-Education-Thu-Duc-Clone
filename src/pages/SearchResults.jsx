@@ -327,7 +327,9 @@ const SearchResults = () => {
                                                     <h4 className="text-lg font-bold text-gray-800 mb-3 line-clamp-2 group-hover:text-red-600 transition duration-200">
                                                         {course.name}
                                                     </h4>
-                                                    <p className="text-gray-600 text-sm line-clamp-2 mb-4 flex-1">{course.desc}</p>
+                                                    <p className="text-gray-600 text-sm leading-snug line-clamp-3 overflow-hidden break-words mb-4">
+                                                        {(course.desc || '').replace(/\s+/g, ' ').trim()}
+                                                    </p>
                                                     <p className="text-sm text-gray-500 flex items-center gap-2 mb-4">
                                                         <FaCalendar size={14} />
                                                         <span className="truncate">{course.schedule}</span>

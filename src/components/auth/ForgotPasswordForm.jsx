@@ -69,7 +69,7 @@ const ForgotPasswordForm = ({ onSwitchMode, direction }) => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="w-full max-w-lg bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-6 border border-white/50 relative overflow-hidden"
+            className="w-full max-w-lg bg-white/90 backdrop-blur-md rounded-3xl shadow-xl px-4 py-6 md:px-6 border border-white/50 relative overflow-hidden"
         >
             {/* Back to Home */}
             <button
@@ -145,7 +145,8 @@ const ForgotPasswordForm = ({ onSwitchMode, direction }) => {
                         </div>
                         <h2 className="text-xl font-bold text-gray-800 mb-2">Yêu cầu đã gửi!</h2>
                         <p className="text-gray-500 text-sm mb-4">
-                            Mã khôi phục đã được gửi tới <span className="font-semibold text-gray-700">{forgotEmail}</span>. <br/>
+                            Mã khôi phục đã được gửi tới{' '}
+                            <span className="font-semibold text-gray-700">{forgotEmail}</span>. <br />
                             Vui lòng kiểm tra email của bạn.
                         </p>
                         <button

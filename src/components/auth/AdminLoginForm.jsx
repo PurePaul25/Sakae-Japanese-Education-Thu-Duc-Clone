@@ -88,7 +88,7 @@ const AdminLoginForm = ({ direction }) => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="w-full max-w-lg bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-6 border border-white/50 relative overflow-hidden"
+            className="w-full max-w-lg bg-white/90 backdrop-blur-md rounded-3xl shadow-xl px-4 py-6 md:px-6 border border-white/50 relative overflow-hidden"
         >
             {/* Back to Home */}
             <button

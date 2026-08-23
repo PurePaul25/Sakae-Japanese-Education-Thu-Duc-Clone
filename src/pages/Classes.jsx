@@ -32,6 +32,11 @@ function fmt(n) {
     return Number(n).toLocaleString('vi-VN') + ' đ';
 }
 
+function previewDescription(text) {
+    if (!text) return '';
+    return text.replace(/\s+/g, ' ').trim();
+}
+
 // ─── Spinner loading ──────────────────────────────────────────────────────────
 const SpinnerLoading = ({ text = 'Đang tải danh sách lớp học...' }) => (
     <div className="col-span-full flex flex-col items-center justify-center py-20 gap-3 bg-white rounded-xl shadow-md">
@@ -86,7 +91,9 @@ const CourseCard = ({ course, onRegister }) => {
                 </Link>
 
                 {course.description && (
-                    <p className="text-gray-600 mb-2 text-sm flex-grow line-clamp-3">{course.description}</p>
+                    <p className="text-gray-600 mb-2 text-sm leading-snug line-clamp-3 overflow-hidden break-words">
+                        {previewDescription(course.description)}
+                    </p>
                 )}
 
                 {/* Thông tin lịch */}

@@ -110,7 +110,7 @@ const SignupForm = ({ onSwitchMode, direction }) => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="w-full max-w-lg bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-6 border border-white/50 relative overflow-hidden"
+            className="w-full max-w-lg bg-white/90 backdrop-blur-md rounded-3xl shadow-xl px-4 py-6 md:px-6 border border-white/50 relative overflow-hidden"
         >
             {/* Back to Home */}
             <button
@@ -311,9 +311,9 @@ const SignupForm = ({ onSwitchMode, direction }) => {
             </p>
 
             <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-full -z-0 opacity-50"></div>
-            
-            <VerificationModal 
-                isOpen={showVerifyModal} 
+
+            <VerificationModal
+                isOpen={showVerifyModal}
                 email={signupEmail}
                 onClose={() => setShowVerifyModal(false)}
                 onSuccess={() => {

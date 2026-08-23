@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaLock, FaEye, FaEyeSlash, FaArrowLeft, FaShieldAlt, FaEnvelope, FaCheck, FaTimes } from 'react-icons/fa';
-import { 
-    calculatePasswordStrength, 
-    checkPasswordRequirements, 
-    isPasswordValid 
-} from '../../utils/authUtils';
+import { calculatePasswordStrength, checkPasswordRequirements, isPasswordValid } from '../../utils/authUtils';
 import { resetPasswordAPI, forgotPasswordAPI } from '../../utils/authAPI';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '../../contexts/ToastContext';
@@ -24,14 +20,14 @@ const ResetPasswordForm = ({ onSwitchMode, direction }) => {
     const [timeLeft, setTimeLeft] = useState(90); // 90 seconds (1m30s)
     const [canResend, setCanResend] = useState(false);
     const [isResending, setIsResending] = useState(false);
-    
+
     // Countdown Timer Effect
     useEffect(() => {
         if (timeLeft <= 0) {
             setCanResend(true);
             return;
         }
-        
+
         const timer = setInterval(() => {
             setTimeLeft((prev) => {
                 if (prev <= 1) {
@@ -68,7 +64,7 @@ const ResetPasswordForm = ({ onSwitchMode, direction }) => {
             setIsResending(false);
         }
     };
-    
+
     const navigate = useNavigate();
     const { addToast } = useToast();
 
@@ -118,7 +114,7 @@ const ResetPasswordForm = ({ onSwitchMode, direction }) => {
             await resetPasswordAPI(email, token, newPassword);
             setIsSuccess(true);
             addToast('Đặt lại mật khẩu thành công!', 'success');
-            
+
             setTimeout(() => {
                 if (onSwitchMode) {
                     onSwitchMode('login', -1);
@@ -161,9 +157,11 @@ const ResetPasswordForm = ({ onSwitchMode, direction }) => {
                     <FaShieldAlt size={40} />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">Thành Công!</h2>
-                <p className="text-gray-500 mb-6">Mật khẩu của bạn đã được thay đổi. Đang chuyển hướng về trang đăng nhập...</p>
+                <p className="text-gray-500 mb-6">
+                    Mật khẩu của bạn đã được thay đổi. Đang chuyển hướng về trang đăng nhập...
+                </p>
                 <button
-                    onClick={() => onSwitchMode ? onSwitchMode('login', -1) : navigate('/dang-nhap')}
+                    onClick={() => (onSwitchMode ? onSwitchMode('login', -1) : navigate('/dang-nhap'))}
                     className="text-red-600 font-bold hover:underline"
                 >
                     Đăng nhập ngay
@@ -179,7 +177,7 @@ const ResetPasswordForm = ({ onSwitchMode, direction }) => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="w-full max-w-lg bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-6 border border-white/50 relative overflow-hidden"
+            className="w-full max-w-lg bg-white/90 backdrop-blur-md rounded-3xl shadow-xl px-4 py-6 md:px-6 border border-white/50 relative overflow-hidden"
         >
             {/* Header */}
             <div className="text-center mb-6 relative z-10">
@@ -214,7 +212,9 @@ const ResetPasswordForm = ({ onSwitchMode, direction }) => {
                 <div>
                     <div className="flex justify-between items-center mb-1 ml-1">
                         <label className="block text-sm font-semibold text-gray-700">Mã xác nhận</label>
-                        <span className={`text-xs font-bold ${timeLeft <= 0 ? 'text-red-500 animate-pulse' : 'text-gray-500'}`}>
+                        <span
+                            className={`text-xs font-bold ${timeLeft <= 0 ? 'text-red-500 animate-pulse' : 'text-gray-500'}`}
+                        >
                             {timeLeft <= 0 ? 'Mã đã hết hạn' : `Hiệu lực: ${formatTime(timeLeft)}`}
                         </span>
                     </div>
@@ -237,8 +237,8 @@ const ResetPasswordForm = ({ onSwitchMode, direction }) => {
                             disabled={!canResend || isResending}
                             onClick={handleResendToken}
                             className={`px-4 py-3.5 cursor-pointer rounded-xl text-xs font-bold transition-all border ${
-                                canResend 
-                                    ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' 
+                                canResend
+                                    ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
                                     : 'bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed'
                             }`}
                         >
