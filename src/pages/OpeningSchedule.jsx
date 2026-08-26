@@ -3,6 +3,7 @@ import { FiCalendar, FiClock, FiUsers, FiFilter, FiChevronLeft, FiChevronRight }
 import { GraduationCap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
+import FloatingContact from '../components/layout/FloatingContact.jsx';
 import RegistrationModal from '../components/ui/RegistrationModal';
 import SEO from '../hooks/useSEO';
 import api from '../utils/api';
@@ -407,6 +408,7 @@ const OpeningSchedule = () => {
                 )}
             </div>
 
+            <FloatingContact />
             <ScrollToTopButton />
 
             <RegistrationModal

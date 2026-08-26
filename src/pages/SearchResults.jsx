@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { FaNewspaper, FaBook, FaCalendar, FaTag, FaArrowRight } from 'react-icons/fa';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
+import FloatingContact from '../components/layout/FloatingContact.jsx';
 import SEO from '../hooks/useSEO';
 import blogService from '../services/blogService';
 import { getCourses } from '../services/courseService';
@@ -37,7 +38,9 @@ const normalizeCourse = (course) => ({
     type: course.type || '',
     image: course.thumbnail || course.image || 'https://placehold.co/400x300?text=Sakae+Course',
     thumbnail: course.thumbnail || course.image || 'https://placehold.co/400x300?text=Sakae+Course',
-    schedule: course.nextSchedule ? `${new Date(course.nextSchedule.startDate).toLocaleDateString('vi-VN')} • ${course.nextSchedule.time || ''}` : 'Chưa có lịch khai giảng',
+    schedule: course.nextSchedule
+        ? `${new Date(course.nextSchedule.startDate).toLocaleDateString('vi-VN')} • ${course.nextSchedule.time || ''}`
+        : 'Chưa có lịch khai giảng',
     slug: course.slug,
 });
 
@@ -158,6 +161,7 @@ const SearchResults = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 mt-17.5">
             <SEO page="searchResults" />
+            <FloatingContact />
             <ScrollToTopButton />
 
             <div className="bg-gradient-to-r from-red-500 via-red-400 to-red-600 text-white p-3.5 shadow-lg">
@@ -255,11 +259,15 @@ const SearchResults = () => {
                                                 >
                                                     <div className="relative h-48 overflow-hidden bg-gray-200 shrink-0">
                                                         <img
-                                                            src={item.thumbnail || 'https://placehold.co/400x300?text=Sakae+News'}
+                                                            src={
+                                                                item.thumbnail ||
+                                                                'https://placehold.co/400x300?text=Sakae+News'
+                                                            }
                                                             alt={item.title}
                                                             className="w-full h-full object-cover hover:scale-110 transition duration-500"
                                                             onError={(e) => {
-                                                                e.target.src = 'https://placehold.co/400x300?text=Image+Not+Found';
+                                                                e.target.src =
+                                                                    'https://placehold.co/400x300?text=Image+Not+Found';
                                                             }}
                                                         />
                                                         {item.category && (
@@ -278,7 +286,8 @@ const SearchResults = () => {
                                                             {item.title}
                                                         </h4>
                                                         <p className="text-gray-600 text-sm line-clamp-3 flex-1">
-                                                            {item.excerpt || 'Đọc thêm bài viết này từ hệ thống tin tức Sakae.'}
+                                                            {item.excerpt ||
+                                                                'Đọc thêm bài viết này từ hệ thống tin tức Sakae.'}
                                                         </p>
                                                         <div className="mt-4 inline-flex items-center gap-2 text-red-600 font-semibold hover:text-red-700 transition duration-300">
                                                             Đọc thêm
@@ -311,7 +320,8 @@ const SearchResults = () => {
                                                             alt={course.name}
                                                             className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                                                             onError={(e) => {
-                                                                e.target.src = 'https://placehold.co/400x300?text=Image+Not+Found';
+                                                                e.target.src =
+                                                                    'https://placehold.co/400x300?text=Image+Not+Found';
                                                             }}
                                                         />
                                                     </Link>

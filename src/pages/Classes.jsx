@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { FiSearch, FiFilter, FiX, FiCalendar, FiClock, FiUsers, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
+import FloatingContact from '../components/layout/FloatingContact.jsx';
 import RegistrationModal from '../components/ui/RegistrationModal';
 import SEO from '../hooks/useSEO';
 import api from '../utils/api';
@@ -387,6 +388,7 @@ const Classes = () => {
                 courseId={selectedClass?.id || ''}
             />
 
+            <FloatingContact />
             <ScrollToTopButton />
         </div>
     );

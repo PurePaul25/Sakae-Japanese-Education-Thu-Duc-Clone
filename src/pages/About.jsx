@@ -4,6 +4,7 @@ import SEO from '../hooks/useSEO.jsx';
 import { ASSETS } from '../constants/assets';
 import { Link } from 'react-router-dom';
 import { FiFileText, FiBookOpen, FiAward } from 'react-icons/fi';
+import FloatingContact from '../components/layout/FloatingContact.jsx';
 
 function About() {
     return (
@@ -244,6 +245,7 @@ function About() {
                     </div>
                 </div>
             </section>
+            <FloatingContact />
             <ScrollToTopButton />
         </div>
     );

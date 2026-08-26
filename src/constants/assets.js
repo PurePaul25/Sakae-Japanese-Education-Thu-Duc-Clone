@@ -7,6 +7,9 @@ export const ASSETS = {
     ICONS: {
         VIETNAM: `${CLOUDINARY_BASE_URL}/v1778733188/sakae-academy/icons/vietnam.png`,
         JAPAN: `${CLOUDINARY_BASE_URL}/v1778733189/sakae-academy/icons/japan.png`,
+
+        ZALO: `${CLOUDINARY_BASE_URL}/v1787749280/sakae-academy/system/zalo-logo-contact.png`,
+        MESSENGER: `${CLOUDINARY_BASE_URL}/v1787747759/sakae-academy/system/messenger_logo_contact.webp`,
     },
 
     BANNERS: {

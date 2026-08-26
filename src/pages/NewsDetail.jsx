@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Eye, Heart, MessageCircle, Copy, Edit3, Trash2, MoreHorizontal, Users, X, LoaderCircle } from 'lucide-react';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
+import FloatingContact from '../components/layout/FloatingContact.jsx';
 import blogService from '../services/blogService';
 import { useUser } from '../contexts/UserContext';
 import { useToast } from '../contexts/ToastContext';
@@ -709,6 +710,7 @@ const NewsDetail = () => {
                 </div>
             </div>
 
+            <FloatingContact />
             <ScrollToTopButton />
 
             {openLikesModal && (

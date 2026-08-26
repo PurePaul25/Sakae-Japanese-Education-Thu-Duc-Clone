@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
+import FloatingContact from '../components/layout/FloatingContact.jsx';
 import { FaSearchPlus } from 'react-icons/fa';
 import SEO from '../hooks/useSEO';
 import api from '../utils/api';
@@ -255,6 +256,7 @@ const Gallerys = () => {
                 setComments={setComments}
             />
 
+            <FloatingContact />
             <ScrollToTopButton />
         </div>
     );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
+import FloatingContact from '../components/layout/FloatingContact.jsx';
 import SEO from '../hooks/useSEO';
 import blogService from '../services/blogService';
 
@@ -282,6 +283,7 @@ const News = () => {
                 )}
             </section>
 
+            <FloatingContact />
             <ScrollToTopButton />
         </div>
     );

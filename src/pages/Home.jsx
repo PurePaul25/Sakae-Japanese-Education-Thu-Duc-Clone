@@ -6,12 +6,12 @@ import CoursesSection from '../features/courses/CoursesSection.jsx';
 import NewsSection from '../components/home/NewsSection.jsx';
 import TestimonialsSection from '../components/home/TestimonialsSection.jsx';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton.jsx';
+import FloatingContact from '../components/layout/FloatingContact.jsx';
 import { useToast } from '../contexts/ToastContext.jsx';
 import SEO from '../hooks/useSEO.jsx';
 
 function Home() {
     const { addToast } = useToast();
-
 
     return (
         <main>
@@ -22,6 +22,7 @@ function Home() {
             <CoursesSection />
             <NewsSection />
             <TestimonialsSection />
+            <FloatingContact />
             <ScrollToTopButton />
         </main>
     );

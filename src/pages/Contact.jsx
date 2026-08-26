@@ -1,5 +1,6 @@
 import React from 'react';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
+import FloatingContact from '../components/layout/FloatingContact.jsx';
 import SEO from '../hooks/useSEO';
 
 const Contact = () => {
@@ -86,6 +87,7 @@ const Contact = () => {
                     </div>
                 </div>
             </section>
+            <FloatingContact />
             <ScrollToTopButton />
         </div>
     );

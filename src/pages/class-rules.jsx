@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { FiFilter, FiZoomIn, FiZoomOut, FiX, FiAward, FiBookOpen } from 'react-icons/fi';
 import ScrollToTopButton from '../components/layout/ScrollToTopButton';
+import FloatingContact from '../components/layout/FloatingContact.jsx';
 import SEO from '../hooks/useSEO';
 import { ASSETS } from '../constants/assets';
 
@@ -342,6 +343,7 @@ const ClassRule = () => {
                 />
             )}
 
+            <FloatingContact />
             <ScrollToTopButton />
         </div>
     );

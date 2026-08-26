@@ -13,6 +13,7 @@ import {
 import { FiLoader, FiArrowLeft } from 'react-icons/fi';
 import { IoIosCall } from 'react-icons/io';
 import ScrollToTopButton from '../../components/layout/ScrollToTopButton';
+import FloatingContact from '../../components/layout/FloatingContact.jsx';
 import RegistrationModal from '../../components/ui/RegistrationModal';
 import SEO from '../../hooks/useSEO.jsx';
 import { getCourseBySlug } from '../../services/courseService';
@@ -215,6 +216,7 @@ const CourseDetailPage = () => {
 
     return (
         <div className="pt-24 pb-14 bg-gray-50 min-h-screen">
+            <FloatingContact />
             <ScrollToTopButton />
             <SEO
                 customTitle={`${course.title} — Trung tâm Nhật Ngữ Sakae Thủ Đức`}
@@ -223,7 +225,6 @@ const CourseDetailPage = () => {
                     `Khóa học ${course.title} tại Trung tâm Nhật Ngữ Sakae Thủ Đức. Đăng ký tư vấn ngay hôm nay!`
                 }
             />
-
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Back button */}
                 <button
@@ -399,7 +400,6 @@ const CourseDetailPage = () => {
                     </div>
                 </div>
             </div>
-
             {/* Registration Modal */}
             <RegistrationModal
                 isOpen={isModalOpen}
