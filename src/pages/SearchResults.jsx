@@ -68,26 +68,14 @@ const SearchResults = () => {
 
         let ignore = false;
 
+        // FIX 1: Chỉ gọi 1 request search thay vì Promise.allSettled với 2 request đồng thời
         const fetchNews = async () => {
             setNewsLoading(true);
             setNewsError(null);
             try {
-                const [primaryResult, fallbackResult] = await Promise.allSettled([
-                    blogService.getAll({ search: query.trim(), limit: 100 }),
-                    blogService.getAll({ page: 1, limit: 100 }),
-                ]);
-
-                let items = [];
-
-                if (primaryResult.status === 'fulfilled') {
-                    const payload = primaryResult.value.data?.data ?? primaryResult.value.data;
-                    items = Array.isArray(payload?.data) ? payload.data : [];
-                }
-
-                if (!items.length && fallbackResult.status === 'fulfilled') {
-                    const payload = fallbackResult.value.data?.data ?? fallbackResult.value.data;
-                    items = Array.isArray(payload?.data) ? payload.data : [];
-                }
+                const res = await blogService.getAll({ search: query.trim(), limit: 100 });
+                const payload = res.data?.data ?? res.data;
+                const items = Array.isArray(payload?.data) ? payload.data : [];
 
                 const filtered = filterNewsByQuery(items, query.trim());
                 const sorted = [...filtered].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -129,6 +117,7 @@ const SearchResults = () => {
             }
         };
 
+        // Chạy song song, mỗi cái update state độc lập khi xong
         fetchNews();
         fetchCourses();
 
@@ -158,6 +147,11 @@ const SearchResults = () => {
 
     const totalResults = filteredResults.news.length + filteredResults.courses.length;
 
+    // FIX 2: isLoading tổng chỉ dùng cho trạng thái "chưa có gì cả" — không khóa toàn trang
+    const isAllLoading = newsLoading && courseLoading;
+    const isDoneLoading = !newsLoading && !courseLoading;
+    const hasNoResults = isDoneLoading && !results.hasResults;
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 mt-17.5">
             <SEO page="searchResults" />
@@ -170,7 +164,8 @@ const SearchResults = () => {
                     <p className="text-red-100">
                         Tìm kiếm cho: <span className="font-semibold text-white text-lg">"{query}"</span>
                     </p>
-                    {results.hasResults && (
+                    {/* FIX 3: Chỉ hiển thị "Tìm thấy X kết quả" khi cả 2 đều xong loading */}
+                    {isDoneLoading && results.hasResults && (
                         <p className="text-red-100">
                             Tìm thấy <span className="font-bold text-white text-lg">{totalResults}</span> kết quả
                         </p>
@@ -179,13 +174,14 @@ const SearchResults = () => {
             </div>
 
             <div className="max-w-6xl mx-auto px-4 pt-6 pb-10">
-                {newsLoading ? (
+                {/* Spinner toàn trang chỉ khi cả 2 đều đang loading và chưa có kết quả nào */}
+                {isAllLoading && !results.hasResults ? (
                     <div className="flex flex-col items-center justify-center py-16 rounded-2xl border border-slate-200 bg-white shadow-sm">
                         <div className="h-14 w-14 rounded-full border-4 border-red-600 border-t-transparent animate-spin mb-4" />
-                        <p className="text-lg font-semibold text-gray-900">Đang tìm kiếm bài viết...</p>
+                        <p className="text-lg font-semibold text-gray-900">Đang tìm kiếm...</p>
                         <p className="text-sm text-gray-500 mt-1">Vui lòng chờ trong giây lát.</p>
                     </div>
-                ) : !results.hasResults ? (
+                ) : hasNoResults ? (
                     <div className="text-center py-16">
                         <div className="text-6xl mb-6 opacity-30">🔍</div>
                         <h2 className="text-3xl font-bold text-gray-800 mb-4">Không tìm thấy kết quả</h2>
@@ -202,156 +198,177 @@ const SearchResults = () => {
                     </div>
                 ) : (
                     <>
-                        <div className="mb-6">
-                            <div className="flex py-0.5 items-center gap-2 overflow-x-auto no-scrollbar">
-                                <span className="text-gray-700 font-medium shrink-0">Lọc theo:</span>
+                        {/* Tabs filter — chỉ hiện khi đã có kết quả */}
+                        {results.hasResults && (
+                            <div className="mb-6">
+                                <div className="flex py-0.5 items-center gap-2 overflow-x-auto no-scrollbar">
+                                    <span className="text-gray-700 font-medium shrink-0">Lọc theo:</span>
 
-                                {[
-                                    {
-                                        key: 'all',
-                                        label: `Tất cả (${results.news.length + results.courses.length})`,
-                                    },
-                                    {
-                                        key: 'news',
-                                        label: `Tin tức (${results.news.length})`,
-                                    },
-                                    {
-                                        key: 'courses',
-                                        label: `Khóa học (${results.courses.length})`,
-                                    },
-                                ].map((tab) => (
-                                    <button
-                                        key={tab.key}
-                                        onClick={() => setActiveTab(tab.key)}
-                                        className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ease-in-out whitespace-nowrap shrink-0 active:scale-95 ${
-                                            activeTab === tab.key
-                                                ? 'bg-red-600 text-white shadow-md scale-105'
-                                                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 cursor-pointer'
-                                        }`}
-                                    >
-                                        {tab.label}
-                                    </button>
-                                ))}
+                                    {[
+                                        {
+                                            key: 'all',
+                                            label: `Tất cả (${results.news.length + results.courses.length})`,
+                                        },
+                                        {
+                                            key: 'news',
+                                            label: `Tin tức (${results.news.length})`,
+                                        },
+                                        {
+                                            key: 'courses',
+                                            label: `Khóa học (${results.courses.length})`,
+                                        },
+                                    ].map((tab) => (
+                                        <button
+                                            key={tab.key}
+                                            onClick={() => setActiveTab(tab.key)}
+                                            className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ease-in-out whitespace-nowrap shrink-0 active:scale-95 ${
+                                                activeTab === tab.key
+                                                    ? 'bg-red-600 text-white shadow-md scale-105'
+                                                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 cursor-pointer'
+                                            }`}
+                                        >
+                                            {tab.label}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         <div className="space-y-6">
-                            {filteredResults.news.length > 0 && (
+                            {/* FIX 2: Khu News tự quản loading riêng */}
+                            {(activeTab === 'all' || activeTab === 'news') && (
                                 <div>
-                                    <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-                                        <FaNewspaper className="text-red-600" /> Tin tức
-                                    </h3>
                                     {newsLoading ? (
-                                        <div className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-gray-500">
-                                            Đang tải tin tức từ API...
+                                        <div className="flex flex-col items-center justify-center py-12 rounded-2xl border border-slate-200 bg-white shadow-sm">
+                                            <div className="h-10 w-10 rounded-full border-4 border-red-600 border-t-transparent animate-spin mb-3" />
+                                            <p className="text-base font-semibold text-gray-700">Đang tìm kiếm bài viết...</p>
                                         </div>
                                     ) : newsError ? (
                                         <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-600">
                                             {newsError}
                                         </div>
-                                    ) : (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                            {filteredResults.news.map((item) => (
-                                                <Link
-                                                    key={item.id}
-                                                    to={`/tin-tuc/${item.slug}`}
-                                                    className="group h-full flex flex-col bg-white rounded-lg shadow-md hover:shadow-xl overflow-hidden transition duration-300 transform hover:-translate-y-1"
-                                                >
-                                                    <div className="relative h-48 overflow-hidden bg-gray-200 shrink-0">
-                                                        <img
-                                                            src={
-                                                                item.thumbnail ||
-                                                                'https://placehold.co/400x300?text=Sakae+News'
-                                                            }
-                                                            alt={item.title}
-                                                            className="w-full h-full object-cover hover:scale-110 transition duration-500"
-                                                            onError={(e) => {
-                                                                e.target.src =
-                                                                    'https://placehold.co/400x300?text=Image+Not+Found';
-                                                            }}
-                                                        />
-                                                        {item.category && (
-                                                            <span className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2 shadow-md">
-                                                                <FaTag size={12} /> {item.category}
-                                                            </span>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="p-5 flex flex-1 flex-col">
-                                                        <p className="text-sm text-gray-500 flex items-center gap-2 mb-3">
-                                                            <FaCalendar size={14} />
-                                                            {new Date(item.createdAt).toLocaleDateString('vi-VN')}
-                                                        </p>
-                                                        <h4 className="text-lg font-bold text-gray-800 mb-3 line-clamp-2 group-hover:text-red-600 transition">
-                                                            {item.title}
-                                                        </h4>
-                                                        <p className="text-gray-600 text-sm line-clamp-3 flex-1">
-                                                            {item.excerpt ||
-                                                                'Đọc thêm bài viết này từ hệ thống tin tức Sakae.'}
-                                                        </p>
-                                                        <div className="mt-4 inline-flex items-center gap-2 text-red-600 font-semibold hover:text-red-700 transition duration-300">
-                                                            Đọc thêm
-                                                            <FaArrowRight size={12} />
+                                    ) : filteredResults.news.length > 0 ? (
+                                        <div>
+                                            <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                                                <FaNewspaper className="text-red-600" /> Tin tức
+                                            </h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                {filteredResults.news.map((item) => (
+                                                    <Link
+                                                        key={item.id}
+                                                        to={`/tin-tuc/${item.slug}`}
+                                                        className="group h-full flex flex-col bg-white rounded-lg shadow-md hover:shadow-xl overflow-hidden transition duration-300 transform hover:-translate-y-1"
+                                                    >
+                                                        <div className="relative h-48 overflow-hidden bg-gray-200 shrink-0">
+                                                            <img
+                                                                src={
+                                                                    item.thumbnail ||
+                                                                    'https://placehold.co/400x300?text=Sakae+News'
+                                                                }
+                                                                alt={item.title}
+                                                                className="w-full h-full object-cover hover:scale-110 transition duration-500"
+                                                                onError={(e) => {
+                                                                    e.target.src =
+                                                                        'https://placehold.co/400x300?text=Image+Not+Found';
+                                                                }}
+                                                            />
+                                                            {item.category && (
+                                                                <span className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2 shadow-md">
+                                                                    <FaTag size={12} /> {item.category}
+                                                                </span>
+                                                            )}
                                                         </div>
-                                                    </div>
-                                                </Link>
-                                            ))}
+
+                                                        <div className="p-5 flex flex-1 flex-col">
+                                                            <p className="text-sm text-gray-500 flex items-center gap-2 mb-3">
+                                                                <FaCalendar size={14} />
+                                                                {new Date(item.createdAt).toLocaleDateString('vi-VN')}
+                                                            </p>
+                                                            <h4 className="text-lg font-bold text-gray-800 mb-3 line-clamp-2 group-hover:text-red-600 transition">
+                                                                {item.title}
+                                                            </h4>
+                                                            <p className="text-gray-600 text-sm line-clamp-3 flex-1">
+                                                                {item.excerpt ||
+                                                                    'Đọc thêm bài viết này từ hệ thống tin tức Sakae.'}
+                                                            </p>
+                                                            <div className="mt-4 inline-flex items-center gap-2 text-red-600 font-semibold hover:text-red-700 transition duration-300">
+                                                                Đọc thêm
+                                                                <FaArrowRight size={12} />
+                                                            </div>
+                                                        </div>
+                                                    </Link>
+                                                ))}
+                                            </div>
                                         </div>
-                                    )}
+                                    ) : null}
                                 </div>
                             )}
 
-                            {filteredResults.courses.length > 0 && (
+                            {/* FIX 2: Khu Course tự quản loading riêng */}
+                            {(activeTab === 'all' || activeTab === 'courses') && (
                                 <div className={filteredResults.news.length > 0 ? 'mt-12' : ''}>
-                                    <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-                                        <FaBook className="text-red-600" /> Khóa học
-                                    </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                        {filteredResults.courses.map((course) => (
-                                            <Link
-                                                key={course.slug}
-                                                to={`/khoa-hoc-tieng-nhat/${course.slug}`}
-                                                className="group h-full flex flex-col bg-white rounded-lg shadow-md hover:shadow-xl overflow-hidden transition duration-300 transform hover:-translate-y-1 cursor-pointer"
-                                            >
-                                                <div className="relative h-48 overflow-hidden bg-gray-200 shrink-0">
-                                                    <Link to={`/khoa-hoc-tieng-nhat/${course.slug}`}>
-                                                        <img
-                                                            src={course.image}
-                                                            alt={course.name}
-                                                            className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                                                            onError={(e) => {
-                                                                e.target.src =
-                                                                    'https://placehold.co/400x300?text=Image+Not+Found';
-                                                            }}
-                                                        />
-                                                    </Link>
-                                                    <span className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-bold shadow-lg">
-                                                        {course.level}
-                                                    </span>
-                                                    <span className="absolute top-4 right-4 bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-md">
-                                                        {course.type}
-                                                    </span>
-                                                </div>
+                                    {courseLoading ? (
+                                        <div className="flex flex-col items-center justify-center py-12 rounded-2xl border border-slate-200 bg-white shadow-sm">
+                                            <div className="h-10 w-10 rounded-full border-4 border-red-600 border-t-transparent animate-spin mb-3" />
+                                            <p className="text-base font-semibold text-gray-700">Đang tìm kiếm khóa học...</p>
+                                        </div>
+                                    ) : courseError ? (
+                                        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-600">
+                                            {courseError}
+                                        </div>
+                                    ) : filteredResults.courses.length > 0 ? (
+                                        <div>
+                                            <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                                                <FaBook className="text-red-600" /> Khóa học
+                                            </h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                {filteredResults.courses.map((course) => (
+                                                    <Link
+                                                        key={course.slug}
+                                                        to={`/khoa-hoc-tieng-nhat/${course.slug}`}
+                                                        className="group h-full flex flex-col bg-white rounded-lg shadow-md hover:shadow-xl overflow-hidden transition duration-300 transform hover:-translate-y-1 cursor-pointer"
+                                                    >
+                                                        <div className="relative h-48 overflow-hidden bg-gray-200 shrink-0">
+                                                            <Link to={`/khoa-hoc-tieng-nhat/${course.slug}`}>
+                                                                <img
+                                                                    src={course.image}
+                                                                    alt={course.name}
+                                                                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                                                                    onError={(e) => {
+                                                                        e.target.src =
+                                                                            'https://placehold.co/400x300?text=Image+Not+Found';
+                                                                    }}
+                                                                />
+                                                            </Link>
+                                                            <span className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-bold shadow-lg">
+                                                                {course.level}
+                                                            </span>
+                                                            <span className="absolute top-4 right-4 bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-md">
+                                                                {course.type}
+                                                            </span>
+                                                        </div>
 
-                                                <div className="p-5 flex flex-1 flex-col">
-                                                    <h4 className="text-lg font-bold text-gray-800 mb-3 line-clamp-2 group-hover:text-red-600 transition duration-200">
-                                                        {course.name}
-                                                    </h4>
-                                                    <p className="text-gray-600 text-sm leading-snug line-clamp-3 overflow-hidden break-words mb-4">
-                                                        {(course.desc || '').replace(/\s+/g, ' ').trim()}
-                                                    </p>
-                                                    <p className="text-sm text-gray-500 flex items-center gap-2 mb-4">
-                                                        <FaCalendar size={14} />
-                                                        <span className="truncate">{course.schedule}</span>
-                                                    </p>
-                                                    <div className="inline-flex items-center gap-2 text-red-600 font-semibold group-hover:text-red-700 transition duration-300">
-                                                        Xem chi tiết
-                                                        <FaArrowRight size={12} />
-                                                    </div>
-                                                </div>
-                                            </Link>
-                                        ))}
-                                    </div>
+                                                        <div className="p-5 flex flex-1 flex-col">
+                                                            <h4 className="text-lg font-bold text-gray-800 mb-3 line-clamp-2 group-hover:text-red-600 transition duration-200">
+                                                                {course.name}
+                                                            </h4>
+                                                            <p className="text-gray-600 text-sm leading-snug line-clamp-3 overflow-hidden break-words mb-4">
+                                                                {(course.desc || '').replace(/\s+/g, ' ').trim()}
+                                                            </p>
+                                                            <p className="text-sm text-gray-500 flex items-center gap-2 mb-4">
+                                                                <FaCalendar size={14} />
+                                                                <span className="truncate">{course.schedule}</span>
+                                                            </p>
+                                                            <div className="inline-flex items-center gap-2 text-red-600 font-semibold group-hover:text-red-700 transition duration-300">
+                                                                Xem chi tiết
+                                                                <FaArrowRight size={12} />
+                                                            </div>
+                                                        </div>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ) : null}
                                 </div>
                             )}
                         </div>
