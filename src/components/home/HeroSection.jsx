@@ -48,12 +48,12 @@ export default function HeroSection() {
             </div>
 
             {/* Nút chuyển banner Trái */}
-            <div className="hidden group-hover:block absolute top-1/2 -translate-y-1/2 left-5 text-2xl rounded-full p-2 bg-black/20 text-white cursor-pointer hover:bg-black/40 transition">
+            <div className="hidden group-hover:block absolute top-1/2 -translate-y-1/2 left-8 text-2xl rounded-full p-2 bg-black/20 text-white cursor-pointer hover:bg-black/40 transition">
                 <BsChevronCompactLeft onClick={prevBanner} size={35} />
             </div>
 
             {/* Nút chuyển banner Phải */}
-            <div className="hidden group-hover:block absolute top-1/2 -translate-y-1/2 right-5 text-2xl rounded-full p-2 bg-black/20 text-white cursor-pointer hover:bg-black/40 transition">
+            <div className="hidden group-hover:block absolute top-1/2 -translate-y-1/2 lg:right-8 sm:right-6 text-2xl rounded-full p-2 bg-black/20 text-white cursor-pointer hover:bg-black/40 transition">
                 <BsChevronCompactRight onClick={nextBanner} size={35} />
             </div>
 

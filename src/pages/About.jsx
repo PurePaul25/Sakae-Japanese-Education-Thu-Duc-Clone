@@ -193,10 +193,10 @@ function About() {
 
             {/* 5. Tài liệu, giáo trình */}
             <section className="max-w-6xl mx-auto px-4 mt-10 border-t border-gray-200 pt-6">
-                <div className="mb-6">
-                    <h2 className="text-3xl font-bold text-gray-800">Tài liệu, giáo trình</h2>
+                <div className="mb-6 w-68">
+                    <h2 className="text-3xl font-extrabold text-gray-800">Tài liệu, giáo trình</h2>
 
-                    <div className="w-12 h-1 bg-red-500 rounded-full mt-2"></div>
+                    <div className="w-full h-0.5 bg-red-500 rounded-full mt-2"></div>
                 </div>
 
                 <div className="space-y-4 text-gray-700 md:text-lg leading-relaxed">

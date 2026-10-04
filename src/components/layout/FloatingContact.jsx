@@ -5,7 +5,7 @@ const FloatingContact = () => {
     const messengerUrl = 'https://m.me/107525079044139';
 
     return (
-        <div className="fixed bottom-28 z-50 flex flex-col items-center gap-4 right-6.5">
+        <div className="fixed bottom-28 z-50 flex flex-col items-center gap-4 sm:right-6.5 right-4.5">
             {/* Zalo */}
             <a
                 href={zaloUrl}
@@ -21,9 +21,9 @@ const FloatingContact = () => {
                         absolute right-full top-1/2 mr-3
                         hidden -translate-y-1/2
                         whitespace-nowrap
-                        rounded-lg bg-white
+                        rounded-lg bg-red-500
                         px-3 py-2
-                        text-sm font-bold text-red-600
+                        text-sm font-bold text-white
                         opacity-0 shadow-lg
                         transition-all duration-300
                         sm:block
@@ -94,9 +94,9 @@ const FloatingContact = () => {
                         absolute right-full top-1/2 mr-3
                         hidden -translate-y-1/2
                         whitespace-nowrap
-                        rounded-lg bg-white
+                        rounded-lg bg-red-500
                         px-3 py-2
-                        text-sm font-bold text-red-600
+                        text-sm font-bold text-white
                         opacity-0 shadow-lg
                         transition-all duration-300
                         sm:block

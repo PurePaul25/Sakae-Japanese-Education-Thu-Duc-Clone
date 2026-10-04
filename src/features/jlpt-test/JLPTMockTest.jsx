@@ -5,34 +5,56 @@ import LevelSelection from './LevelSelection';
 import TestSelection from './TestSelection';
 import ExamView from './ExamView';
 import ResultView from './ResultView';
-// Practice components (to be created)
+
+// Practice — selection screens
 import PracticeLevelSelection from './practice/PracticeLevelSelection';
 import PracticeTypeSelection from './practice/PracticeTypeSelection';
 import PracticeTestSelection from './practice/PracticeTestSelection';
-import PracticeExamView from './practice/PracticeExamView';
-import PracticeResultView from './practice/PracticeResultView';
+
+// Practice — set-based flow (Phase 3.1 / 3.2)
+import PracticeSetExamView from './practice/PracticeSetExamView';
+import PracticeSetResultView from './practice/PracticeSetResultView';
 
 const JLPTMockTest = () => {
     return (
         <Routes>
             <Route index element={<JLPTHub />} />
 
-            {/* Part 1: Thi Thử (Mock Test) */}
+            {/* ── Mock Test ─────────────────────────────────────────────── */}
             <Route path="mock-test" element={<LevelSelection />} />
             <Route path="mock-test/level/:levelId" element={<TestSelection />} />
-
-            {/* Part 2: Luyện Tập (Practice) */}
-            <Route path="practice" element={<PracticeLevelSelection />} />
-            <Route path="practice/:levelId" element={<PracticeTypeSelection />} />
-            <Route path="practice/:levelId/:type" element={<PracticeTestSelection />} />
-            <Route path="practice/exam/:testId/:qIndex" element={<PracticeExamView />} />
-            <Route path="practice/exam/:testId" element={<PracticeExamView />} />
-            <Route path="practice/result/:testId" element={<PracticeResultView />} />
-
-            {/* Common Exam & Result (Shared for now, or can be specific) */}
             <Route path="exam/:testId/:qIndex" element={<ExamView />} />
             <Route path="exam/:testId" element={<ExamView />} />
             <Route path="result/:testId" element={<ResultView />} />
+
+            {/* ── Practice — level / category selection ─────────────────── */}
+            <Route path="practice" element={<PracticeLevelSelection />} />
+            <Route path="practice/:levelId" element={<PracticeTypeSelection />} />
+
+            {/*
+              Practice — set list.
+              URL: /thi-thu-JLPT/practice/:levelId/:type
+              type = vocabulary | kanji | grammar | reading
+              PracticeTestSelection fetches GET /jlpt/practice/sets?level=&category=
+              and opens popup to /practice/exam/set/:setId
+            */}
+            <Route path="practice/:levelId/:type" element={<PracticeTestSelection />} />
+
+            {/*
+              Practice — exam popup (set-based).
+              URL: /thi-thu-JLPT/practice/exam/set/:setId
+              Fetches GET /jlpt/practice/sets/:setId
+              Submits via POST /jlpt/practice/sets/:setId/submit
+              No /answer call on option click.
+            */}
+            <Route path="practice/exam/set/:setId" element={<PracticeSetExamView />} />
+
+            {/*
+              Practice — result page (set-based).
+              URL: /thi-thu-JLPT/practice/result/set/:setId
+              Reads backend result from localStorage (setResultKey).
+            */}
+            <Route path="practice/result/set/:setId" element={<PracticeSetResultView />} />
         </Routes>
     );
 };

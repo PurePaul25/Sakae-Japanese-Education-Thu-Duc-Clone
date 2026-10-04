@@ -12,7 +12,7 @@ const PracticeLevelSelection = () => {
     return (
         <div className="pt-22 pb-14 bg-slate-50 min-h-screen">
             <SEO page="practicejlptTest" />
-            <div className="max-w-6xl mx-auto px-4">
+            <div className="max-w-7xl mx-auto px-4">
                 <button
                     onClick={() => navigate('/thi-thu-JLPT')}
                     className="flex items-center gap-2 text-slate-500 hover:text-red-600 font-bold mb-6 transition-colors cursor-pointer group"

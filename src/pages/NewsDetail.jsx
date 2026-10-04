@@ -320,7 +320,7 @@ const NewsDetail = () => {
 
     return (
         <div className="pt-25 pb-12 bg-gray-100 text-gray-800">
-            <div className="max-w-5xl mx-auto px-3 md:px-4">
+            <div className="max-w-6xl mx-auto px-3 md:px-4">
                 {/* Header */}
                 <article className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
                     {post.thumbnail && (
@@ -728,7 +728,7 @@ const NewsDetail = () => {
                     />
 
                     <div
-                        className={`relative w-full max-w-3xl rounded-[1rem] bg-white shadow-2xl overflow-hidden transform transition-all duration-${modalTransitionDuration} ${
+                        className={`relative w-full max-w-4xl rounded-[1rem] bg-white shadow-2xl overflow-hidden transform transition-all duration-${modalTransitionDuration} ${
                             showLikesModal ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-3 scale-95'
                         }`}
                     >

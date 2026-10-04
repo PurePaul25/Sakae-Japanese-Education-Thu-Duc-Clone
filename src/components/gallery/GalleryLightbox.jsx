@@ -460,8 +460,14 @@ const GalleryLightbox = ({
                                             e.stopPropagation();
                                             handleLike(selectedImage.id, e, selectedImage.userReaction || 'LIKE');
                                         }}
-                                        onTouchStart={(e) => { e.stopPropagation(); handleMobilePressStart(e); }}
-                                        onTouchEnd={(e) => { e.stopPropagation(); handleMobilePressEnd(); }}
+                                        onTouchStart={(e) => {
+                                            e.stopPropagation();
+                                            handleMobilePressStart(e);
+                                        }}
+                                        onTouchEnd={(e) => {
+                                            e.stopPropagation();
+                                            handleMobilePressEnd();
+                                        }}
                                         onTouchCancel={handleMobilePressEnd}
                                         className={`flex items-center gap-1.5 px-3 py-2 text-xs font-black transition-all cursor-pointer ${
                                             selectedImage.likesCount > 0
@@ -975,7 +981,7 @@ const GalleryLightbox = ({
 
                     {/* Modal Card */}
                     <div
-                        className={`relative bg-white dark:bg-slate-900 rounded-2xl p-3 md:p-5 max-w-xl w-full shadow-2xl z-[290] border border-slate-100 dark:border-slate-800 flex flex-col max-h-[80vh] transform transition-all duration-${likesModalDuration} ${
+                        className={`relative bg-white dark:bg-slate-900 rounded-2xl p-3 md:p-5 max-w-4xl w-full shadow-2xl z-[290] border border-slate-100 dark:border-slate-800 flex flex-col max-h-[80vh] transform transition-all duration-${likesModalDuration} ${
                             showLikesModal ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-3 scale-95'
                         }`}
                         onClick={(e) => e.stopPropagation()}

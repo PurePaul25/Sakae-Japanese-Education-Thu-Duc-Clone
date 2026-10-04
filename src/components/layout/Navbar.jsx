@@ -483,7 +483,7 @@ function Navbar() {
                                     />
                                 </button>
                                 <div
-                                    className={`w-full bg-gray-50 overflow-hidden transition-all duration-300 ease-in-out ${
+                                    className={`w-full bg-gray-100 overflow-hidden transition-all duration-300 ease-in-out ${
                                         mobileSubmenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
                                     }`}
                                 >
