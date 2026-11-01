@@ -2,13 +2,29 @@ import api from './api';
 
 const normalizeResponse = (response) => response?.data?.data ?? response?.data;
 
+const normalizeLoginError = (error, fallbackMessage) => {
+    const responseMessage = error.response?.data?.message;
+    if (
+        responseMessage?.includes('CSRF') ||
+        responseMessage?.includes('Phiên bảo mật')
+    ) {
+        return 'Phiên bảo mật không hợp lệ hoặc đã hết hạn. Vui lòng tải lại trang và thử lại.';
+    }
+    if (responseMessage?.includes('Origin')) {
+        return 'Không thể kết nối an toàn với máy chủ đăng nhập. Vui lòng tải lại trang hoặc liên hệ hỗ trợ.';
+    }
+    if (error.response?.status === 401) return fallbackMessage;
+    if (Array.isArray(responseMessage)) return responseMessage.join(', ');
+    return responseMessage || error.message || fallbackMessage;
+};
+
 // Login API
 export const loginAPI = async (email, password) => {
     try {
         const response = await api.post('/auth/login', { email, password });
         return normalizeResponse(response);
     } catch (error) {
-        throw new Error(error.response?.data?.message || 'Email hoặc mật khẩu không chính xác');
+        throw new Error(normalizeLoginError(error, 'Email hoặc mật khẩu không chính xác.'));
     }
 };
 
@@ -93,14 +109,15 @@ export const getCurrentUserAPI = async () => {
 // Admin Login API
 export const adminLoginAPI = async (email, password) => {
     try {
-        const response = await api.post('/auth/login', { email, password });
+        const response = await api.post('/auth/admin/login', { email, password });
         const result = normalizeResponse(response);
-        // Check if user is admin
-        if (result.user.role !== 'ADMIN') {
-            throw new Error('Bạn không có quyền truy cập trang quản trị');
-        }
         return result;
     } catch (error) {
-        throw new Error(error.response?.data?.message || error.message || 'Đăng nhập admin thất bại');
+        throw new Error(
+            normalizeLoginError(
+                error,
+                'Email hoặc mật khẩu không chính xác, hoặc tài khoản không có quyền quản trị.',
+            ),
+        );
     }
 };

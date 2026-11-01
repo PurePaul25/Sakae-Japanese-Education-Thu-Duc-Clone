@@ -9,6 +9,7 @@ const AUTH_EXPIRED_FLAG = '__sakaeAuthExpiredDispatched';
 const AUTH_ENDPOINTS_WITHOUT_REFRESH = [
     '/auth/me',
     '/auth/login',
+    '/auth/admin/login',
     '/auth/register',
     '/auth/verify-email',
     '/auth/refresh',
@@ -89,7 +90,8 @@ api.interceptors.response.use(
         const request = error.config;
         if (
             error.response?.status === 403 &&
-            error.response?.data?.message?.includes('CSRF') &&
+            (error.response?.data?.message?.includes('CSRF') ||
+                error.response?.data?.message?.includes('Phiên bảo mật')) &&
             request &&
             !request._csrfRetry
         ) {
