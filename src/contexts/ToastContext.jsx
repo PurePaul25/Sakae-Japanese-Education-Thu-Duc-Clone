@@ -1,5 +1,6 @@
 import React, { createContext, useState, useCallback } from 'react';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const ToastContext = createContext();
 
 export const ToastProvider = ({ children }) => {
@@ -40,6 +41,7 @@ export const ToastProvider = ({ children }) => {
     return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useToast = () => {
     const context = React.useContext(ToastContext);
     if (!context) {

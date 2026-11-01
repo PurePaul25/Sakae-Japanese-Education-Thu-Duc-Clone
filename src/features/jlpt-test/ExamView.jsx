@@ -18,6 +18,8 @@ import {
 import { jlptTests } from '../../dataTest/jlptTests';
 import { formatTime, getTranslatedSectionName } from './constants';
 import SEO from '../../hooks/useSEO';
+import JlptContentRenderer from '../../components/jlpt/JlptContentRenderer';
+import ReadingImage from '../../components/jlpt/ReadingImage';
 
 const ExamView = () => {
     const { testId, qIndex } = useParams();
@@ -363,18 +365,19 @@ const ExamView = () => {
                         <div className="bg-white rounded-[1rem] px-5 pt-5 pb-2 shadow-sm border border-gray-100 mb-6">
                             {currentQuestion?.contentImage && (
                                 <div className="mb-4 flex justify-center">
-                                    <img
+                                    <ReadingImage
                                         src={currentQuestion.contentImage}
-                                        alt="Reading content"
-                                        className="max-w-full h-auto max-h-64 rounded-lg"
+                                        alt="Ảnh minh họa bài đọc"
+                                        className="max-h-64 rounded-lg"
                                     />
                                 </div>
                             )}
                             {currentQuestion?.passage && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
-                                    <p className="text-gray-700 font-medium leading-relaxed mb-2">
-                                        {currentQuestion.passage}
-                                    </p>
+                                    <JlptContentRenderer
+                                        content={currentQuestion.passage}
+                                        className="text-gray-700 font-medium leading-relaxed mb-2"
+                                    />
                                     {currentQuestion?.passageTranslation && (
                                         <p className="text-gray-500 italic text-sm leading-relaxed">
                                             {currentQuestion.passageTranslation}
@@ -589,9 +592,10 @@ const ExamView = () => {
                                 />
                             </div>
                         ) : (
-                            <p className="text-lg md:text-xl text-gray-800 font-bold mb-4 leading-relaxed">
-                                {currentQuestion?.text}
-                            </p>
+                            <JlptContentRenderer
+                                content={currentQuestion?.text}
+                                className="text-lg md:text-xl text-gray-800 mb-4"
+                            />
                         )}
 
                         <div className="grid gap-2">

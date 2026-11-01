@@ -136,15 +136,18 @@ function Navbar() {
         }, 600);
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         setIsUserDropdownOpen(false);
+        const revoked = await logout();
+        if (!revoked) {
+            addToast(
+                'Chưa thể đăng xuất do chưa kết nối được máy chủ. Vui lòng thử lại.',
+                'error',
+            );
+            return;
+        }
         addToast('Bạn đã đăng xuất thành công!', 'success');
-
-        // Chuyển hướng trước khi gọi logout() để tránh ProtectedRoute kích hoạt điều hướng sang trang login
         navigate('/', { replace: true });
-
-        // Gọi logout() sau khi đã bắt đầu chuyển hướng
-        logout();
     };
 
     return (

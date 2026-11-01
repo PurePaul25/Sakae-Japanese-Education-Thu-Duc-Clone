@@ -1,143 +1,209 @@
-import React, { createContext, useState, useCallback, useEffect, useRef } from 'react';
+import React, { createContext, useState, useCallback, useEffect } from 'react';
+import api, { resetCsrfToken, setAuthenticatedSession } from '../utils/api';
+
+const IDLE_TIMEOUT_MS = 45 * 60 * 1000;
+const ACTIVITY_HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000;
+const LAST_ACTIVITY_KEY_PREFIX = 'sakae_last_activity_';
+const LAST_SERVER_ACTIVITY_KEY_PREFIX = 'sakae_last_server_activity_';
+
+const getActivityKey = (prefix, userId) => `${prefix}${userId}`;
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const UserContext = createContext();
 
-const parseJwt = (token) => {
-    try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(
-            atob(base64)
-                .split('')
-                .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-                .join(''),
-        );
-        return JSON.parse(jsonPayload);
-    } catch {
-        return null;
-    }
-};
-
-const getTokenExpirationMs = (token) => {
-    const payload = parseJwt(token);
-    if (!payload?.exp) return null;
-    return payload.exp * 1000 - Date.now();
+const normalizeUserData = (rawData) => {
+    const normalized = rawData?.data || rawData || {};
+    const nestedUser = normalized?.user || {};
+    const safeUser = { ...nestedUser, ...normalized };
+    delete safeUser.accessToken;
+    delete safeUser.refreshToken;
+    delete safeUser.token;
+    delete safeUser.data;
+    delete safeUser.user;
+    return safeUser;
 };
 
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const authExpiredTimerRef = useRef(null);
 
-    const normalizeUserData = (rawData) => {
-        const normalized = rawData?.data || rawData || {};
-        const nestedUser = normalized?.user || {};
-        const accessToken =
-            normalized?.accessToken ||
-            normalized?.token ||
-            normalized?.data?.accessToken ||
-            nestedUser?.accessToken ||
-            null;
+    const clearLocalSession = useCallback(
+        (userId = user?.id) => {
+            setUser(null);
+            localStorage.removeItem('sakae_user');
+            localStorage.removeItem('sakae_admin');
+            sessionStorage.removeItem('showAdminLoginSuccessToast');
+            if (userId) {
+                localStorage.removeItem(getActivityKey(LAST_ACTIVITY_KEY_PREFIX, userId));
+                localStorage.removeItem(getActivityKey(LAST_SERVER_ACTIVITY_KEY_PREFIX, userId));
+            }
+            setAuthenticatedSession(false);
+            resetCsrfToken();
+        },
+        [user?.id],
+    );
 
-        const result = {
-            ...nestedUser,
-            ...normalized,
-            accessToken,
+    const logout = useCallback(async () => {
+        try {
+            await api.post('/auth/logout');
+            clearLocalSession();
+            return true;
+        } catch (error) {
+            console.error('Unable to revoke the server session during logout:', error);
+            return false;
+        }
+    }, [clearLocalSession]);
+
+    useEffect(() => {
+        let isMounted = true;
+        localStorage.removeItem('sakae_user');
+        localStorage.removeItem('sakae_admin');
+
+        api.get('/auth/me', { timeout: 5000 })
+            .then((response) => {
+                setAuthenticatedSession(true);
+                if (isMounted) setUser(normalizeUserData(response.data));
+            })
+            .catch((error) => {
+                if (error.response?.status === 401) {
+                    setAuthenticatedSession(false);
+                } else {
+                    setAuthenticatedSession(false);
+                    console.error('Unable to restore the current session:', error);
+                }
+            })
+            .finally(() => {
+                if (isMounted) setIsLoading(false);
+            });
+
+        return () => {
+            isMounted = false;
         };
+    }, []);
 
-        delete result.user;
-        delete result.data;
-
-        return result;
-    };
-
-    const clearAuthExpiryTimer = useCallback(() => {
-        if (authExpiredTimerRef.current) {
-            clearTimeout(authExpiredTimerRef.current);
-            authExpiredTimerRef.current = null;
+    const login = useCallback((userData) => {
+        const normalizedUser = normalizeUserData(userData);
+        setAuthenticatedSession(true);
+        setUser(normalizedUser);
+        if (normalizedUser.id) {
+            const now = String(Date.now());
+            localStorage.setItem(getActivityKey(LAST_ACTIVITY_KEY_PREFIX, normalizedUser.id), now);
+            localStorage.setItem(getActivityKey(LAST_SERVER_ACTIVITY_KEY_PREFIX, normalizedUser.id), now);
+        }
+        if (typeof window !== 'undefined') {
+            window.__sakaeAuthExpiredDispatched = false;
         }
     }, []);
 
-    const logout = useCallback(() => {
-        clearAuthExpiryTimer();
-        setUser(null);
-        localStorage.removeItem('sakae_user');
-        localStorage.removeItem('sakae_admin');
-    }, [clearAuthExpiryTimer]);
+    useEffect(() => {
+        if (!user?.id) return undefined;
 
-    const scheduleTokenExpiry = useCallback(
-        (token) => {
-            clearAuthExpiryTimer();
-            const expiresInMs = getTokenExpirationMs(token);
-            if (expiresInMs === null) return;
+        const activityKey = getActivityKey(LAST_ACTIVITY_KEY_PREFIX, user.id);
+        const serverActivityKey = getActivityKey(LAST_SERVER_ACTIVITY_KEY_PREFIX, user.id);
+        let lastActivityAt = Number(localStorage.getItem(activityKey));
+        let lastServerActivityAt = Number(localStorage.getItem(serverActivityKey)) || 0;
+        let heartbeatInFlight = false;
+        let expired = false;
 
-            // Nếu token đã hết hạn rồi, logout ngay
-            if (expiresInMs <= 0) {
-                logout();
+        if (!Number.isFinite(lastActivityAt) || lastActivityAt <= 0) {
+            lastActivityAt = Date.now();
+            localStorage.setItem(activityKey, String(lastActivityAt));
+        }
+
+        const expireSession = () => {
+            if (expired) return;
+            expired = true;
+            window.dispatchEvent(
+                new CustomEvent('sakae-auth-expired', {
+                    detail: {
+                        message: 'Bạn đã tự động đăng xuất vì không hoạt động trong 45 phút.',
+                    },
+                }),
+            );
+        };
+
+        const checkIdleTimeout = () => {
+            const sharedActivityAt = Number(localStorage.getItem(activityKey)) || lastActivityAt;
+            lastActivityAt = Math.max(lastActivityAt, sharedActivityAt);
+            if (Date.now() - lastActivityAt >= IDLE_TIMEOUT_MS) {
+                expireSession();
+            }
+        };
+
+        const sendActivityHeartbeat = async (now) => {
+            if (
+                heartbeatInFlight ||
+                now - lastServerActivityAt < ACTIVITY_HEARTBEAT_INTERVAL_MS
+            ) {
                 return;
             }
 
-            // Schedule logout khi token hết hạn (không dispatch event, để api.js xử lý)
-            authExpiredTimerRef.current = setTimeout(() => {
-                logout();
-            }, expiresInMs + 1000);
-        },
-        [clearAuthExpiryTimer, logout],
-    );
-
-    // Initialize user from localStorage on mount
-    useEffect(() => {
-        const savedUser = localStorage.getItem('sakae_user');
-        const savedAdmin = localStorage.getItem('sakae_admin');
-
-        const dataToUse = savedUser || savedAdmin;
-
-        if (dataToUse) {
+            heartbeatInFlight = true;
+            lastServerActivityAt = now;
             try {
-                const normalized = normalizeUserData(JSON.parse(dataToUse));
-                setUser(normalized);
-                if (normalized.accessToken) {
-                    scheduleTokenExpiry(normalized.accessToken);
-                }
+                await api.post('/auth/activity');
+                lastServerActivityAt = Date.now();
+                localStorage.setItem(serverActivityKey, String(lastServerActivityAt));
             } catch (error) {
-                console.error('Error loading user from localStorage:', error);
-                localStorage.removeItem('sakae_user');
-                localStorage.removeItem('sakae_admin');
+                if (!error.response) {
+                    console.error('Unable to update the active session heartbeat:', error);
+                }
+            } finally {
+                heartbeatInFlight = false;
             }
-        }
-        setIsLoading(false);
-    }, [scheduleTokenExpiry]);
+        };
 
-    const login = useCallback(
-        (userData) => {
-            const storedUser = normalizeUserData(userData);
-            setUser(storedUser);
-            localStorage.setItem('sakae_user', JSON.stringify(storedUser));
-            clearAuthExpiryTimer();
-            if (storedUser.accessToken) {
-                scheduleTokenExpiry(storedUser.accessToken);
-            }
-            if (typeof window !== 'undefined') {
-                window.__sakaeAuthExpiredDispatched = false;
-            }
-        },
-        [clearAuthExpiryTimer, scheduleTokenExpiry],
-    );
+        const recordUserActivity = () => {
+            checkIdleTimeout();
+            if (expired) return;
+
+            const now = Date.now();
+            const shouldSyncActivity = now - lastActivityAt >= 1000;
+            lastActivityAt = now;
+            if (shouldSyncActivity) localStorage.setItem(activityKey, String(now));
+            void sendActivityHeartbeat(now);
+        };
+
+        const handleStorageChange = (event) => {
+            if (event.key === activityKey) checkIdleTimeout();
+        };
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') checkIdleTimeout();
+        };
+
+        const idleCheckTimer = window.setInterval(checkIdleTimeout, 10_000);
+        const initialCheckTimer = window.setTimeout(checkIdleTimeout, 0);
+        const activityEvents = ['pointerdown', 'keydown', 'scroll', 'touchstart', 'mousemove'];
+        activityEvents.forEach((eventName) =>
+            window.addEventListener(eventName, recordUserActivity, { passive: true }),
+        );
+        window.addEventListener('storage', handleStorageChange);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            window.clearInterval(idleCheckTimer);
+            window.clearTimeout(initialCheckTimer);
+            activityEvents.forEach((eventName) =>
+                window.removeEventListener(eventName, recordUserActivity),
+            );
+            window.removeEventListener('storage', handleStorageChange);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [user?.id]);
 
     useEffect(() => {
-        const handleAuthExpired = () => {
-            logout();
+        const handleAuthExpired = async () => {
+            const revoked = await logout();
+            if (!revoked) clearLocalSession();
         };
         window.addEventListener('sakae-auth-expired', handleAuthExpired);
         return () => window.removeEventListener('sakae-auth-expired', handleAuthExpired);
-    }, [logout]);
+    }, [clearLocalSession, logout]);
 
     const updateUser = useCallback((newData) => {
-        setUser((prevUser) => {
-            const updatedUser = { ...prevUser, ...newData };
-            localStorage.setItem('sakae_user', JSON.stringify(updatedUser));
-            return updatedUser;
+        setUser((previousUser) => {
+            if (!previousUser) return previousUser;
+            return normalizeUserData({ ...previousUser, ...newData });
         });
     }, []);
 

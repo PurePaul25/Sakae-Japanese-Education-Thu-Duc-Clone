@@ -37,6 +37,8 @@ npm install
 npm run dev
 ```
 
+For production, set `VITE_API_URL` to the backend API base URL ending in `/api/v1`, and set the backend's `FRONTEND_URL` to this site's exact origin. Authentication uses credentialed `HttpOnly` cookies and requires HTTPS in production; serving the frontend and API on the same site through a reverse proxy is preferred.
+
 ## 🇬🇧 English Version
 
 **Sakae Japanese Education - Thu Duc (Clone)** is a modern and responsive website inspired by the Sakae Japanese Language Center.

@@ -31,7 +31,14 @@ import { Grid3x3, X, CheckCircle2, XCircle } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import SEO from '../../../hooks/useSEO';
-import { setResultKey, setStateKey, CATEGORY_TO_TYPE_SLUG } from '../../../types/jlptPractice';
+import {
+    setResultKey,
+    setStateKey,
+    CATEGORY_TO_TYPE_SLUG,
+    getPracticeSetDisplayTitle,
+} from '../../../types/jlptPractice';
+import JlptContentRenderer from '../../../components/jlpt/JlptContentRenderer';
+import ReadingImage from '../../../components/jlpt/ReadingImage';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -110,9 +117,7 @@ const PracticeSetResultView = () => {
     }
 
     const categoryLabel = CATEGORY_LABELS[set.category] || set.category || '';
-    const examTitle = [categoryLabel, set.level, set.setNumber ? `Đề số ${set.setNumber}` : '']
-        .filter(Boolean)
-        .join(' — ');
+    const examTitle = getPracticeSetDisplayTitle(set);
     const reviewQuestion = questions[reviewIndex];
 
     // ── Redo: reopen exam popup ───────────────────────────────────────────────
@@ -196,20 +201,23 @@ const PracticeSetResultView = () => {
                             <span>{(q.readingPassage || rec.readingPassage)?.title || 'Đoạn văn đọc hiểu'}</span>
                         </div>
                         {(q.readingPassage || rec?.readingPassage)?.imageUrl && (
-                            <img
+                            <ReadingImage
                                 src={(q.readingPassage || rec.readingPassage).imageUrl}
-                                alt="Passage"
-                                className="w-full rounded-xl mb-3 object-contain max-h-60 bg-white p-2 border border-blue-100"
+                                alt="Ảnh minh họa bài đọc"
+                                className="mb-3 max-h-60 w-full rounded-xl border border-blue-100 bg-white p-2"
                             />
                         )}
-                        <p className="text-gray-800 text-sm sm:text-base leading-relaxed whitespace-pre-wrap">
-                            {(q.readingPassage || rec.readingPassage)?.passage}
-                        </p>
+                        <JlptContentRenderer
+                            content={(q.readingPassage || rec.readingPassage)?.passage}
+                            className="text-gray-800 text-sm sm:text-base leading-relaxed"
+                        />
                     </div>
                 )}
 
                 {/* Nội dung câu hỏi */}
-                <p className="text-base sm:text-lg text-gray-900 font-bold mb-4 leading-relaxed">{q.content}</p>
+                <div className="text-base sm:text-lg text-gray-900 mb-4 leading-relaxed">
+                    <JlptContentRenderer content={q.content} />
+                </div>
 
                 {/* Danh sách các lựa chọn */}
                 <div className="grid gap-2.5 mb-4">
@@ -263,14 +271,15 @@ const PracticeSetResultView = () => {
 
                 {/* Phần giải thích chi tiết */}
                 {rec?.explanation && (
-                    <div className="bg-amber-50/70 p-4 rounded-2xl border border-amber-200/80 shadow-2xs">
+                    <div className="bg-amber-50/70 p-3 rounded-2xl border border-amber-200/80 shadow-2xs">
                         <h4 className="flex items-center gap-2 text-amber-900 font-black mb-1.5 text-sm">
                             <FaLightbulb className="text-amber-600" />
                             <span>Giải thích chi tiết:</span>
                         </h4>
-                        <p className="text-amber-950 leading-relaxed text-sm sm:text-base font-medium">
-                            {rec.explanation}
-                        </p>
+                        <JlptContentRenderer
+                            content={rec.explanation}
+                            className="text-amber-950 text-sm sm:text-base font-medium"
+                        />
                     </div>
                 )}
             </div>
@@ -292,8 +301,10 @@ const PracticeSetResultView = () => {
                     <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 mb-1.5">
                         Kết quả luyện tập
                     </h1>
-                    <p className="text-gray-600 font-bold text-base sm:text-lg mb-1">{examTitle}</p>
-                    {set.title && <p className="text-gray-400 text-xs sm:text-sm mb-6">{set.title}</p>}
+                    <p className="text-gray-800 font-bold text-base sm:text-lg mb-1 break-words">{examTitle}</p>
+                    <p className="text-gray-500 text-xs sm:text-sm mb-6">
+                        {[categoryLabel, set.level].filter(Boolean).join(' · ')}
+                    </p>
 
                     {/* Vòng tròn điểm số Sakae */}
                     <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-red-50 to-orange-50 border-4 border-red-200 mb-6 shadow-xs">

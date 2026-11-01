@@ -5,7 +5,12 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Play, Clock, AlertCircle, Loader2, BookOpen, ChevronRight } from 'lucide-react';
 import SEO from '../../../hooks/useSEO';
 import { getPracticeSets } from '../../../services/jlptPracticeService';
-import { TYPE_SLUG_TO_CATEGORY, setStateKey, setResultKey } from '../../../types/jlptPractice';
+import {
+    TYPE_SLUG_TO_CATEGORY,
+    setStateKey,
+    setResultKey,
+    getPracticeSetDisplayTitle,
+} from '../../../types/jlptPractice';
 
 const CATEGORY_LABELS = {
     vocabulary: 'Từ vựng',
@@ -134,7 +139,7 @@ const PracticeTestSelection = () => {
                         {error.includes('đăng nhập') ? (
                             <button
                                 onClick={() => navigate('/dang-nhap')}
-                                className="px-8 py-3 bg-red-600 text-white font-black rounded-2xl cursor-pointer"
+                                className="px-8 py-3 bg-red-500 hover:bg-red-600 transition duration-200 text-white font-black rounded-2xl cursor-pointer"
                             >
                                 Đăng nhập ngay
                             </button>
@@ -195,8 +200,8 @@ const PracticeTestSelection = () => {
                                         {set.setNumber}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="font-black text-slate-900 text-lg mb-1 group-hover:text-red-600 transition-colors leading-tight">
-                                            Đề số {set.setNumber}
+                                        <h3 className="font-black text-slate-900 text-lg mb-1 group-hover:text-red-600 transition-colors leading-tight break-words">
+                                            {getPracticeSetDisplayTitle(set)}
                                         </h3>
                                         {set.description && (
                                             <p className="text-xs text-slate-400 font-medium line-clamp-2 leading-relaxed">

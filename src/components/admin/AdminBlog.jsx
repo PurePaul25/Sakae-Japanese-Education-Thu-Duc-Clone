@@ -760,7 +760,7 @@ const BlogModal = ({ post, onClose, onSaved, show, duration = 300 }) => {
                                             }
                                         }}
                                         className="absolute top-2 right-2 w-9 h-9 cursor-pointer rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-500 transition"
-                                        title='Xóa ảnh thumbnail'
+                                        title="Xóa ảnh thumbnail"
                                     >
                                         ✕
                                     </button>
@@ -787,7 +787,7 @@ const BlogModal = ({ post, onClose, onSaved, show, duration = 300 }) => {
                             value={form.title}
                             onChange={handleTitleChange}
                             required
-                            className="w-full px-2.5 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                            className="w-full px-2.5 py-2 border border-slate-200 dark:border-slate-700 rounded-xl transition duration-200 bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
                             placeholder="Tiêu đề bài viết..."
                         />
                     </div>
@@ -802,7 +802,7 @@ const BlogModal = ({ post, onClose, onSaved, show, duration = 300 }) => {
                             value={form.slug}
                             onChange={handleChange}
                             required
-                            className="w-full px-2.5 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400 font-mono"
+                            className="w-full px-2.5 py-2 border border-slate-200 dark:border-slate-700 rounded-xl transition duration-200 bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400 font-mono"
                             placeholder="slug-bai-viet"
                         />
                     </div>
@@ -816,7 +816,7 @@ const BlogModal = ({ post, onClose, onSaved, show, duration = 300 }) => {
                             name="category"
                             value={form.category}
                             onChange={handleChange}
-                            className="w-full px-2.5 cursor-pointer py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                            className="w-full px-2.5 cursor-pointer py-2 border border-slate-200 dark:border-slate-700 rounded-xl transition duration-200 bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
                         >
                             <option value="">-- Chọn danh mục --</option>
                             {CATEGORIES.map((c) => (
@@ -832,7 +832,7 @@ const BlogModal = ({ post, onClose, onSaved, show, duration = 300 }) => {
                                 value={form.customCategory}
                                 onChange={handleChange}
                                 autoFocus
-                                className="mt-2 w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                                className="mt-2 w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl transition duration-200 bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
                                 placeholder="Nhập tên danh mục..."
                             />
                         )}
@@ -848,7 +848,7 @@ const BlogModal = ({ post, onClose, onSaved, show, duration = 300 }) => {
                             value={form.excerpt}
                             onChange={handleChange}
                             rows={2}
-                            className="w-full px-2.5 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
+                            className="w-full px-2.5 py-2 border border-slate-200 dark:border-slate-700 rounded-lg transition duration-200 bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
                             placeholder="Mô tả ngắn hiển thị ở trang danh sách..."
                         />
                     </div>
@@ -874,7 +874,7 @@ const BlogModal = ({ post, onClose, onSaved, show, duration = 300 }) => {
                                 name="metaTitle"
                                 value={form.metaTitle}
                                 onChange={handleChange}
-                                className="w-full px-2.5 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                                className="w-full px-2.5 py-2 border border-slate-200 dark:border-slate-700 transition duration-200 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
                                 placeholder="Meta title (để trống = dùng tiêu đề bài)"
                             />
                             <textarea
@@ -882,7 +882,7 @@ const BlogModal = ({ post, onClose, onSaved, show, duration = 300 }) => {
                                 value={form.metaDescription}
                                 onChange={handleChange}
                                 rows={2}
-                                className="w-full px-2.5 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
+                                className="w-full px-2.5 py-2 border border-slate-200 dark:border-slate-700 transition duration-200 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
                                 placeholder="Meta description..."
                             />
                         </div>
@@ -893,14 +893,14 @@ const BlogModal = ({ post, onClose, onSaved, show, duration = 300 }) => {
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 px-2.5 py-2 cursor-pointer border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                            className="flex-1 p-2.5 cursor-pointer border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                         >
                             Huỷ
                         </button>
                         <button
                             type="submit"
                             disabled={saving}
-                            className="flex-1 px-2.5 py-2 cursor-pointer bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-semibold transition-colors disabled:opacity-60"
+                            className="flex-1 p-2.5 cursor-pointer bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-semibold transition-colors disabled:opacity-60"
                         >
                             {saving ? 'Đang lưu...' : isEdit ? 'Lưu thay đổi' : 'Tạo bài viết'}
                         </button>
@@ -1006,7 +1006,10 @@ const AdminBlog = () => {
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
                 <div className="px-4 py-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap gap-3 items-center">
                     <div className="relative flex-1 min-w-[220px]">
-                        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                        <Search
+                            size={15}
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                        />
                         <input
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}

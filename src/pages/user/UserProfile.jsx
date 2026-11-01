@@ -8,7 +8,10 @@ import SEO from '../../hooks/useSEO';
 import api from '../../utils/api';
 import { ASSETS } from '../../constants/assets';
 
-const UserProfile = () => {
+const PROFILE_INPUT_CLASS =
+    'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-800 outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-red-500 focus:ring-1 focus:ring-red-500 ';
+
+const UserProfile = ({ isAdmin = false }) => {
     const { user, updateUser } = useUser();
     const { addToast } = useToast();
     const fileInputRef = useRef(null);
@@ -29,7 +32,7 @@ const UserProfile = () => {
     });
 
     useEffect(() => {
-        if (!user?.accessToken) {
+        if (!user?.id) {
             setIsLoading(false);
             return;
         }
@@ -46,7 +49,6 @@ const UserProfile = () => {
                 setIsLoading(true);
                 const response = await api.get('/users/profile');
                 const data = response.data.data || response.data;
-                console.log('Profile data fetched:', data);
                 if (!isMounted) return;
                 setProfile(data);
                 setFormData({
@@ -84,7 +86,7 @@ const UserProfile = () => {
         return () => {
             isMounted = false;
         };
-    }, [user, user?.accessToken, updateUser]);
+    }, [user, user?.id, updateUser]);
 
     const handleAvatarClick = () => {
         if (!isEditing) {
@@ -166,7 +168,7 @@ const UserProfile = () => {
 
             // 3. Hợp nhất dữ liệu mới nhất (bao gồm cả avatar mới)
             const finalUserData = {
-                ...user, // Giữ lại accessToken và các thông tin cũ
+                ...user,
                 ...updatedProfile,
                 avatar: currentAvatarUrl,
             };
@@ -226,7 +228,7 @@ const UserProfile = () => {
                         <button
                             onClick={handleAvatarClick}
                             className={`absolute -bottom-2.5 -right-2.5 p-2 text-white rounded-xl shadow-md cursor-pointer transition-all hover:scale-105 z-20 ${
-                                isEditing ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-400 opacity-70'
+                                isEditing ? 'bg-red-600 hover:bg-red-700' : 'bg-slate-400 opacity-70'
                             }`}
                         >
                             <FiEdit2 size={16} />
@@ -246,7 +248,7 @@ const UserProfile = () => {
                             transition={{ delay: 0.2 }}
                             className="text-xl md:text-3xl font-black mb-1 drop-shadow-md"
                         >
-                            {profile?.fullName || 'Học viên Sakae'}
+                            {profile?.fullName || (isAdmin ? 'Quản trị viên' : 'Học viên Sakae')}
                         </motion.h1>
                         <motion.p
                             initial={{ opacity: 0, y: 10 }}
@@ -255,7 +257,7 @@ const UserProfile = () => {
                             className="opacity-90 flex items-center gap-2 text-sm font-medium bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full w-fit"
                         >
                             <FiUser size={14} />
-                            Học viên • {profile?.username || 'user'}
+                            {isAdmin ? 'Quản trị viên' : 'Học viên'} • {profile?.username || 'user'}
                         </motion.p>
                     </div>
                 </div>
@@ -267,17 +269,17 @@ const UserProfile = () => {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-white p-3.5 md:p-6 rounded-2xl shadow-sm border border-gray-100"
+                        className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 md:p-6"
                     >
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-bold text-gray-800">Thông tin cá nhân</h2>
+                            <h2 className="text-xl font-bold text-slate-800 dark:text-white">Thông tin cá nhân</h2>
                             <div className="flex items-center gap-2">
                                 {isEditing ? (
                                     <>
                                         <button
                                             onClick={handleSave}
                                             disabled={isSaving}
-                                            className="text-sm cursor-pointer bg-green-50 text-green-600 px-3 py-2 rounded-lg font-semibold hover:bg-green-100 flex items-center gap-1 transition-colors disabled:opacity-50"
+                                            className="inline-flex items-center cursor-pointer gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-red-600/20 transition-all duration-200 hover:bg-red-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 dark:focus-visible:ring-offset-slate-900"
                                         >
                                             <FiCheck size={14} /> {isSaving ? 'Đang lưu...' : 'Lưu'}
                                         </button>
@@ -298,7 +300,7 @@ const UserProfile = () => {
                                                     bio: profile?.bio || '',
                                                 });
                                             }}
-                                            className="text-sm cursor-pointer bg-gray-50 text-gray-600 px-3 py-1.5 rounded-lg font-semibold hover:bg-gray-100 flex items-center gap-1 transition-colors"
+                                            className="inline-flex items-center cursor-pointer gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition-all duration-200 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-white dark:focus-visible:ring-offset-slate-900"
                                         >
                                             <FiX size={14} /> Hủy
                                         </button>
@@ -306,7 +308,7 @@ const UserProfile = () => {
                                 ) : (
                                     <button
                                         onClick={() => setIsEditing(true)}
-                                        className="text-sm cursor-pointer text-red-600 font-semibold hover:underline flex items-center gap-1"
+                                        className="inline-flex items-center gap-2 cursor-pointer rounded-xl border border-red-100 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-700 transition-all duration-200 hover:border-red-200 hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20 dark:focus-visible:ring-offset-slate-900"
                                     >
                                         <FiEdit2 size={14} /> Chỉnh sửa
                                     </button>
@@ -316,7 +318,7 @@ const UserProfile = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <div className="space-y-1">
-                                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                                     Họ và tên
                                 </label>
                                 {isEditing ? (
@@ -325,43 +327,49 @@ const UserProfile = () => {
                                         name="fullName"
                                         value={formData.fullName}
                                         onChange={handleChange}
-                                        className="w-full px-2.5 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
+                                        className={PROFILE_INPUT_CLASS}
                                     />
                                 ) : (
-                                    <p className="text-gray-700 font-medium">{profile?.fullName}</p>
+                                    <p className="font-medium text-slate-700 dark:text-slate-200">
+                                        {profile?.fullName}
+                                    </p>
                                 )}
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                                <label className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                                     Tên người dùng
                                 </label>
                                 {isEditing ? (
                                     <div className="relative">
-                                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm select-none">@</span>
+                                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 select-none text-sm text-slate-400">
+                                            @
+                                        </span>
                                         <input
                                             type="text"
                                             name="username"
                                             value={formData.username}
                                             onChange={handleChange}
-                                            className="w-full pl-7 pr-2.5 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
+                                            className={`${PROFILE_INPUT_CLASS} pl-7 pr-2.5`}
                                             placeholder="ten_nguoi_dung"
                                         />
                                     </div>
                                 ) : (
-                                    <p className="text-gray-700 font-medium flex items-center gap-1.5">
-                                        <span className="text-gray-500">@</span>{profile?.username}
+                                    <p className="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-200">
+                                        <span className="text-slate-500 dark:text-slate-400">@</span>
+                                        {profile?.username}
                                     </p>
                                 )}
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                                     Email
                                 </label>
-                                <p className="text-gray-700 font-medium flex items-center gap-2">
-                                    <FiMail className="text-gray-400" /> {profile?.email}
+                                <p className="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-200">
+                                    <FiMail className="text-slate-400" /> {profile?.email}
                                 </p>
-                            </div>                            <div className="space-y-1">
-                                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                            </div>{' '}
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                                     Số điện thoại
                                 </label>
                                 {isEditing ? (
@@ -370,16 +378,16 @@ const UserProfile = () => {
                                         name="phoneNumber"
                                         value={formData.phoneNumber}
                                         onChange={handleChange}
-                                        className="w-full px-2.5 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
+                                        className={PROFILE_INPUT_CLASS}
                                     />
                                 ) : (
-                                    <p className="text-gray-700 font-medium flex items-center gap-2">
-                                        <FiPhone className="text-gray-400" /> {profile?.phoneNumber || 'Chưa cập nhật'}
+                                    <p className="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-200">
+                                        <FiPhone className="text-slate-400" /> {profile?.phoneNumber || 'Chưa cập nhật'}
                                     </p>
                                 )}
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                                     Giới tính
                                 </label>
                                 {isEditing ? (
@@ -387,7 +395,7 @@ const UserProfile = () => {
                                         name="gender"
                                         value={formData.gender}
                                         onChange={handleChange}
-                                        className="w-full cursor-pointer px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all bg-white"
+                                        className={`${PROFILE_INPUT_CLASS} cursor-pointer`}
                                     >
                                         <option value="">Chọn giới tính</option>
                                         <option value="Nam">Nam</option>
@@ -395,11 +403,13 @@ const UserProfile = () => {
                                         <option value="Khác">Khác</option>
                                     </select>
                                 ) : (
-                                    <p className="text-gray-700 font-medium">{profile?.gender || 'Chưa cập nhật'}</p>
+                                    <p className="font-medium text-slate-700 dark:text-slate-200">
+                                        {profile?.gender || 'Chưa cập nhật'}
+                                    </p>
                                 )}
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                                     Ngày sinh
                                 </label>
                                 {isEditing ? (
@@ -408,24 +418,24 @@ const UserProfile = () => {
                                         name="dateOfBirth"
                                         value={formData.dateOfBirth}
                                         onChange={handleChange}
-                                        className="w-full px-2.5 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
+                                        className={PROFILE_INPUT_CLASS}
                                     />
                                 ) : (
-                                    <p className="text-gray-700 font-medium flex items-center gap-2">
-                                        <FiCalendar className="text-gray-400" /> {formatDate(profile?.dateOfBirth)}
+                                    <p className="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-200">
+                                        <FiCalendar className="text-slate-400" /> {formatDate(profile?.dateOfBirth)}
                                     </p>
                                 )}
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                                     Ngày tham gia
                                 </label>
-                                <p className="text-gray-700 font-medium flex items-center gap-2">
-                                    <FiCalendar className="text-gray-400" /> {formatDate(profile?.createdAt)}
+                                <p className="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-200">
+                                    <FiCalendar className="text-slate-400" /> {formatDate(profile?.createdAt)}
                                 </p>
                             </div>
                             <div className="space-y-1 md:col-span-2">
-                                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                                     Địa chỉ
                                 </label>
                                 {isEditing ? (
@@ -434,11 +444,11 @@ const UserProfile = () => {
                                         value={formData.address}
                                         onChange={handleChange}
                                         rows="2"
-                                        className="w-full px-2.5 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all resize-none"
+                                        className={`${PROFILE_INPUT_CLASS} resize-none`}
                                     />
                                 ) : (
-                                    <p className="text-gray-700 font-medium flex items-center gap-2">
-                                        <FiMapPin className="text-gray-400" /> {profile?.address || 'Chưa cập nhật'}
+                                    <p className="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-200">
+                                        <FiMapPin className="text-slate-400" /> {profile?.address || 'Chưa cập nhật'}
                                     </p>
                                 )}
                             </div>
@@ -449,9 +459,9 @@ const UserProfile = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="bg-white p-3.5 md:p-6 rounded-2xl shadow-sm border border-gray-100"
+                        className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 md:p-6"
                     >
-                        <h2 className="text-xl font-bold text-gray-800 mb-2">Giới thiệu bản thân</h2>
+                        <h2 className="mb-2 text-xl font-bold text-slate-800 dark:text-white">Giới thiệu bản thân</h2>
                         {isEditing ? (
                             <textarea
                                 name="bio"
@@ -459,10 +469,10 @@ const UserProfile = () => {
                                 onChange={handleChange}
                                 rows="4"
                                 placeholder="Hãy chia sẻ một chút về bản thân bạn..."
-                                className="w-full px-2.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all resize-none text-gray-600 leading-relaxed"
+                                className={`${PROFILE_INPUT_CLASS} resize-none leading-relaxed`}
                             />
                         ) : (
-                            <p className="text-gray-600 leading-relaxed">
+                            <p className="leading-relaxed text-slate-600 dark:text-slate-300">
                                 {profile?.bio || 'Học viên chưa cập nhật phần giới thiệu bản thân.'}
                             </p>
                         )}

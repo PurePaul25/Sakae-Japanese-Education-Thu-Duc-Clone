@@ -97,22 +97,8 @@ const DashboardHome = ({
                 </div>
 
                 {/* Quick Actions / Activity Feed */}
-                <div className="space-y-6">
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Thao tác nhanh</h3>
-                        <div className="grid grid-cols-2 gap-3">
-                            <button className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-800 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition-all border border-transparent hover:border-red-200 cursor-pointer">
-                                <Plus size={20} className="mb-2" />
-                                <span className="text-xs font-semibold">Khóa học mới</span>
-                            </button>
-                            <button className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-800 rounded-xl hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 transition-all border border-transparent hover:border-orange-200 cursor-pointer">
-                                <TrendingUp size={20} className="mb-2" />
-                                <span className="text-xs font-semibold">Báo cáo</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+                <div className="h-full">
+                    <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Hoạt động gần đây</h3>
                         <div className="space-y-4">
                             {[1, 2, 3].map((item) => (
@@ -130,7 +116,7 @@ const DashboardHome = ({
                                 </div>
                             ))}
                         </div>
-                        <button className="w-full mt-6 py-2 text-sm font-semibold text-slate-500 hover:text-red-600 transition-all cursor-pointer">
+                        <button className="mt-auto w-full pt-6 py-2 text-sm font-semibold text-slate-500 hover:text-red-600 transition-all cursor-pointer">
                             Xem tất cả hoạt động
                         </button>
                     </div>

@@ -16,7 +16,7 @@ export default function AboutSection() {
 
                 {/* Nội dung */}
                 <div>
-                    <h2 className="text-3xl md:text-4xl font-extrabold text-gray-800 mb-4 transition-colors duration-200 hover:text-red-600">
+                    <h2 className="text-3xl md:text-4xl font-extrabold text-gray-800 mb-4">
                         Về Trung tâm Nhật ngữ Sakae
                     </h2>
                     <p className="text-gray-600 mb-6 leading-relaxed text-left sm:text-justify text-base md:text-lg">

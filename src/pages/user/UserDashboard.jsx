@@ -44,7 +44,7 @@ const UserDashboard = () => {
                             }`
                         }
                     >
-                        <div className="flex items-center gap-3 font-semibold text-sm">
+                        <div className="flex items-center gap-3 font-semibold text-sm lg:text-base">
                             <span className="text-xl group-hover:scale-110 transition-transform">{item.icon}</span>
                             <span>{item.label}</span>
                         </div>

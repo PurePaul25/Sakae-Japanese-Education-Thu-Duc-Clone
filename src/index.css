@@ -1,5 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Open+Sans:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+@custom-variant dark {
+    @media (prefers-color-scheme: dark) {
+        &:not(.admin-theme-root, .admin-theme-root *) {
+            @slot;
+        }
+    }
+
+    &:where(.admin-theme-root.dark, .admin-theme-root.dark *) {
+        @slot;
+    }
+}
 
 @layer base {
     html {
@@ -37,4 +48,85 @@
 ::selection {
     background-color: rgba(59, 130, 246, 0.2);
     color: #3b82f6;
+}
+
+
+/* JLPT Exam & Rich Text Styles */
+.jlpt-content-rendered u,
+.jlpt-editor-content u {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1.5px;
+}
+
+.jlpt-blank {
+    display: inline-block;
+    min-width: 3.5rem;
+    text-align: center;
+    border-bottom: 2px solid currentColor;
+    margin: 0 0.35rem;
+    padding: 0 0.25rem;
+    line-height: 1.2;
+    vertical-align: baseline;
+    font-weight: 600;
+    user-select: none;
+}
+
+.jlpt-editor-content .jlpt-blank {
+    cursor: default;
+    background-color: rgba(226, 232, 240, 0.5);
+    border-radius: 2px;
+}
+
+.dark .jlpt-editor-content .jlpt-blank {
+    background-color: rgba(51, 65, 85, 0.5);
+}
+
+.jlpt-content-rendered p,
+.jlpt-editor-content p,
+.jlpt-content-rendered div,
+.jlpt-editor-content div {
+    margin-block: 0.35em;
+}
+
+.jlpt-content-rendered,
+.jlpt-editor-content {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.jlpt-content-rendered ul,
+.jlpt-editor-content ul {
+    list-style: disc;
+    padding-inline-start: 1.25em;
+    margin-block: 0.35em;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.jlpt-content-rendered ol,
+.jlpt-editor-content ol {
+    list-style: decimal;
+    padding-inline-start: 1.25em;
+    margin-block: 0.35em;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.jlpt-content-rendered li > ul,
+.jlpt-editor-content li > ul {
+    list-style-type: circle;
+}
+
+.jlpt-content-rendered li > ul li > ul,
+.jlpt-editor-content li > ul li > ul {
+    list-style-type: square;
+}
+
+.jlpt-content-rendered li,
+.jlpt-editor-content li {
+    display: list-item;
+    overflow-wrap: anywhere;
+    word-break: normal;
 }

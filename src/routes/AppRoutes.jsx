@@ -89,6 +89,7 @@ function AppRoutes() {
                 <Route path="/admin/dang-nhap" element={<AdminAuthLazy />} />
                 <Route path="/admin/dashboard" element={<AdminDashboardLazy />} />
                 <Route path="/admin/dashboard/:category" element={<AdminDashboardLazy />} />
+                <Route path="/admin/dashboard/:category/:subId" element={<AdminDashboardLazy />} />
 
                 <Route path="*" element={<NotFoundLazy />} />
             </Routes>

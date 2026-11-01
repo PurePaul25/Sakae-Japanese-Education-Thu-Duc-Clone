@@ -1,140 +1,309 @@
-import React from 'react';
-// eslint-disable-next-line no-unused-vars
-import { motion } from 'framer-motion';
-import { Settings, Bell, Shield, User, Mail, Globe, Moon, Save } from 'lucide-react';
+import { createElement, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Bell, Globe, Moon, Shield, Sun, User, Clock3, Eye, EyeOff } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useToast } from '../../contexts/ToastContext';
+import api from '../../utils/api';
+import UserProfile from '../../pages/user/UserProfile';
 
-const AdminSettings = ({ admin }) => {
+const MotionDiv = motion.div;
+
+const SETTINGS_SECTIONS = [
+    { id: 'ho-so-ca-nhan', label: 'Hồ sơ cá nhân', icon: User },
+    { id: 'bao-mat', label: 'Bảo mật', icon: Shield },
+    { id: 'thong-bao', label: 'Thông báo', icon: Bell },
+    { id: 'chung', label: 'Cài đặt chung', icon: Globe },
+];
+
+const getInitialClockPreference = () => localStorage.getItem('sakae_admin_show_clock') !== 'false';
+
+const AdminSettings = ({ section = 'chung' }) => {
+    const navigate = useNavigate();
+    const { addToast } = useToast();
+    const activeSection = SETTINGS_SECTIONS.some((item) => item.id === section) ? section : 'chung';
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [isSavingPassword, setIsSavingPassword] = useState(false);
+    const [showClock, setShowClock] = useState(getInitialClockPreference);
+    const [themeEnabled, setThemeEnabled] = useState(() => localStorage.getItem('theme') === 'dark');
+
+    useEffect(() => {
+        const syncPreferences = () => {
+            setThemeEnabled(localStorage.getItem('theme') === 'dark');
+            setShowClock(getInitialClockPreference());
+        };
+        window.addEventListener('sakae-admin-settings-changed', syncPreferences);
+        return () => window.removeEventListener('sakae-admin-settings-changed', syncPreferences);
+    }, []);
+
+    const updateClockPreference = (enabled) => {
+        setShowClock(enabled);
+        localStorage.setItem('sakae_admin_show_clock', String(enabled));
+        window.dispatchEvent(new CustomEvent('sakae-admin-settings-changed'));
+    };
+
+    const updateTheme = (enabled) => {
+        const theme = enabled ? 'dark' : 'light';
+        setThemeEnabled(enabled);
+        localStorage.setItem('theme', theme);
+        window.dispatchEvent(new CustomEvent('sakae-admin-settings-changed'));
+    };
+
+    const handlePasswordChange = async (event) => {
+        event.preventDefault();
+        if (newPassword !== confirmPassword) {
+            addToast('Mật khẩu mới nhập lại không khớp.', 'error');
+            return;
+        }
+        if (currentPassword === newPassword) {
+            addToast('Mật khẩu mới phải khác mật khẩu hiện tại.', 'error');
+            return;
+        }
+
+        setIsSavingPassword(true);
+        try {
+            await api.patch('/users/change-password', { currentPassword, newPassword });
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+            addToast('Đổi mật khẩu thành công. Các phiên đăng nhập khác đã bị thu hồi.', 'success');
+        } catch (error) {
+            const message = error.response?.data?.message;
+            addToast(Array.isArray(message) ? message.join(', ') : message || 'Không thể đổi mật khẩu.', 'error');
+        } finally {
+            setIsSavingPassword(false);
+        }
+    };
+
+    const activeItem = SETTINGS_SECTIONS.find((item) => item.id === activeSection);
+    const ActiveIcon = activeItem.icon;
+
     return (
-        <div className="space-y-8 pb-12">
-            <div>
+        <div className="space-y-6 pb-12">
+            <header>
                 <h2 className="text-3xl font-bold text-slate-800 dark:text-white">Cài đặt hệ thống</h2>
-                <p className="text-slate-500 mt-1">Quản lý tài khoản và tùy chỉnh trải nghiệm quản trị.</p>
-            </div>
+                <p className="mt-1 text-slate-500 dark:text-slate-400">
+                    Quản lý hồ sơ, bảo mật và tùy chỉnh giao diện quản trị.
+                </p>
+            </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Navigation */}
-                <div className="lg:col-span-1 space-y-2">
-                    {[
-                        { id: 'profile', icon: User, label: 'Thông tin cá nhân' },
-                        { id: 'security', icon: Shield, label: 'Bảo mật' },
-                        { id: 'notifications', icon: Bell, label: 'Thông báo' },
-                        { id: 'general', icon: Globe, label: 'Cài đặt chung' },
-                    ].map((item, idx) => (
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+                <nav
+                    aria-label="Danh mục cài đặt"
+                    className="h-fit space-y-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm transition-all duration-300 dark:border-slate-800 dark:bg-slate-900"
+                >
+                    {SETTINGS_SECTIONS.map(({ id, label, icon }) => (
                         <button
-                            key={item.id}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all cursor-pointer ${
-                                idx === 0
-                                    ? 'bg-red-600 text-white shadow-lg shadow-red-200 dark:shadow-none'
-                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                            type="button"
+                            key={id}
+                            aria-current={activeSection === id ? 'page' : undefined}
+                            onClick={() => navigate(`/admin/dashboard/cai-dat/${id}`)}
+                            className={`group flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-left font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 ${
+                                activeSection === id
+                                    ? 'bg-red-100 text-red-700 shadow-sm dark:bg-red-500/10 dark:text-red-300'
+                                    : 'text-slate-600 hover:translate-x-0.5 cursor-pointer hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
                             }`}
                         >
-                            <item.icon size={20} />
-                            <span>{item.label}</span>
+                            {createElement(icon, {
+                                size: 19,
+                                className: `transition-colors duration-200 ${activeSection === id ? 'text-red-600 dark:text-red-300' : 'text-slate-400 group-hover:text-red-500'}`,
+                            })}
+                            <span>{label}</span>
+                            {activeSection === id && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-red-500" />}
                         </button>
                     ))}
-                </div>
+                </nav>
 
-                {/* Content */}
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-                        <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-                            <h3 className="text-lg font-bold text-slate-800 dark:text-white">Thông tin cá nhân</h3>
-                        </div>
-                        <div className="p-6 space-y-6">
-                            <div className="flex items-center gap-6 mb-8">
-                                <div className="relative group">
-                                    <div className="w-24 h-24 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-4xl font-bold text-red-600 border-4 border-white dark:border-slate-900 shadow-xl">
-                                        {admin?.fullName?.charAt(0) || 'A'}
+                <section
+                    className={`min-w-0 ${
+                        activeSection === 'ho-so-ca-nhan'
+                            ? ''
+                            : 'rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 transition-all duration-300'
+                    }`}
+                >
+                    <AnimatePresence mode="wait" initial={false}>
+                        <MotionDiv
+                            key={activeSection}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -6 }}
+                            transition={{ duration: 0.18, ease: 'easeOut' }}
+                        >
+                            {activeSection === 'ho-so-ca-nhan' ? (
+                                <UserProfile isAdmin />
+                            ) : (
+                                <>
+                                    <div className="mb-6 flex items-center gap-3 border-b border-slate-100 pb-5 dark:border-slate-800">
+                                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400">
+                                            {createElement(ActiveIcon, { size: 21 })}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-bold text-slate-800 dark:text-white">
+                                                {activeItem.label}
+                                            </h3>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                                {activeSection === 'bao-mat' && 'Đổi mật khẩu tài khoản quản trị.'}
+                                                {activeSection === 'thong-bao' &&
+                                                    'Trạng thái và khả năng hỗ trợ thông báo của hệ thống.'}
+                                                {activeSection === 'chung' &&
+                                                    'Tùy chỉnh giao diện hiển thị trên thiết bị này.'}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <button className="absolute -bottom-2 -right-2 p-2 bg-red-600 text-white rounded-xl shadow-lg hover:scale-110 transition-transform cursor-pointer">
-                                        <Mail size={16} />
-                                    </button>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-slate-800 dark:text-white text-xl">
-                                        {admin?.fullName || 'Administrator'}
-                                    </h4>
-                                    <p className="text-slate-500">{admin?.email || 'admin@sakae.edu.vn'}</p>
-                                    <span className="inline-block mt-2 px-3 py-1 bg-red-50 dark:bg-red-900/30 text-red-600 text-[10px] font-bold uppercase tracking-widest rounded-full">
-                                        Quản trị viên hệ thống
-                                    </span>
-                                </div>
-                            </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                                        Họ và tên
-                                    </label>
-                                    <input
-                                        type="text"
-                                        defaultValue={admin?.fullName}
-                                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-red-500/50 outline-none transition-all"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                                        Email
-                                    </label>
-                                    <input
-                                        type="email"
-                                        defaultValue={admin?.email}
-                                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-red-500/50 outline-none transition-all text-slate-400"
-                                        disabled
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                                        Số điện thoại
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="Nhập số điện thoại..."
-                                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-red-500/50 outline-none transition-all"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                                        Ngôn ngữ
-                                    </label>
-                                    <select className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-red-500/50 outline-none transition-all">
-                                        <option value="vi">Tiếng Việt</option>
-                                        <option value="ja">Tiếng Nhật</option>
-                                        <option value="en">English</option>
-                                    </select>
-                                </div>
-                            </div>
+                                    {activeSection === 'bao-mat' && (
+                                        <form onSubmit={handlePasswordChange} className="max-w-xl space-y-5">
+                                            <PasswordField
+                                                label="Mật khẩu hiện tại"
+                                                value={currentPassword}
+                                                onChange={setCurrentPassword}
+                                                autoComplete="current-password"
+                                            />
+                                            <PasswordField
+                                                label="Mật khẩu mới"
+                                                value={newPassword}
+                                                onChange={setNewPassword}
+                                                autoComplete="new-password"
+                                            />
+                                            <PasswordField
+                                                label="Nhập lại mật khẩu mới"
+                                                value={confirmPassword}
+                                                onChange={setConfirmPassword}
+                                                autoComplete="new-password"
+                                            />
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                                Mật khẩu mới cần ít nhất 6 ký tự. Các phiên đăng nhập khác sẽ bị thu hồi
+                                                sau khi đổi.
+                                            </p>
+                                            <button
+                                                type="submit"
+                                                disabled={
+                                                    isSavingPassword ||
+                                                    !currentPassword ||
+                                                    !newPassword ||
+                                                    !confirmPassword
+                                                }
+                                                className="rounded-xl bg-red-600 cursor-pointer px-5 py-2.5 font-semibold text-white shadow-sm shadow-red-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 dark:focus-visible:ring-offset-slate-900"
+                                            >
+                                                {isSavingPassword ? 'Đang cập nhật...' : 'Đổi mật khẩu'}
+                                            </button>
+                                        </form>
+                                    )}
 
-                            <div className="flex justify-end pt-4">
-                                <button className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-red-200 dark:shadow-none cursor-pointer">
-                                    <Save size={20} />
-                                    <span>Lưu thay đổi</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                                    {activeSection === 'thong-bao' && (
+                                        <div className="rounded-xl border border-slate-200 p-5 dark:border-slate-700">
+                                            <div className="flex items-start gap-3">
+                                                <Bell className="mt-0.5 shrink-0 text-slate-400" size={20} />
+                                                <div>
+                                                    <h4 className="font-semibold text-slate-800 dark:text-white">
+                                                        Trung tâm thông báo chưa được kết nối
+                                                    </h4>
+                                                    <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                                                        Hiện backend chưa có API lưu và quản lý thông báo quản trị. Mục
+                                                        này không hiển thị dữ liệu mẫu hoặc thông báo giả.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
 
-                    {/* Appereance Settings */}
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/30 text-orange-600 flex items-center justify-center">
-                                    <Moon size={20} />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-slate-800 dark:text-white">Giao diện tối</h3>
-                                    <p className="text-xs text-slate-500">Sử dụng giao diện màu tối để bảo vệ mắt.</p>
-                                </div>
-                            </div>
-                            <div className="w-12 h-6 bg-red-600 rounded-full relative cursor-pointer">
-                                <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                                    {activeSection === 'chung' && (
+                                        <div className="space-y-4">
+                                            <PreferenceRow
+                                                icon={themeEnabled ? Moon : Sun}
+                                                title="Giao diện tối"
+                                                description="Đổi giao diện tất cả trang quản trị sang nền tối trên thiết bị này."
+                                                checked={themeEnabled}
+                                                onChange={updateTheme}
+                                            />
+                                            <PreferenceRow
+                                                icon={Clock3}
+                                                title="Hiển thị ngày và giờ"
+                                                description="Hiện đồng hồ và ngày hiện tại trên thanh điều hướng admin."
+                                                checked={showClock}
+                                                onChange={updateClockPreference}
+                                            />
+                                            <div className="flex items-start gap-3 rounded-xl bg-slate-50 p-4 dark:bg-slate-800/60 transition-all duration-300">
+                                                <Globe className="mt-0.5 shrink-0 text-slate-500" size={19} />
+                                                <div>
+                                                    <p className="font-medium text-slate-800 dark:text-white">
+                                                        Ngôn ngữ và múi giờ
+                                                    </p>
+                                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                                        Tiếng Việt · Giờ Việt Nam (Asia/Ho_Chi_Minh)
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </MotionDiv>
+                    </AnimatePresence>
+                </section>
             </div>
         </div>
     );
 };
+
+const PasswordField = ({ label, value, onChange, autoComplete }) => {
+    const [showPassword, setShowPassword] = useState(false);
+
+    return (
+        <label className="block space-y-2">
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{label}</span>
+
+            <div className="relative">
+                <input
+                    required
+                    type={showPassword ? 'text' : 'password'}
+                    minLength={6}
+                    autoComplete={autoComplete}
+                    value={value}
+                    onChange={(event) => onChange(event.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-12 text-slate-800 outline-none transition focus:border-red-500 focus:ring-2 focus:ring-red-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                />
+
+                <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-4 cursor-pointer top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-600 dark:hover:text-slate-200"
+                    aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+            </div>
+        </label>
+    );
+};
+
+const PreferenceRow = ({ icon, title, description, checked, onChange }) => (
+    <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+        <div className="flex items-start gap-3">
+            {createElement(icon, { className: 'mt-0.5 shrink-0 text-slate-500', size: 19 })}
+            <div>
+                <p className="font-medium text-slate-800 dark:text-white">{title}</p>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{description}</p>
+            </div>
+        </div>
+        <button
+            type="button"
+            role="switch"
+            aria-checked={checked}
+            aria-label={title}
+            onClick={() => onChange(!checked)}
+            className={`relative h-6 w-11 shrink-0 cursor-pointer overflow-hidden rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 ${
+                checked ? 'bg-red-600' : 'bg-slate-300 dark:bg-slate-600'
+            }`}
+        >
+            <span
+                className={`absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ease-out ${
+                    checked ? 'translate-x-5' : 'translate-x-0'
+                }`}
+            />
+        </button>
+    </div>
+);
 
 export default AdminSettings;

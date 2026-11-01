@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '../../contexts/ToastContext';
-import { Activity } from 'lucide-react';
+import { Activity, GraduationCap } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import MediaLibrary from '../../components/admin/MediaLibrary';
 import DashboardHome from '../../components/admin/DashboardHome';
@@ -10,6 +10,9 @@ import AdminCourses from '../../components/admin/AdminCourses';
 import AdminSettings from '../../components/admin/AdminSettings';
 import AdminBlog from '../../components/admin/AdminBlog';
 import AdminRegistrations from '../../components/admin/AdminRegistrations';
+import AdminJlptSets from '../../components/admin/AdminJlptSets';
+import AdminJlptQuestions from '../../components/admin/AdminJlptQuestions';
+import AdminJlptReading from '../../components/admin/AdminJlptReading';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import SEO from '../../hooks/useSEO';
@@ -17,12 +20,12 @@ import { useUser } from '../../contexts/UserContext';
 import { getAdminUsers, getUserStats } from '../../services/userService';
 
 const AdminDashboard = () => {
-    const { category } = useParams();
+    const { category, subId } = useParams();
     const activeTab = category || 'dashboard';
 
     const navigate = useNavigate();
     const { addToast } = useToast();
-    const { user: contextUser, logout } = useUser();
+    const { user: contextUser, isLoading, logout } = useUser();
     const [authLoading, setAuthLoading] = useState(true);
     const [dataLoading, setDataLoading] = useState(false);
     const [userData, setUserData] = useState([]);
@@ -45,8 +48,7 @@ const AdminDashboard = () => {
     }, [selectedCategory, userData]);
 
     // Get admin info from multiple sources for robustness
-    const localAdmin = JSON.parse(localStorage.getItem('sakae_admin') || '{}');
-    const admin = contextUser?.role === 'ADMIN' ? contextUser : localAdmin.user || localAdmin;
+    const admin = contextUser?.role === 'ADMIN' ? contextUser : {};
     const adminName = admin.fullName || admin.user?.fullName || 'Quản trị viên';
 
     const normalizeRoleLabel = (role) => {
@@ -97,7 +99,7 @@ const AdminDashboard = () => {
             const status = error?.response?.status;
             if (status === 401 || status === 403) {
                 addToast('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.', 'error');
-                logout();
+                void logout();
                 localStorage.removeItem('sakae_admin');
                 localStorage.removeItem('sakae_user');
                 navigate('/admin/dang-nhap');
@@ -112,37 +114,22 @@ const AdminDashboard = () => {
     }, [addToast, logout, navigate]);
 
     useEffect(() => {
-        const init = async () => {
-            const adminData = localStorage.getItem('sakae_admin');
-            const userData = localStorage.getItem('sakae_user');
-
-            let currentAdmin = null;
-            if (adminData) {
-                currentAdmin = JSON.parse(adminData);
-            } else if (userData) {
-                const parsedUser = JSON.parse(userData);
-                if (parsedUser.role === 'ADMIN') {
-                    currentAdmin = parsedUser;
-                }
-            }
-
-            if (!currentAdmin) {
-                navigate('/admin/dang-nhap');
-                return;
-            }
-
-            const showLoginToast = sessionStorage.getItem('showAdminLoginSuccessToast');
-            if (showLoginToast) {
-                addToast(`Đăng nhập thành công! Chào mừng ${adminName}!`, 'success');
-                sessionStorage.removeItem('showAdminLoginSuccessToast');
-            }
-
+        if (isLoading) return;
+        if (contextUser?.role !== 'ADMIN') {
             setAuthLoading(false);
-            await loadDashboardData();
-        };
+            navigate('/admin/dang-nhap', { replace: true });
+            return;
+        }
 
-        init();
-    }, [navigate, addToast, adminName, loadDashboardData]);
+        const showLoginToast = sessionStorage.getItem('showAdminLoginSuccessToast');
+        if (showLoginToast) {
+            addToast(`Đăng nhập thành công! Chào mừng ${adminName}!`, 'success');
+            sessionStorage.removeItem('showAdminLoginSuccessToast');
+        }
+
+        setAuthLoading(false);
+        void loadDashboardData();
+    }, [isLoading, contextUser, navigate, addToast, adminName, loadDashboardData]);
 
     const userColumns = [
         {
@@ -195,48 +182,6 @@ const AdminDashboard = () => {
             ),
         },
         { key: 'joinedDate', label: 'Ngày tham gia' },
-    ];
-
-    const jlptColumns = [
-        { key: 'title', label: 'Tên bộ đề' },
-        {
-            key: 'level',
-            label: 'Cấp độ',
-            render: (val) => (
-                <span className="px-2 py-0.5 rounded-lg bg-red-50 text-red-600 font-bold text-[10px] uppercase">
-                    JLPT {val}
-                </span>
-            ),
-        },
-        { key: 'questions', label: 'Số câu hỏi' },
-        { key: 'duration', label: 'Thời gian' },
-        {
-            key: 'status',
-            label: 'Trạng thái',
-            render: (val) => (
-                <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        val === 'published' ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-500'
-                    }`}
-                >
-                    {val === 'published' ? 'Đã đăng' : 'Bản nháp'}
-                </span>
-            ),
-        },
-    ];
-
-    const jlptData = [
-        {
-            id: 1,
-            title: 'Đề thi thử N3 - Kì 1/2024',
-            level: 'N3',
-            questions: 105,
-            duration: '140p',
-            status: 'published',
-        },
-        { id: 2, title: 'Luyện tập Ngữ pháp N2', level: 'N2', questions: 45, duration: '60p', status: 'published' },
-        { id: 3, title: 'Đề thi thử N5 cấp tốc', level: 'N5', questions: 80, duration: '100p', status: 'draft' },
-        { id: 4, title: 'Tổng hợp Kanji N1', level: 'N1', questions: 60, duration: '45p', status: 'published' },
     ];
 
     const renderContent = () => {
@@ -324,16 +269,35 @@ const AdminDashboard = () => {
                     </motion.div>
                 );
             case 'cai-dat':
-                return <AdminSettings admin={admin} />;
+                return <AdminSettings section={subId} />;
+            case 'ho-so-ca-nhan':
+                return <AdminSettings section="ho-so-ca-nhan" />;
+            case 'bo-de':
+                return (
+                    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
+                        <AdminJlptSets setId={subId} />
+                    </motion.div>
+                );
+            case 'cau-hoi':
+                return (
+                    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
+                        <AdminJlptQuestions />
+                    </motion.div>
+                );
+            case 'doc-hieu':
+                return (
+                    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
+                        <AdminJlptReading passageId={subId} />
+                    </motion.div>
+                );
             case 'jlpt':
                 return (
                     <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
-                        <DataTable
-                            title="Quản lý đề thi JLPT"
-                            description="Danh sách bộ đề thi thử và luyện tập từ N1-N5."
-                            columns={jlptColumns}
-                            data={jlptData}
-                        />
+                        <div className="flex flex-col items-center justify-center min-h-[400px] text-slate-400">
+                            <GraduationCap size={48} className="mb-4 opacity-20" />
+                            <h2 className="text-xl font-bold">Quản lý Thi thử JLPT</h2>
+                            <p>Mô-đun quản lý đề thi thử JLPT đang trong quá trình phát triển.</p>
+                        </div>
                     </motion.div>
                 );
             case 'tin-tuc':
@@ -353,14 +317,17 @@ const AdminDashboard = () => {
         }
     };
 
-    const handleLogout = () => {
-        logout(); // Clear user context, sakae_user, and sakae_admin
-        localStorage.removeItem('sakae_admin');
-        localStorage.removeItem('sakae_user');
+    const handleLogout = async () => {
+        const revoked = await logout();
+        if (!revoked) {
+            addToast(
+                'Chưa thể đăng xuất do chưa kết nối được máy chủ. Vui lòng thử lại.',
+                'error',
+            );
+            return;
+        }
         addToast('Đã đăng xuất thành công!', 'success');
-        setTimeout(() => {
-            navigate('/admin/dang-nhap');
-        }, 500);
+        navigate('/admin/dang-nhap', { replace: true });
     };
 
     return (

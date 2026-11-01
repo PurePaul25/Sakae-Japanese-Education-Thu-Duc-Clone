@@ -34,6 +34,15 @@ export const MAX_EXAM_SECONDS = 30 * 60; // tối đa 30 phút
 export const calcExamTime = (questionCount) =>
   Math.min(questionCount * SECONDS_PER_QUESTION, MAX_EXAM_SECONDS);
 
+/** Return the admin-defined set title, with a stable-number fallback for legacy data. */
+export const getPracticeSetDisplayTitle = (set = {}) => {
+  if (typeof set.title === 'string' && set.title.trim()) return set.title.trim();
+  if (set.setNumber !== null && set.setNumber !== undefined && String(set.setNumber).trim()) {
+    return `Đề số ${set.setNumber}`;
+  }
+  return 'Đề luyện tập';
+};
+
 // ─── localStorage key helpers (set-based flow) ─────────────────────────────
 
 /**

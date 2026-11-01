@@ -1,20 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import AdminLoginForm from '../../components/auth/AdminLoginForm';
 import SEO from '../../hooks/useSEO';
+import { useUser } from '../../contexts/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 const AdminAuth = () => {
     const location = useLocation();
-    const [direction, setDirection] = useState(0);
+    const navigate = useNavigate();
+    const { user, isLoading } = useUser();
+    const direction = 0;
 
-    // Check if admin is already logged in
     useEffect(() => {
-        const adminData = localStorage.getItem('sakae_admin');
-        if (adminData && location.pathname.includes('/admin/dang-nhap')) {
-            window.location.href = '/admin/dashboard';
+        if (!isLoading && user?.role === 'ADMIN' && location.pathname.includes('/admin/dang-nhap')) {
+            navigate('/admin/dashboard', { replace: true });
         }
-    }, [location.pathname]);
+    }, [isLoading, location.pathname, navigate, user]);
 
     return (
         <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-red-50 to-orange-50 flex items-center justify-center px-4 py-6 overflow-hidden z-0">

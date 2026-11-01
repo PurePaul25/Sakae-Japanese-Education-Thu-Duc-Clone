@@ -6,7 +6,7 @@ import api from '../../utils/api';
 import DropdownSelect from './DropdownSelect';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
-const PHONE_RE = /^[0-9]{10,11}$/;
+const PHONE_RE = /^[0-9]{10}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function validate(form) {
@@ -15,7 +15,8 @@ function validate(form) {
     if (!form.email.trim()) e.email = 'Vui lòng nhập email';
     else if (!EMAIL_RE.test(form.email)) e.email = 'Email không đúng định dạng';
     if (!form.phone.trim()) e.phone = 'Vui lòng nhập số điện thoại';
-    else if (!PHONE_RE.test(form.phone.replace(/\s+/g, ''))) e.phone = 'Số điện thoại phải có 10–11 chữ số';
+    else if (!PHONE_RE.test(form.phone)) e.phone = 'Số điện thoại phải có đúng 10 chữ số';
+    if (form.zalo && !PHONE_RE.test(form.zalo)) e.zalo = 'Số Zalo phải có đúng 10 chữ số';
     return e;
 }
 
@@ -76,7 +77,9 @@ const RegistrationModal = ({
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
+        const nextValue =
+            name === 'phone' || name === 'zalo' ? value.replace(/\D/g, '').slice(0, 10) : value;
+        setForm((prev) => ({ ...prev, [name]: nextValue }));
         if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
         if (apiError) setApiError('');
     };
@@ -231,17 +234,21 @@ const RegistrationModal = ({
                                         onChange={handleChange}
                                         placeholder="0901234567"
                                         autoComplete="tel"
+                                        inputMode="numeric"
+                                        maxLength={10}
                                         className={inputCls(errors.phone)}
                                     />
                                 </Field>
-                                <Field label="Zalo (tùy chọn)">
+                                <Field label="Zalo (tùy chọn)" error={errors.zalo}>
                                     <input
-                                        type="text"
+                                        type="tel"
                                         name="zalo"
                                         value={form.zalo}
                                         onChange={handleChange}
                                         placeholder="Số Zalo"
-                                        className={inputCls()}
+                                        inputMode="numeric"
+                                        maxLength={10}
+                                        className={inputCls(errors.zalo)}
                                     />
                                 </Field>
                             </div>

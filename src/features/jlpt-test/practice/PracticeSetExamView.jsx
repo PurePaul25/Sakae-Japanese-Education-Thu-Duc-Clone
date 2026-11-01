@@ -22,13 +22,20 @@ import {
     FaRedo,
     FaBookOpen,
 } from 'react-icons/fa';
-import { Loader2, AlertCircle, Grid3x3, X } from 'lucide-react';
+import { Loader2, AlertCircle, Grid3x3, X, GripVertical } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime } from '../constants';
 import SEO from '../../../hooks/useSEO';
 import { getPracticeSet, submitPracticeSet } from '../../../services/jlptPracticeService';
-import { setStateKey, setResultKey, calcExamTime } from '../../../types/jlptPractice';
+import {
+    setStateKey,
+    setResultKey,
+    calcExamTime,
+    getPracticeSetDisplayTitle,
+} from '../../../types/jlptPractice';
+import JlptContentRenderer from '../../../components/jlpt/JlptContentRenderer';
+import ReadingImage from '../../../components/jlpt/ReadingImage';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -75,17 +82,66 @@ const PracticeSetExamView = () => {
 
     // ── UI state ─────────────────────────────────────────────────────────────
     const [currentIndex, setCurrentIndex] = useState(0);
+
+    // ── Resizable Split Pane (Kéo ngang 2 cột cho bài đọc trên máy tính) ──────
+    const [splitWidth, setSplitWidth] = useState(50); // percentage 20% - 80%
+    const [isDragging, setIsDragging] = useState(false);
+    const splitContainerRef = useRef(null);
+
+    const handleSplitMouseDown = useCallback((e) => {
+        e.preventDefault();
+        setIsDragging(true);
+    }, []);
+
+    useEffect(() => {
+        if (!isDragging) return;
+
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+
+        const handleMove = (e) => {
+            if (!splitContainerRef.current) return;
+            const rect = splitContainerRef.current.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const newPercent = ((clientX - rect.left) / rect.width) * 100;
+            if (newPercent >= 20 && newPercent <= 80) {
+                setSplitWidth(newPercent);
+            }
+        };
+
+        const handleEnd = () => {
+            setIsDragging(false);
+        };
+
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleEnd);
+        window.addEventListener('touchmove', handleMove);
+        window.addEventListener('touchend', handleEnd);
+
+        return () => {
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            window.removeEventListener('mousemove', handleMove);
+            window.removeEventListener('mouseup', handleEnd);
+            window.removeEventListener('touchmove', handleMove);
+            window.removeEventListener('touchend', handleEnd);
+        };
+    }, [isDragging]);
     const [showSubmitModal, setShowSubmitModal] = useState(false);
     const [showTimeoutModal, setShowTimeoutModal] = useState(false);
     const [showPaletteModal, setShowPaletteModal] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState(null);
 
-    // Nhận diện màn hình điện thoại (<640px) vs tablet (>=640px) để áp dụng animation tối ưu
+    // Nhận diện kích thước màn hình để tối ưu bố cục và responsive
     const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 640);
+    const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1024);
 
     useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 640);
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 640);
+            setIsDesktop(window.innerWidth >= 1024);
+        };
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -250,6 +306,10 @@ const PracticeSetExamView = () => {
 
             const resultWithSnapshot = {
                 ...result,
+                set: {
+                    ...result.set,
+                    setNumber: setInfo.setNumber,
+                },
                 questions: setInfo.questions,
             };
 
@@ -335,7 +395,7 @@ const PracticeSetExamView = () => {
         );
     }
 
-    const examTitle = `${CATEGORY_LABELS[setInfo.category] || setInfo.category} — ${setInfo.level} — Đề số ${setInfo.setNumber}`;
+    const examTitle = getPracticeSetDisplayTitle(setInfo);
 
     return (
         <div className="bg-gray-50/80 min-h-screen">
@@ -353,11 +413,11 @@ const PracticeSetExamView = () => {
                                 {setInfo.level}
                             </div>
                             <div className="min-w-0">
-                                <h1 className="font-black text-gray-800 text-xs sm:text-base truncate leading-tight">
+                                <h1 className="font-black text-gray-800 text-sm sm:text-base truncate leading-tight">
                                     {examTitle}
                                 </h1>
-                                <span className="text-[11px] text-gray-400 font-medium hidden sm:inline-block">
-                                    Luyện thi JLPT Sakae
+                                <span className="text-[13px] text-gray-400 font-medium hidden sm:inline-block truncate">
+                                    {CATEGORY_LABELS[setInfo.category] || setInfo.category} · {setInfo.level}
                                 </span>
                             </div>
                         </div>
@@ -387,14 +447,15 @@ const PracticeSetExamView = () => {
                                 {isSubmitting ? 'Đang nộp...' : 'Nộp bài'}
                             </button>
 
-                            {/* Icon 9 ô grid (Mobile) — Đặt cạnh icon mũi xoay vòng */}
+                            {/* Nút 9 ô grid mở Bảng câu hỏi pop-up trên mọi màn hình */}
                             <button
                                 onClick={() => setShowPaletteModal(true)}
-                                className="lg:hidden p-2 sm:p-2.5 cursor-pointer text-gray-700 hover:text-red-600 hover:bg-red-50 border border-gray-200 rounded-xl bg-white shadow-2xs active:scale-95 transition-all flex items-center justify-center relative"
+                                className="p-2 sm:px-3 sm:py-2 cursor-pointer text-gray-700 hover:text-red-600 hover:bg-red-50 border border-gray-200 rounded-xl bg-white shadow-2xs active:scale-95 transition-all flex items-center gap-1.5 justify-center relative font-bold text-xs sm:text-sm"
                                 title="Bảng câu hỏi"
                                 aria-label="Mở bảng câu hỏi"
                             >
-                                <Grid3x3 size={17} />
+                                <Grid3x3 size={16} className="text-red-600" />
+                                <span className="hidden sm:inline">Bảng câu hỏi</span>
                                 {unansweredCount > 0 && (
                                     <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-600 rounded-full ring-2 ring-white" />
                                 )}
@@ -441,205 +502,288 @@ const PracticeSetExamView = () => {
             </header>
 
             {/* ── Main Layout Container ── */}
-            <main className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8 px-4 sm:px-6 pt-38 sm:pt-32 pb-8">
-                {/* ── Question Area ── */}
-                <div className="flex-1 lg:max-w-3xl xl:max-w-4xl mx-auto w-full">
-                    {/* Reading Passage (nếu có) */}
-                    {currentQuestion.readingPassage && (
-                        <div className="bg-blue-50/70 border border-blue-100 rounded-2xl p-5 md:p-6 mb-4 shadow-xs">
-                            <div className="flex items-center gap-2 mb-3 text-blue-700 font-black">
-                                <FaBookOpen size={16} />
-                                <span>Đoạn văn đọc hiểu</span>
-                                {currentQuestion.readingPassage.title && (
-                                    <span className="font-medium text-blue-500">
-                                        — {currentQuestion.readingPassage.title}
-                                    </span>
-                                )}
-                            </div>
-                            {currentQuestion.readingPassage.imageUrl && (
-                                <img
-                                    src={currentQuestion.readingPassage.imageUrl}
-                                    alt="Đoạn văn đọc hiểu"
-                                    className="w-full rounded-xl mb-4 object-contain max-h-64 bg-white p-2 border border-blue-100"
-                                />
-                            )}
-                            <p className="text-gray-800 font-medium leading-relaxed whitespace-pre-wrap text-base md:text-lg">
-                                {currentQuestion.readingPassage.passage}
-                            </p>
-                        </div>
-                    )}
-
-                    {/* Question Card */}
-                    <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-xs border border-gray-200/80 mb-4 transition-all">
-                        {/* Header của câu hỏi: Số câu & Nút Flag */}
-                        <div className="flex justify-between items-center mb-3">
-                            <span className="text-lg sm:text-xl font-black text-gray-800 flex items-center gap-2">
-                                <span>Câu {currentIndex + 1}</span>
-                                <span className="text-xs sm:text-sm font-bold text-gray-400">/ {totalQuestions}</span>
-                            </span>
-                            <button
-                                onClick={() =>
-                                    setFlaggedQuestions((prev) => ({
-                                        ...prev,
-                                        [currentQuestion.id]: !prev[currentQuestion.id],
-                                    }))
-                                }
-                                className={`p-2.5 rounded-xl cursor-pointer outline-none transition-all active:scale-95 ${
-                                    flaggedQuestions[currentQuestion.id]
-                                        ? 'bg-amber-100 text-amber-600 ring-1 ring-amber-300'
-                                        : 'bg-gray-100 text-gray-400 hover:text-amber-500 hover:bg-amber-50'
-                                }`}
-                                title={flaggedQuestions[currentQuestion.id] ? 'Bỏ đánh dấu' : 'Đánh dấu xem lại'}
-                            >
-                                <FaFlag size={15} />
-                            </button>
-                        </div>
-
-                        {/* Question Content */}
-                        <p className="text-base sm:text-lg text-gray-900 font-bold mb-5 leading-relaxed">
-                            {currentQuestion.content}
-                        </p>
-
-                        {/* Options */}
-                        <div className="grid gap-2.5">
-                            {currentQuestion.options.map((opt) => {
-                                const isSelected = selectedOptionId === opt.id;
-                                return (
-                                    <button
-                                        key={opt.id}
-                                        disabled={isSubmitting}
-                                        onClick={() => handleOptionClick(currentQuestion.id, opt.id)}
-                                        className={`w-full p-2.5 sm:p-3 rounded-2xl border-2 text-left transition-all duration-150 flex items-center gap-3 active:scale-[0.99] cursor-pointer ${
-                                            isSelected
-                                                ? 'border-blue-600 bg-blue-50/60 shadow-xs ring-1 ring-blue-500'
-                                                : 'border-gray-100 hover:border-blue-200 bg-gray-50/50 hover:bg-gray-50'
-                                        } disabled:cursor-not-allowed`}
-                                    >
-                                        <div
-                                            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center font-black text-sm sm:text-base transition-all shrink-0 ${
-                                                isSelected
-                                                    ? 'bg-blue-600 text-white shadow-xs'
-                                                    : 'bg-white text-gray-500 border border-gray-200'
-                                            }`}
-                                        >
-                                            {String.fromCharCode(64 + opt.order)}
-                                        </div>
-                                        <span
-                                            className={`text-sm sm:text-base leading-snug transition-colors ${
-                                                isSelected ? 'text-gray-900 font-bold' : 'text-gray-700 font-medium'
-                                            }`}
-                                        >
-                                            {opt.content}
+            <main
+                className={`mx-auto px-4 sm:px-6 pt-[140px] sm:pt-[120px] pb-10 w-full transition-all ${
+                    currentQuestion.readingPassage ? 'max-w-[1600px]' : 'max-w-6xl'
+                }`}
+            >
+                {/* Khi có bài đọc hiểu (Reading Passage): Chia 2 cột ngang có divider kéo chiều rộng trên máy tính */}
+                {currentQuestion.readingPassage ? (
+                    <div
+                        ref={splitContainerRef}
+                        className={`flex flex-col lg:flex-row items-stretch gap-0 lg:h-[calc(100vh-140px)] min-h-[550px] relative ${
+                            isDragging ? 'select-none cursor-col-resize' : ''
+                        }`}
+                    >
+                        {/* ── Cột trái: Đoạn văn đọc hiểu tiếng Nhật ── */}
+                        <div
+                            style={{
+                                width: isDesktop ? `${splitWidth}%` : '100%',
+                            }}
+                            className="w-full flex flex-col bg-white rounded-xl border border-gray-200/90 shadow-xs overflow-hidden mb-4 lg:mb-0"
+                        >
+                            <div className="p-4 sm:p-5 border-b border-gray-100 bg-blue-50/50 flex items-center justify-between shrink-0">
+                                <div className="flex items-center gap-2 text-blue-700 font-black text-sm sm:text-base">
+                                    <FaBookOpen size={16} />
+                                    <span>Đoạn văn đọc hiểu</span>
+                                    {currentQuestion.readingPassage.title && (
+                                        <span className="font-semibold text-blue-600 truncate max-w-[220px] sm:max-w-xs">
+                                            — {currentQuestion.readingPassage.title}
                                         </span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* Submit error */}
-                    {submitError && (
-                        <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-4 flex items-center gap-3 text-red-700 font-bold text-sm">
-                            <AlertCircle size={18} className="shrink-0" />
-                            <span>{submitError}</span>
-                        </div>
-                    )}
-
-                    {/* Navigation Buttons (Trước / Tiếp theo) */}
-                    <div className="flex justify-between gap-4">
-                        <button
-                            disabled={currentIndex === 0}
-                            onClick={() => goToQuestion(currentIndex - 1)}
-                            className={`flex-1 py-2.5 sm:py-3 bg-white rounded-xl font-bold text-gray-700 border border-gray-200 shadow-xs disabled:opacity-40 hover:bg-gray-50 transition-all flex items-center justify-center gap-2 active:scale-98 ${
-                                currentIndex === 0 ? 'cursor-not-allowed' : 'cursor-pointer'
-                            }`}
-                        >
-                            <FaChevronLeft size={13} />
-                            <span>Trước</span>
-                        </button>
-                        <button
-                            disabled={currentIndex === totalQuestions - 1}
-                            onClick={() => goToQuestion(currentIndex + 1)}
-                            className={`flex-1 py-2.5 sm:py-3 bg-white rounded-xl font-bold text-gray-900 border border-gray-200 shadow-xs disabled:opacity-40 hover:bg-gray-50 transition-all flex items-center justify-center gap-2 active:scale-98 ${
-                                currentIndex === totalQuestions - 1 ? 'cursor-not-allowed' : 'cursor-pointer'
-                            }`}
-                        >
-                            <span>Tiếp theo</span>
-                            <FaChevronRight size={13} />
-                        </button>
-                    </div>
-                </div>
-
-                {/* ── Sidebar Desktop (Bảng câu hỏi hiển thị trên màn hình lớn) ── */}
-                <aside className="hidden lg:block lg:w-80 shrink-0">
-                    <div className="sticky top-24 bg-white rounded-2xl p-5 shadow-xs border border-gray-200/80">
-                        <h3 className="font-black text-gray-800 mb-3 flex items-center gap-2.5 text-base">
-                            <FaListAlt className="text-red-600" />
-                            <span>Bảng câu hỏi</span>
-                        </h3>
-
-                        {/* Question palette grid */}
-                        <div className="grid grid-cols-6 gap-2 max-h-[420px] overflow-y-auto pr-1 py-1 custom-scrollbar">
-                            {questions.map((q, idx) => {
-                                const answered = !!selectedAnswers[q.id];
-                                const isCurrent = currentIndex === idx;
-                                const flagged = flaggedQuestions[q.id];
-                                return (
-                                    <button
-                                        key={q.id}
-                                        onClick={() => goToQuestion(idx)}
-                                        className={`relative h-10 w-full rounded-xl text-xs font-black transition-all flex items-center justify-center cursor-pointer active:scale-95 ${
-                                            isCurrent
-                                                ? 'bg-red-600 text-white shadow-md shadow-red-200 ring-2 ring-red-400'
-                                                : answered
-                                                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200'
-                                                  : flagged
-                                                    ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 border border-amber-300'
-                                                    : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border border-gray-100'
-                                        }`}
-                                    >
-                                        {idx + 1}
-                                        {flagged && !isCurrent && (
-                                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-white" />
-                                        )}
-                                    </button>
-                                );
-                            })}
-                        </div>
-
-                        {/* Progress info */}
-                        <div className="mt-4 pt-4 border-t border-gray-100">
-                            <div className="flex items-center justify-between text-xs font-bold text-gray-500 mb-2">
-                                <span>Đã hoàn thành</span>
-                                <span className="text-red-600 font-black">
-                                    {answeredCount}/{totalQuestions}
+                                    )}
+                                </div>
+                                <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-blue-100 text-blue-700">
+                                    {setInfo.level}
                                 </span>
                             </div>
-                            <div className="w-full bg-red-50/80 border border-red-100/50 rounded-full h-2 overflow-hidden">
-                                <div
-                                    className="bg-gradient-to-r from-red-500 to-red-600 h-2 rounded-full transition-all duration-300"
-                                    style={{ width: `${progressPercent}%` }}
+                            <div className="p-5 sm:p-6 overflow-y-auto flex-1 custom-scrollbar">
+                                {currentQuestion.readingPassage.imageUrl && (
+                                    <div className="mb-4 rounded-xl border border-blue-100 overflow-hidden bg-slate-50 flex items-center justify-center p-2">
+                                        <ReadingImage
+                                            src={currentQuestion.readingPassage.imageUrl}
+                                            alt="Đoạn văn đọc hiểu"
+                                            className="max-h-64 w-full rounded-lg"
+                                        />
+                                    </div>
+                                )}
+                                <JlptContentRenderer
+                                    content={currentQuestion.readingPassage.passage}
+                                    className="text-gray-900 font-sans leading-loose tracking-wide text-base sm:text-lg"
                                 />
                             </div>
                         </div>
 
-                        {/* Status Legend */}
-                        <div className="mt-4 pt-3 border-t border-gray-100 space-y-2 text-xs font-bold uppercase tracking-wider">
-                            <div className="flex items-center gap-2.5 text-gray-500">
-                                <div className="w-3.5 h-3.5 rounded-md bg-red-600 shrink-0" />
-                                <span>Đang làm</span>
+                        {/* ── Cột giữa: Divider kéo ngang đổi chiều rộng (Chỉ hiển thị trên máy tính >= 1024px) ── */}
+                        <div
+                            onMouseDown={handleSplitMouseDown}
+                            onTouchStart={handleSplitMouseDown}
+                            role="separator"
+                            aria-orientation="vertical"
+                            title="Kéo sang trái / phải để chỉnh chiều rộng 2 bên"
+                            className={`hidden lg:flex w-3.5 shrink-0 items-center justify-center cursor-col-resize select-none mx-1 group z-10 transition-colors rounded-full ${
+                                isDragging ? 'bg-blue-500/20' : 'hover:bg-blue-500/10'
+                            }`}
+                        >
+                            <div
+                                className={`w-1.5 h-14 rounded-full flex items-center justify-center transition-all ${
+                                    isDragging
+                                        ? 'bg-blue-600 scale-y-110 shadow-sm'
+                                        : 'bg-slate-300 group-hover:bg-blue-500 group-hover:scale-y-105'
+                                }`}
+                            >
+                                <GripVertical size={10} className="text-white opacity-80" />
                             </div>
-                            <div className="flex items-center gap-2.5 text-gray-500">
-                                <div className="w-3.5 h-3.5 rounded-md bg-blue-100 border border-blue-200 shrink-0" />
-                                <span>Đã chọn ({answeredCount})</span>
+                        </div>
+
+                        {/* ── Cột phải: Câu hỏi & Các lựa chọn đáp án ── */}
+                        <div
+                            style={{
+                                width: isDesktop ? `calc(${100 - splitWidth}% - 14px)` : '100%',
+                            }}
+                            className="w-full flex flex-col lg:overflow-y-auto custom-scrollbar lg:pr-1"
+                        >
+                            {/* Question Card */}
+                            <div className="bg-white rounded-xl p-5 sm:p-6 shadow-xs border border-gray-200/80 mb-4 transition-all">
+                                <div className="flex justify-between items-center mb-3">
+                                    <span className="text-lg sm:text-xl font-black text-gray-800 flex items-center gap-2">
+                                        <span>Câu {currentIndex + 1}</span>
+                                        <span className="text-xs sm:text-sm font-bold text-gray-400">
+                                            / {totalQuestions}
+                                        </span>
+                                    </span>
+                                    <button
+                                        onClick={() =>
+                                            setFlaggedQuestions((prev) => ({
+                                                ...prev,
+                                                [currentQuestion.id]: !prev[currentQuestion.id],
+                                            }))
+                                        }
+                                        className={`p-2.5 rounded-xl cursor-pointer outline-none transition-all active:scale-95 ${
+                                            flaggedQuestions[currentQuestion.id]
+                                                ? 'bg-amber-100 text-amber-600 ring-1 ring-amber-300'
+                                                : 'bg-gray-100 text-gray-400 hover:text-amber-500 hover:bg-amber-50'
+                                        }`}
+                                        title={
+                                            flaggedQuestions[currentQuestion.id] ? 'Bỏ đánh dấu' : 'Đánh dấu xem lại'
+                                        }
+                                    >
+                                        <FaFlag size={15} />
+                                    </button>
+                                </div>
+
+                                <div className="text-base sm:text-lg text-gray-900 mb-5 leading-relaxed">
+                                    <JlptContentRenderer content={currentQuestion.content} />
+                                </div>
+
+                                <div className="grid gap-2.5">
+                                    {currentQuestion.options.map((opt) => {
+                                        const isSelected = selectedOptionId === opt.id;
+                                        return (
+                                            <button
+                                                key={opt.id}
+                                                disabled={isSubmitting}
+                                                onClick={() => handleOptionClick(currentQuestion.id, opt.id)}
+                                                className={`w-full p-2.5 rounded-2xl border text-left transition-all duration-150 flex items-center gap-2 active:scale-[0.99] cursor-pointer ${
+                                                    isSelected
+                                                        ? 'border-blue-600 bg-blue-50/60 shadow-xs ring-1 ring-blue-500'
+                                                        : 'border-gray-100 hover:border-blue-200 bg-gray-50/50 hover:bg-gray-50'
+                                                } disabled:cursor-not-allowed`}
+                                            >
+                                                <div
+                                                    className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm sm:text-base transition-all shrink-0 ${
+                                                        isSelected
+                                                            ? 'bg-blue-600 text-white shadow-xs'
+                                                            : 'bg-white text-gray-500 border border-gray-200'
+                                                    }`}
+                                                >
+                                                    {String.fromCharCode(64 + opt.order)}
+                                                </div>
+                                                <span
+                                                    className={`text-sm sm:text-base leading-snug transition-colors ${
+                                                        isSelected
+                                                            ? 'text-gray-900 font-bold'
+                                                            : 'text-gray-700 font-medium'
+                                                    }`}
+                                                >
+                                                    {opt.content}
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2.5 text-gray-500">
-                                <div className="w-3.5 h-3.5 rounded-md bg-amber-100 border border-amber-300 shrink-0" />
-                                <span>Đánh dấu xem lại</span>
+
+                            {submitError && (
+                                <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-4 flex items-center gap-3 text-red-700 font-bold text-sm">
+                                    <AlertCircle size={18} className="shrink-0" />
+                                    <span>{submitError}</span>
+                                </div>
+                            )}
+
+                            <div className="flex justify-between gap-4 mt-auto pt-2">
+                                <button
+                                    disabled={currentIndex === 0}
+                                    onClick={() => goToQuestion(currentIndex - 1)}
+                                    className={`flex-1 py-2.5 sm:py-3 bg-white rounded-xl font-bold text-gray-700 border border-gray-200 shadow-xs disabled:opacity-40 hover:bg-gray-100 transition-all flex items-center justify-center gap-2 active:scale-98 ${
+                                        currentIndex === 0 ? 'cursor-not-allowed' : 'cursor-pointer'
+                                    }`}
+                                >
+                                    <FaChevronLeft size={13} />
+                                    <span>Trước</span>
+                                </button>
+                                <button
+                                    disabled={currentIndex === totalQuestions - 1}
+                                    onClick={() => goToQuestion(currentIndex + 1)}
+                                    className={`flex-1 py-2.5 sm:py-3 bg-white rounded-xl font-bold text-gray-900 border border-gray-200 shadow-xs disabled:opacity-40 hover:bg-gray-100 transition-all flex items-center justify-center gap-2 active:scale-98 ${
+                                        currentIndex === totalQuestions - 1 ? 'cursor-not-allowed' : 'cursor-pointer'
+                                    }`}
+                                >
+                                    <span>Tiếp theo</span>
+                                    <FaChevronRight size={13} />
+                                </button>
                             </div>
                         </div>
                     </div>
-                </aside>
+                ) : (
+                    /* Khi KHÔNG có bài đọc (Từ vựng, Hán tự, Ngữ pháp): 1 cột căn giữa thanh lịch */
+                    <div className="w-full">
+                        <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-xs border border-gray-200/80 mb-4 transition-all">
+                            <div className="flex justify-between items-center mb-3">
+                                <span className="text-lg sm:text-xl font-black text-gray-800 flex items-center gap-2">
+                                    <span>Câu {currentIndex + 1}</span>
+                                    <span className="text-xs sm:text-sm font-bold text-gray-400">
+                                        / {totalQuestions}
+                                    </span>
+                                </span>
+                                <button
+                                    onClick={() =>
+                                        setFlaggedQuestions((prev) => ({
+                                            ...prev,
+                                            [currentQuestion.id]: !prev[currentQuestion.id],
+                                        }))
+                                    }
+                                    className={`p-2.5 rounded-xl cursor-pointer outline-none transition-all active:scale-95 ${
+                                        flaggedQuestions[currentQuestion.id]
+                                            ? 'bg-amber-100 text-amber-600 ring-1 ring-amber-300'
+                                            : 'bg-gray-100 text-gray-400 hover:text-amber-500 hover:bg-amber-50'
+                                    }`}
+                                    title={flaggedQuestions[currentQuestion.id] ? 'Bỏ đánh dấu' : 'Đánh dấu xem lại'}
+                                >
+                                    <FaFlag size={15} />
+                                </button>
+                            </div>
+
+                            <div className="text-base sm:text-lg text-gray-900 mb-5 leading-relaxed">
+                                <JlptContentRenderer content={currentQuestion.content} />
+                            </div>
+
+                            <div className="grid gap-2.5">
+                                {currentQuestion.options.map((opt) => {
+                                    const isSelected = selectedOptionId === opt.id;
+                                    return (
+                                        <button
+                                            key={opt.id}
+                                            disabled={isSubmitting}
+                                            onClick={() => handleOptionClick(currentQuestion.id, opt.id)}
+                                            className={`w-full p-2.5 sm:p-3 rounded-2xl border-2 text-left transition-all duration-150 flex items-center gap-3 active:scale-[0.99] cursor-pointer ${
+                                                isSelected
+                                                    ? 'border-blue-600 bg-blue-50/60 shadow-xs ring-1 ring-blue-500'
+                                                    : 'border-gray-100 hover:border-blue-200 bg-gray-50/50 hover:bg-gray-50'
+                                            } disabled:cursor-not-allowed`}
+                                        >
+                                            <div
+                                                className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center font-black text-sm sm:text-base transition-all shrink-0 ${
+                                                    isSelected
+                                                        ? 'bg-blue-600 text-white shadow-xs'
+                                                        : 'bg-white text-gray-500 border border-gray-200'
+                                                }`}
+                                            >
+                                                {String.fromCharCode(64 + opt.order)}
+                                            </div>
+                                            <span
+                                                className={`text-sm sm:text-base leading-snug transition-colors ${
+                                                    isSelected ? 'text-gray-900 font-bold' : 'text-gray-700 font-medium'
+                                                }`}
+                                            >
+                                                {opt.content}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {submitError && (
+                            <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-4 flex items-center gap-3 text-red-700 font-bold text-sm">
+                                <AlertCircle size={18} className="shrink-0" />
+                                <span>{submitError}</span>
+                            </div>
+                        )}
+
+                        <div className="flex justify-between gap-4">
+                            <button
+                                disabled={currentIndex === 0}
+                                onClick={() => goToQuestion(currentIndex - 1)}
+                                className={`flex-1 py-2.5 sm:py-3 bg-white rounded-xl font-bold text-gray-700 border border-gray-200 shadow-xs disabled:opacity-40 hover:bg-gray-50 transition-all flex items-center justify-center gap-2 active:scale-98 ${
+                                    currentIndex === 0 ? 'cursor-not-allowed' : 'cursor-pointer'
+                                }`}
+                            >
+                                <FaChevronLeft size={13} />
+                                <span>Trước</span>
+                            </button>
+                            <button
+                                disabled={currentIndex === totalQuestions - 1}
+                                onClick={() => goToQuestion(currentIndex + 1)}
+                                className={`flex-1 py-2.5 sm:py-3 bg-white rounded-xl font-bold text-gray-900 border border-gray-200 shadow-xs disabled:opacity-40 hover:bg-gray-50 transition-all flex items-center justify-center gap-2 active:scale-98 ${
+                                    currentIndex === totalQuestions - 1 ? 'cursor-not-allowed' : 'cursor-pointer'
+                                }`}
+                            >
+                                <span>Tiếp theo</span>
+                                <FaChevronRight size={13} />
+                            </button>
+                        </div>
+                    </div>
+                )}
             </main>
 
             {/* ── Mobile & Tablet Question Palette Pop-up (Kích hoạt từ icon 9 ô) ── */}
@@ -668,7 +812,7 @@ const PracticeSetExamView = () => {
                                     ? { type: 'spring', damping: 28, stiffness: 320, mass: 0.85 }
                                     : { duration: 0.24, ease: [0.16, 1, 0.3, 1] }
                             }
-                            className="relative z-10 w-full max-w-xl bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl p-6 border border-gray-100 max-h-[85vh] sm:max-h-[80vh] flex flex-col"
+                            className="relative z-10 w-full max-w-4xl bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl p-5 sm:p-6 border border-gray-100 max-h-[85vh] sm:max-h-[80vh] flex flex-col"
                         >
                             {/* Thanh gạch kéo (Handle bar) trực quan cho Mobile */}
                             <div className="w-12 h-1.5 bg-gray-300/80 rounded-full mx-auto mb-2.5 sm:hidden shrink-0" />
@@ -676,12 +820,12 @@ const PracticeSetExamView = () => {
                             {/* Header của Pop-up */}
                             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                                 <div className="flex items-center gap-2.5">
-                                    <div className="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
-                                        <Grid3x3 size={18} />
+                                    <div className="w-10 h-10 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+                                        <Grid3x3 size={22} />
                                     </div>
                                     <div>
-                                        <h3 className="font-black text-gray-800 text-base">Bảng câu hỏi</h3>
-                                        <p className="text-xs text-gray-500 font-medium">
+                                        <h3 className="font-black text-gray-800 text-xl">Bảng câu hỏi</h3>
+                                        <p className="text-[13px] text-gray-500 font-medium">
                                             Đã làm:{' '}
                                             <span className="font-bold text-red-600">
                                                 {answeredCount}/{totalQuestions}
@@ -699,17 +843,9 @@ const PracticeSetExamView = () => {
                                 </button>
                             </div>
 
-                            {/* Thanh tiến độ mini trong Pop-up */}
-                            <div className="w-full bg-red-50/80 border border-red-100/50 rounded-full h-2 my-3 overflow-hidden">
-                                <div
-                                    className="bg-gradient-to-r from-red-500 to-red-600 h-full rounded-full transition-all duration-300"
-                                    style={{ width: `${progressPercent}%` }}
-                                />
-                            </div>
-
                             {/* Danh sách lưới câu hỏi */}
-                            <div className="flex-1 overflow-y-auto py-2 pr-1 custom-scrollbar">
-                                <div className="grid grid-cols-5 gap-2">
+                            <div className="flex-1 overflow-y-auto py-4 px-1 custom-scrollbar">
+                                <div className="grid grid-cols-5 sm:grid-cols-8 gap-2">
                                     {questions.map((q, idx) => {
                                         const answered = !!selectedAnswers[q.id];
                                         const isCurrent = currentIndex === idx;
@@ -721,7 +857,7 @@ const PracticeSetExamView = () => {
                                                     goToQuestion(idx);
                                                     setShowPaletteModal(false);
                                                 }}
-                                                className={`relative h-11 rounded-xl text-sm font-black transition-all flex items-center justify-center cursor-pointer active:scale-95 ${
+                                                className={`relative h-12 rounded-xl font-black transition-all flex items-center justify-center cursor-pointer active:scale-95 ${
                                                     isCurrent
                                                         ? 'bg-red-600 text-white shadow-md shadow-red-200 ring-2 ring-red-400'
                                                         : answered
@@ -733,7 +869,7 @@ const PracticeSetExamView = () => {
                                             >
                                                 {idx + 1}
                                                 {flagged && !isCurrent && (
-                                                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-white" />
+                                                    <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-amber-500 rounded-full border-2 border-white" />
                                                 )}
                                             </button>
                                         );
@@ -743,17 +879,17 @@ const PracticeSetExamView = () => {
 
                             {/* Chú thích màu sắc & Nút Nộp bài nhanh */}
                             <div className="pt-3 border-t border-gray-100 mt-2">
-                                <div className="grid grid-cols-3 gap-2 text-[11px] font-bold text-gray-500 mb-3">
+                                <div className="grid grid-cols-3 gap-2 text-sm font-bold text-gray-500 mb-3">
                                     <div className="flex items-center gap-1.5">
-                                        <span className="w-3 h-3 rounded-md bg-red-600 shrink-0" />
+                                        <span className="w-4 h-4 rounded-md bg-red-600 shrink-0" />
                                         <span>Đang làm</span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
-                                        <span className="w-3 h-3 rounded-md bg-blue-100 border border-blue-200 shrink-0" />
+                                        <span className="w-4 h-4 rounded-md bg-blue-100 border border-blue-200 shrink-0" />
                                         <span>Đã chọn</span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
-                                        <span className="w-3 h-3 rounded-md bg-amber-100 border border-amber-300 shrink-0" />
+                                        <span className="w-4 h-4 rounded-md bg-amber-100 border border-amber-300 shrink-0" />
                                         <span>Đánh dấu</span>
                                     </div>
                                 </div>
@@ -763,7 +899,7 @@ const PracticeSetExamView = () => {
                                         setShowPaletteModal(false);
                                         setShowSubmitModal(true);
                                     }}
-                                    className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white font-black text-sm rounded-xl transition shadow-xs active:scale-98 cursor-pointer flex items-center justify-center gap-2"
+                                    className="w-full py-2.5 sm:py-3.5 bg-red-600 hover:bg-red-700 text-white font-black rounded-xl transition shadow-xs active:scale-98 cursor-pointer flex items-center justify-center gap-2"
                                 >
                                     <span>Nộp bài ngay</span>
                                     <span className="opacity-90 font-normal">
@@ -795,7 +931,7 @@ const PracticeSetExamView = () => {
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.94, opacity: 0, y: 12 }}
                             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                            className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full relative z-10 text-center shadow-2xl"
+                            className="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full relative z-10 text-center shadow-2xl"
                         >
                             <div className="w-16 h-16 sm:w-20 sm:h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center mx-auto mb-5">
                                 <FaQuestionCircle size={36} />
@@ -832,7 +968,7 @@ const PracticeSetExamView = () => {
                                 <button
                                     onClick={() => setShowSubmitModal(false)}
                                     disabled={isSubmitting}
-                                    className="w-full py-2.5 bg-gray-100 cursor-pointer text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-all disabled:opacity-60"
+                                    className="w-full py-2.5 sm:py-3.5 bg-gray-100 cursor-pointer text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-all disabled:opacity-60"
                                 >
                                     Tiếp tục làm bài
                                 </button>

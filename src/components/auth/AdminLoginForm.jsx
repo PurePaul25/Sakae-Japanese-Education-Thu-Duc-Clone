@@ -48,9 +48,8 @@ const AdminLoginForm = ({ direction }) => {
         try {
             const adminData = await adminLoginAPI(adminEmail, adminPassword);
 
-            // Save to context and localStorage
+            // Keep profile data in memory; session credentials stay in HttpOnly cookies.
             login(adminData);
-            localStorage.setItem('sakae_admin', JSON.stringify(adminData));
 
             // Store flag to show toast on admin dashboard
             sessionStorage.setItem('showAdminLoginSuccessToast', 'true');

@@ -12,6 +12,7 @@ import {
     FaInfoCircle,
 } from 'react-icons/fa';
 import ScrollToTopButton from '../../components/layout/ScrollToTopButton';
+import JlptContentRenderer from '../../components/jlpt/JlptContentRenderer';
 import { jlptTests } from '../../dataTest/jlptTests';
 import { levels, getTranslatedSectionName } from './constants';
 import SEO from '../../hooks/useSEO';
@@ -263,10 +264,10 @@ const ResultView = () => {
                                                             <h4 className="flex items-center gap-2 text-blue-800 font-black mb-1">
                                                                 <FaInfoCircle /> Giải thích:
                                                             </h4>
-                                                            <p className="text-blue-700 leading-relaxed text-[15px] font-medium">
-                                                                {q.explanation ||
-                                                                    'Đang cập nhật giải thích cho câu hỏi này.'}
-                                                            </p>
+                                                            <JlptContentRenderer
+                                                                content={q.explanation || 'Đang cập nhật giải thích cho câu hỏi này.'}
+                                                                className="text-blue-700 text-[15px] font-medium"
+                                                            />
                                                         </div>
                                                     </div>
                                                 );
@@ -298,9 +299,10 @@ const ResultView = () => {
                                         </div>
                                     </div>
 
-                                    <p className="text-lg text-gray-800 font-bold mb-3 leading-relaxed">
-                                        {reviewQuestion.text}
-                                    </p>
+                                    <JlptContentRenderer
+                                        content={reviewQuestion.text}
+                                        className="text-lg text-gray-800 mb-3"
+                                    />
 
                                     <div className="grid gap-2 mb-5">
                                         {reviewQuestion.options.map((opt, oIdx) => {
@@ -345,9 +347,12 @@ const ResultView = () => {
                                         <h4 className="flex items-center gap-2 text-blue-800 font-black mb-1">
                                             <FaInfoCircle /> Giải thích:
                                         </h4>
-                                        <p className="text-blue-700 leading-relaxed font-medium text-[15px]">
-                                            {reviewQuestion.explanation || 'Đang cập nhật giải thích cho câu hỏi này.'}
-                                        </p>
+                                        <div className="text-blue-700 leading-relaxed font-medium text-[15px]">
+                                            <JlptContentRenderer
+                                                content={reviewQuestion.explanation || 'Đang cập nhật giải thích cho câu hỏi này.'}
+                                                className="text-blue-700"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 

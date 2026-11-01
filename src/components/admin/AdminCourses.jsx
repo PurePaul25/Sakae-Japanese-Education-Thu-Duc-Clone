@@ -1430,7 +1430,7 @@ const SchedulePanel = ({ course, onClose, show, duration = 300 }) => {
 
 // ─── Course Card ──────────────────────────────────────────────────────────────
 const CourseCard = ({ course, onEdit, onDelete, onSchedule }) => (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+    <div className="h-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-md transition-shadow group flex flex-col">
         {/* Thumbnail */}
         <div className="relative h-60 bg-slate-100 dark:bg-slate-800 overflow-hidden">
             {course.thumbnail ? (
@@ -1457,7 +1457,7 @@ const CourseCard = ({ course, onEdit, onDelete, onSchedule }) => (
         </div>
 
         {/* Body */}
-        <div className="px-4 py-3">
+        <div className="px-4 py-3 flex-1 flex flex-col">
             <h3 className="font-bold text-slate-800 dark:text-white line-clamp-2 leading-snug mb-2">{course.title}</h3>
 
             {/* Badges */}
@@ -1480,7 +1480,7 @@ const CourseCard = ({ course, onEdit, onDelete, onSchedule }) => (
             </div>
 
             {/* Tuition */}
-            <p className="font-bold text-red-600 dark:text-red-400 mb-3">
+            <p className="mt-auto font-bold text-red-600 dark:text-red-400 mb-3">
                 {course.tuition != null ? fmtCurrency(course.tuition) : 'Liên hệ'}
             </p>
 
