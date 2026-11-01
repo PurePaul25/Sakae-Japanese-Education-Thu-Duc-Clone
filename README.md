@@ -37,7 +37,7 @@ npm install
 npm run dev
 ```
 
-For production, set `VITE_API_URL` to the backend API base URL ending in `/api/v1`, and set the backend's `FRONTEND_URL` to this site's exact origin. Authentication uses credentialed `HttpOnly` cookies and requires HTTPS in production; serving the frontend and API on the same site through a reverse proxy is preferred.
+In production, API requests use the same-origin `/api/v1` path, which Vercel rewrites to the backend so authentication cookies remain first-party; do not set `VITE_API_URL` to the cross-site backend URL. The backend's `FRONTEND_URL` must match the deployed site's exact origin. For local development, set `VITE_API_URL` to the backend API base URL ending in `/api/v1`. Authentication uses credentialed `HttpOnly` cookies and requires HTTPS in production.
 
 ## 🇬🇧 English Version
 
