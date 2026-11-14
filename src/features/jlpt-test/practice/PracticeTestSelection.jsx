@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { ArrowLeft, Play, Clock, AlertCircle, Loader2, BookOpen, ChevronRight } from 'lucide-react';
 import SEO from '../../../hooks/useSEO';
-import { getPracticeSets } from '../../../services/jlptPracticeService';
+import { getPracticeSets, getReadingPassages } from '../../../services/jlptPracticeService';
 import {
     TYPE_SLUG_TO_CATEGORY,
     setStateKey,
     setResultKey,
+    passageStateKey,
+    passageResultKey,
     getPracticeSetDisplayTitle,
 } from '../../../types/jlptPractice';
 
@@ -31,26 +33,34 @@ const PracticeTestSelection = () => {
     const navigate = useNavigate();
 
     const [sets, setSets] = useState([]);
+    const [passages, setPassages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     const category = TYPE_SLUG_TO_CATEGORY[type];
     const colors = CATEGORY_COLORS[type] ?? CATEGORY_COLORS.vocabulary;
 
-    // Fetch practice sets from backend
-    useEffect(() => {
+    const loadTests = useCallback(() => {
         if (!category) {
             setError('Loại luyện tập không hợp lệ.');
             setLoading(false);
-            return;
+            return Promise.resolve();
         }
         setLoading(true);
         setError(null);
-        getPracticeSets(levelId, category)
-            .then((data) => {
-                // Sort by setNumber in case backend order differs
-                const sorted = [...(Array.isArray(data) ? data : [])].sort((a, b) => a.setNumber - b.setNumber);
-                setSets(sorted);
+        setSets([]);
+        setPassages([]);
+        const passageRequest = category === 'READING' ? getReadingPassages(levelId) : Promise.resolve([]);
+        return Promise.all([getPracticeSets(levelId, category), passageRequest])
+            .then(([setData, passageData]) => {
+                const sortedSets = [...(Array.isArray(setData) ? setData : [])].sort(
+                    (a, b) => a.setNumber - b.setNumber,
+                );
+                const sortedPassages = [...(Array.isArray(passageData) ? passageData : [])].sort(
+                    (a, b) => a.order - b.order,
+                );
+                setSets(sortedSets);
+                setPassages(sortedPassages);
             })
             .catch((err) => {
                 if (err?.response?.status === 401) {
@@ -61,6 +71,10 @@ const PracticeTestSelection = () => {
             })
             .finally(() => setLoading(false));
     }, [levelId, category]);
+
+    useEffect(() => {
+        loadTests();
+    }, [loadTests]);
 
     const openSetExamPopup = (set) => {
         const popupWidth = 1400;
@@ -78,6 +92,24 @@ const PracticeTestSelection = () => {
             `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes,status=no,location=no,toolbar=no,menubar=no`,
         );
     };
+
+    const openPassageExamPopup = (passage) => {
+        const popupWidth = 1400;
+        const popupHeight = 900;
+        const left = (window.screen.width - popupWidth) / 2;
+        const top = (window.screen.height - popupHeight) / 2;
+
+        localStorage.removeItem(passageStateKey(passage.id));
+        localStorage.removeItem(passageResultKey(passage.id));
+
+        window.open(
+            `/thi-thu-JLPT/practice/exam/passage/${passage.id}`,
+            `PracticePassageWindow_${passage.id}`,
+            `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes,status=no,location=no,toolbar=no,menubar=no`,
+        );
+    };
+
+    const totalTests = sets.length + passages.length;
 
     // ── Render ─────────────────────────────────────────────────────────────
     return (
@@ -111,13 +143,13 @@ const PracticeTestSelection = () => {
                         <h1 className="text-3xl md:text-4xl font-black text-slate-900">Danh sách bộ đề luyện tập</h1>
                     </div>
 
-                    {!loading && !error && sets.length > 0 && (
+                    {!loading && !error && totalTests > 0 && (
                         <div className="bg-white px-6 py-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
                             <div className="text-center">
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
                                     Tổng số đề
                                 </p>
-                                <p className="text-xl font-black text-slate-800">{sets.length}</p>
+                                <p className="text-xl font-black text-slate-800">{totalTests}</p>
                             </div>
                         </div>
                     )}
@@ -145,19 +177,7 @@ const PracticeTestSelection = () => {
                             </button>
                         ) : (
                             <button
-                                onClick={() => {
-                                    setLoading(true);
-                                    setError(null);
-                                    getPracticeSets(levelId, category)
-                                        .then((data) => {
-                                            const sorted = [...(Array.isArray(data) ? data : [])].sort(
-                                                (a, b) => a.setNumber - b.setNumber,
-                                            );
-                                            setSets(sorted);
-                                        })
-                                        .catch(() => setError('Không thể tải danh sách đề. Vui lòng thử lại.'))
-                                        .finally(() => setLoading(false));
-                                }}
+                                onClick={loadTests}
                                 className="px-8 py-3 bg-slate-900 text-white font-black rounded-2xl cursor-pointer hover:bg-red-600 transition-all"
                             >
                                 Thử lại
@@ -167,7 +187,7 @@ const PracticeTestSelection = () => {
                 )}
 
                 {/* Empty state */}
-                {!loading && !error && sets.length === 0 && (
+                {!loading && !error && totalTests === 0 && (
                     <div className="flex flex-col items-center justify-center gap-4 py-24">
                         <BookOpen size={48} className="text-slate-300" />
                         <p className="text-slate-500 font-bold text-lg text-center">
@@ -232,6 +252,47 @@ const PracticeTestSelection = () => {
                             </motion.div>
                         ))}
                     </div>
+                )}
+
+                {!loading && !error && passages.length > 0 && (
+                    <section className={sets.length > 0 ? 'mt-8' : ''}>
+                        <h2 className="mb-4 text-xl font-black text-slate-800">Bài đọc</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {passages.map((passage, idx) => (
+                                <motion.div
+                                    key={passage.id}
+                                    initial={{ opacity: 0, y: 15 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: idx * 0.05 }}
+                                    className="group relative bg-white p-5 rounded-[1.5rem] border-2 border-transparent hover:border-red-500 hover:shadow-2xl hover:shadow-red-500/10 transition-all duration-300 cursor-pointer"
+                                    onClick={() => openPassageExamPopup(passage)}
+                                >
+                                    <div className="flex items-start gap-4 mb-4">
+                                        <div
+                                            className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl shadow-inner shrink-0 ${colors.bg} ${colors.text} group-hover:scale-110 transition-transform`}
+                                        >
+                                            {passage.order}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="font-black text-slate-900 text-lg mb-1 group-hover:text-red-600 transition-colors leading-tight break-words">
+                                                {passage.title?.trim() || `Bài đọc ${passage.order}`}
+                                            </h3>
+                                            <p className="text-xs text-slate-400 font-medium">Bài đọc độc lập</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                                        <div className="flex items-center gap-1.5 text-slate-400 text-xs font-bold">
+                                            <Play size={12} strokeWidth={2.5} fill="currentColor" />
+                                            {passage.questionCount ?? '—'} câu
+                                        </div>
+                                        <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-md group-hover:bg-red-600 group-hover:scale-110 transition-all">
+                                            <ChevronRight size={18} />
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </section>
                 )}
             </div>
         </div>

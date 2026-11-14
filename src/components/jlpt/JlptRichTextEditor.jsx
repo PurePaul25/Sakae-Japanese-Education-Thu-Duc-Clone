@@ -12,12 +12,7 @@ import {
     List,
     ListOrdered,
 } from 'lucide-react';
-import {
-    JLPT_FONTS,
-    JLPT_FONT_SIZES,
-    hasHtmlTags,
-    sanitizeJlptHtml,
-} from '../../utils/jlptContentUtil';
+import { JLPT_FONTS, JLPT_FONT_SIZES, hasHtmlTags, sanitizeJlptHtml } from '../../utils/jlptContentUtil';
 import JlptContentRenderer from './JlptContentRenderer';
 
 const MIXED_VALUE = '__mixed__';
@@ -243,9 +238,7 @@ function getSelectionStyleValues(editor, property, ignoreBlankMarkers = false) {
         const element =
             container.nodeType === Node.TEXT_NODE
                 ? container.parentElement
-                : container.childNodes[range.startOffset] ||
-                  container.childNodes[range.startOffset - 1] ||
-                  container;
+                : container.childNodes[range.startOffset] || container.childNodes[range.startOffset - 1] || container;
         if (element && editor.contains(element)) elements.add(element);
     } else {
         const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT);
@@ -589,9 +582,7 @@ export default function JlptRichTextEditor({
                 const previousItem = item.previousElementSibling;
                 if (previousItem?.tagName !== 'LI') return;
 
-                let nestedList = Array.from(previousItem.children).find(
-                    (child) => child.tagName === list.tagName,
-                );
+                let nestedList = Array.from(previousItem.children).find((child) => child.tagName === list.tagName);
                 if (!nestedList) {
                     nestedList = document.createElement(list.tagName.toLowerCase());
                     previousItem.appendChild(nestedList);
@@ -871,7 +862,7 @@ export default function JlptRichTextEditor({
                     type="button"
                     onMouseDown={saveSelection}
                     onClick={togglePreview}
-                    className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${showPreview ? 'bg-red-600 text-white shadow-xs' : 'hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'}`}
+                    className={`flex items-center gap-1 cursor-pointer px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${showPreview ? 'bg-red-600 text-white shadow-xs' : 'hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'}`}
                     title={showPreview ? 'Quay lại soạn thảo' : 'Xem trước như đề thi thật'}
                 >
                     {showPreview ? (

@@ -9,13 +9,12 @@ import {
     ChevronLeft,
     ChevronRight,
     X,
-    ToggleLeft,
-    ToggleRight,
     RefreshCw,
     Trash2,
     CheckSquare,
     Check,
     Circle,
+    EyeOff,
 } from 'lucide-react';
 import {
     adminGetQuestions,
@@ -73,6 +72,11 @@ const extractError = (err) => {
     if (Array.isArray(msg)) return msg.join(', ');
     if (typeof msg === 'string') return msg;
     return 'Có lỗi xảy ra. Vui lòng thử lại.';
+};
+
+const isValidOrder = (value) => {
+    const order = Number(value);
+    return String(value).trim() !== '' && Number.isInteger(order) && order >= 1;
 };
 
 const useBodyScrollLock = (enabled) => {
@@ -178,24 +182,26 @@ const DeleteQuestionModal = ({ question, onConfirm, onCancel, loading, show }) =
                 className={`absolute inset-0 bg-black/70 transition-opacity duration-${MODAL_DURATION} ${show ? 'opacity-100' : 'opacity-0'}`}
             />
             <div
-                className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg p-6 transform transition-all duration-${MODAL_DURATION} ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}
+                className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl p-6 transform transition-all duration-${MODAL_DURATION} ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}
             >
                 <div className="flex flex-col items-center text-center gap-4">
                     <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                         <Trash2 size={32} className="text-red-600" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-1">
+                        <h3 className="text-3xl font-bold text-slate-800 dark:text-white mb-1">
                             Xóa vĩnh viễn câu hỏi?
                         </h3>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed line-clamp-3">
+                        <p className="text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-3">
                             "{question?.content}"
                         </p>
                         <div className="mt-3 p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900/30 text-left">
-                            <p className="text-xs text-red-700 dark:text-red-300 font-semibold mb-1">Cảnh báo:</p>
-                            <p className="text-xs text-red-600 dark:text-red-400 leading-normal">
-                                Hành động này sẽ xóa vĩnh viễn câu hỏi cùng 4 lựa chọn đáp án khỏi cơ sở dữ liệu và
-                                không thể hoàn tác.
+                            <p className="text-sm text-red-600 dark:text-red-300 font-semibold mb-1">
+                                Cảnh báo:{' '}
+                                <span className="text-sm text-red-600 dark:text-red-400 leading-normal">
+                                    Hành động này sẽ xóa vĩnh viễn câu hỏi cùng 4 lựa chọn đáp án khỏi cơ sở dữ liệu và
+                                    không thể hoàn tác.
+                                </span>
                             </p>
                         </div>
                     </div>
@@ -296,19 +302,19 @@ const DisableConfirmModal = ({ onConfirm, onCancel, loading, show }) => {
                 className={`absolute inset-0 bg-black/70 transition-opacity duration-${MODAL_DURATION} ${show ? 'opacity-100' : 'opacity-0'}`}
             />
             <div
-                className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg p-6 transform transition-all duration-${MODAL_DURATION} ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}
+                className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl p-6 transform transition-all duration-${MODAL_DURATION} ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}
             >
                 <div className="flex flex-col items-center text-center gap-4">
                     <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
                         <AlertTriangle size={32} className="text-amber-600" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-1">Vô hiệu hóa câu hỏi?</h3>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                        <h3 className="text-3xl font-bold text-slate-800 dark:text-white mb-1">Vô hiệu hóa câu hỏi?</h3>
+                        <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
                             Câu hỏi này sẽ bị ẩn khỏi học viên. Dữ liệu vẫn được lưu trong hệ thống.
                         </p>
-                        <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
-                            Lưu ý: Vô hiệu hóa không xóa câu hỏi khỏi bộ đề, chỉ ẩn với học viên.
+                        <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
+                            Lưu ý: Vô hiệu hóa không xóa câu hỏi khỏi bộ đề, admin vẫn có thể thấy, chỉ ẩn với học viên.
                         </p>
                     </div>
                     <div className="flex gap-3 w-full">
@@ -390,7 +396,7 @@ const EMPTY_QUESTION = {
     explanation: '',
     practiceSetId: '',
     isActive: true,
-    order: 0,
+    order: 1,
     options: [
         { content: '', isCorrect: false, order: 1 },
         { content: '', isCorrect: false, order: 2 },
@@ -427,7 +433,7 @@ const QuestionFormModal = ({ editQuestion, practiceSets, onClose, onSaved, show 
                     explanation: editQuestion.explanation ?? '',
                     practiceSetId: editQuestion.practiceSetId ?? '',
                     isActive: editQuestion.isActive ?? true,
-                    order: editQuestion.order ?? 0,
+                    order: editQuestion.order ?? 1,
                     options: opts.map((o, i) => ({
                         content: o.content ?? '',
                         isCorrect: o.isCorrect ?? false,
@@ -468,6 +474,7 @@ const QuestionFormModal = ({ editQuestion, practiceSets, onClose, onSaved, show 
         if (!normalizeJlptWhitespace(form.content)) {
             next.content = 'Vui lòng nhập nội dung câu hỏi.';
         }
+        if (!isValidOrder(form.order)) next.order = 'Thứ tự phải là số nguyên từ 1 trở lên.';
 
         // Options: all 4 must have content
         form.options.forEach((o, i) => {
@@ -495,11 +502,11 @@ const QuestionFormModal = ({ editQuestion, practiceSets, onClose, onSaved, show 
                 content: normalizeJlptWhitespace(form.content),
                 explanation: normalizeJlptWhitespace(form.explanation),
                 isActive: form.isActive,
-                order: parseInt(form.order, 10) || 0,
-                options: form.options.map((o) => ({
+                order: Number(form.order),
+                options: form.options.map((o, index) => ({
                     content: o.content.trim(),
                     isCorrect: o.isCorrect,
-                    order: o.order,
+                    order: index + 1,
                 })),
                 // practiceSetId: empty string → omit (undefined), null → detach
                 ...(form.practiceSetId === 'null'
@@ -564,7 +571,7 @@ const QuestionFormModal = ({ editQuestion, practiceSets, onClose, onSaved, show 
                 onClick={onClose}
             />
             <div
-                className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto transform transition-all duration-${MODAL_DURATION} ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}
+                className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-y-auto transform transition-all duration-${MODAL_DURATION} ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
@@ -573,7 +580,7 @@ const QuestionFormModal = ({ editQuestion, practiceSets, onClose, onSaved, show 
                         <div className="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                             <HelpCircle size={18} className="text-red-600 dark:text-red-400" />
                         </div>
-                        <h2 className="text-lg font-bold text-slate-800 dark:text-white">
+                        <h2 className="text-xl font-bold text-slate-800 dark:text-white">
                             {isEdit ? 'Chỉnh sửa câu hỏi' : 'Tạo câu hỏi mới'}
                         </h2>
                     </div>
@@ -736,33 +743,46 @@ const QuestionFormModal = ({ editQuestion, practiceSets, onClose, onSaved, show 
                     <div className="grid grid-cols-2 gap-3">
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                                Thứ tự hiển thị
+                                Thứ tự hiển thị câu hỏi
                             </label>
                             <input
                                 name="order"
                                 type="number"
-                                min={0}
+                                min={1}
+                                step={1}
                                 value={form.order}
-                                onChange={(e) => setForm((f) => ({ ...f, order: e.target.value }))}
-                                className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-400 transition duration-200"
-                                placeholder="0"
+                                onChange={(e) => {
+                                    const { value } = e.target;
+                                    setForm((f) => ({ ...f, order: value }));
+                                    setErrors((previous) => ({
+                                        ...previous,
+                                        order: isValidOrder(value) ? '' : 'Thứ tự phải là số nguyên từ 1 trở lên.',
+                                    }));
+                                }}
+                                className={`w-full px-3 py-2 text-sm border rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-400 transition duration-200 ${errors.order ? 'border-red-400' : 'border-slate-200 dark:border-slate-700'}`}
+                                placeholder="1"
                             />
+                            {errors.order && <p className="text-xs text-red-500 mt-1">{errors.order}</p>}
                             <p className="text-xs text-slate-400 mt-1">Số nhỏ hiện trước.</p>
                         </div>
-                        <div className="flex items-end pb-1">
-                            <div className="flex items-center justify-between w-full p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                        <div className="flex items-center">
+                            <div className="flex items-center justify-between w-full p-3 bg-slate-100 dark:bg-slate-800/50 rounded-xl">
                                 <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Kích hoạt</p>
                                 <button
                                     type="button"
+                                    role="switch"
+                                    aria-checked={form.isActive}
+                                    aria-label="Kích hoạt"
                                     onClick={() => setForm((f) => ({ ...f, isActive: !f.isActive }))}
-                                    className="cursor-pointer focus:outline-none"
-                                    aria-label={form.isActive ? 'Đang kích hoạt' : 'Đang vô hiệu hóa'}
+                                    className={`relative h-6 w-11 shrink-0 cursor-pointer overflow-hidden rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 ${
+                                        form.isActive ? 'bg-red-600' : 'bg-slate-300 dark:bg-slate-700'
+                                    }`}
                                 >
-                                    {form.isActive ? (
-                                        <ToggleRight size={32} className="text-green-500" />
-                                    ) : (
-                                        <ToggleLeft size={32} className="text-slate-400" />
-                                    )}
+                                    <span
+                                        className={`absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ease-out ${
+                                            form.isActive ? 'translate-x-5' : 'translate-x-0'
+                                        }`}
+                                    />
                                 </button>
                             </div>
                         </div>
@@ -1348,7 +1368,7 @@ const AdminJlptQuestions = () => {
                                                             className="p-1.5 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors cursor-pointer"
                                                             title="Vô hiệu hóa"
                                                         >
-                                                            <ToggleRight size={15} />
+                                                            <EyeOff size={15} />
                                                         </button>
                                                     )}
                                                     <button

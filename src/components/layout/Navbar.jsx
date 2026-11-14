@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 // eslint-disable-next-line no-unused-vars
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ASSETS } from '../../constants/assets';
 import { useUser } from '../../contexts/UserContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -140,10 +140,7 @@ function Navbar() {
         setIsUserDropdownOpen(false);
         const revoked = await logout();
         if (!revoked) {
-            addToast(
-                'Chưa thể đăng xuất do chưa kết nối được máy chủ. Vui lòng thử lại.',
-                'error',
-            );
+            addToast('Chưa thể đăng xuất do chưa kết nối được máy chủ. Vui lòng thử lại.', 'error');
             return;
         }
         addToast('Bạn đã đăng xuất thành công!', 'success');
@@ -151,11 +148,29 @@ function Navbar() {
     };
 
     return (
-        <header
-            className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b-1 border-gray-200 ${
-                isScrolled ? 'bg-white shadow-md' : 'bg-white/70'
-            }`}
-        >
+        <>
+            <AnimatePresence>
+                {isMenuOpen && (
+                    <motion.button
+                        type="button"
+                        aria-label="Đóng menu"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.25, ease: 'easeOut' }}
+                        onClick={() => {
+                            setIsMenuOpen(false);
+                            setMobileSubmenuOpen(false);
+                        }}
+                        className="fixed inset-0 z-40 border-0 bg-black/30 p-0 lg:hidden"
+                    />
+                )}
+            </AnimatePresence>
+            <header
+                className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b-1 border-gray-200 ${
+                    isScrolled ? 'bg-white shadow-md' : 'bg-white/70'
+                }`}
+            >
             <div className="max-w-7xl mx-auto flex items-center justify-between px-3">
                 {/* Logo */}
                 <div className="flex items-center gap-2">
@@ -535,7 +550,8 @@ function Navbar() {
                     </div>
                 </div>
             </div>
-        </header>
+            </header>
+        </>
     );
 }
 

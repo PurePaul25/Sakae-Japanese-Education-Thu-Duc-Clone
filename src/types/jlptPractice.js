@@ -29,6 +29,22 @@ export const CATEGORY_TO_TYPE_SLUG = {
 // ─── Exam timer helper ──────────────────────────────────────────────────────
 export const SECONDS_PER_QUESTION = 90; // 1.5 phút/câu
 export const MAX_EXAM_SECONDS = 30 * 60; // tối đa 30 phút
+export const MIN_PRACTICE_DURATION_MINUTES = 1;
+export const MAX_PRACTICE_DURATION_MINUTES = 100;
+export const PRACTICE_DURATION_PREFERENCE_KEY = 'jlpt_practice_duration_minutes';
+
+export const getPracticeDurationPreference = () => {
+  try {
+    const minutes = Number(localStorage.getItem(PRACTICE_DURATION_PREFERENCE_KEY));
+    return Number.isInteger(minutes) &&
+      minutes >= MIN_PRACTICE_DURATION_MINUTES &&
+      minutes <= MAX_PRACTICE_DURATION_MINUTES
+      ? minutes
+      : null;
+  } catch {
+    return null;
+  }
+};
 
 /** Tính thời gian làm bài (giây) từ số câu hỏi */
 export const calcExamTime = (questionCount) =>
@@ -57,6 +73,9 @@ export const setStateKey = (setId) => `jlpt_set_state_${setId}`;
  *   { set, total, answered, unanswered, correct, wrong, score, results[], questions[] }
  */
 export const setResultKey = (setId) => `jlpt_set_result_${setId}`;
+
+export const passageStateKey = (passageId) => `jlpt_passage_state_${passageId}`;
+export const passageResultKey = (passageId) => `jlpt_passage_result_${passageId}`;
 
 // ─── JSDoc types ────────────────────────────────────────────────────────────
 

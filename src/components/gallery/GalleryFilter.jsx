@@ -33,7 +33,7 @@ const UserCustomSelect = ({ value, onChange, options, placeholder }) => {
             </button>
 
             {isOpen && (
-                <div className="absolute top-full mt-2 left-0 right-0 sm:right-auto bg-white border border-slate-150 rounded-xl shadow-2xl z-[150] max-h-56 overflow-y-auto py-1.5 min-w-[140px] animate-fadeIn">
+                <div className="absolute top-full mt-2 left-0 right-0 sm:right-auto bg-white border border-slate-400 rounded-xl shadow-2xl z-[150] max-h-56 overflow-y-auto py-1.5 min-w-[140px] animate-fadeIn">
                     {options.map((opt) => (
                         <button
                             key={opt.value}

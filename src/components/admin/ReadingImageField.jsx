@@ -64,8 +64,8 @@ const ReadingImageField = ({
             setError('Dung lượng ảnh tối đa là 5 MB.');
             return;
         }
-        if (!level || !practiceSetId) {
-            setError('Chọn cấp độ và bộ đề Reading trước khi tải ảnh lên.');
+        if (!level) {
+            setError('Chọn cấp độ JLPT trước khi tải ảnh lên.');
             return;
         }
 
@@ -93,14 +93,14 @@ const ReadingImageField = ({
         <div className="space-y-3">
             <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Bộ đề Reading dùng cho ảnh Cloudinary
+                    Bộ đề Reading (không bắt buộc)
                 </label>
                 <select
                     value={practiceSetId}
                     onChange={(event) => onPracticeSetChange(event.target.value)}
                     className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-400"
                 >
-                    <option value="">Chọn bộ đề Reading</option>
+                    <option value="">Bài đọc độc lập</option>
                     {readingSets.map((set) => (
                         <option key={set.id} value={set.id}>
                             #{set.setNumber} {set.title}
@@ -109,7 +109,9 @@ const ReadingImageField = ({
                 </select>
                 {!level && <p className="mt-1 text-xs text-slate-500">Chọn cấp độ JLPT trước.</p>}
                 {level && readingSets.length === 0 && (
-                    <p className="mt-1 text-xs text-amber-600">Chưa có bộ đề Reading cho {level}; cần tạo bộ đề trước khi upload.</p>
+                    <p className="mt-1 text-xs text-slate-500">
+                        Ảnh sẽ tải vào thư mục riêng của cấp độ {level}.
+                    </p>
                 )}
             </div>
 

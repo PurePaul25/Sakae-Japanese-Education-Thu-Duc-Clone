@@ -4,6 +4,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaCheckCircle, FaTimesCircle, FaInfoCircle, FaTimes } from 'react-icons/fa';
 import { useToast } from '../../contexts/ToastContext';
 
+const stripHtmlTags = (message) =>
+    typeof message === 'string'
+        ? message
+              .replace(/<\s*br\s*\/?>/gi, ' ')
+              .replace(/<\/\s*(li|p|div|ul|ol)\s*>/gi, ' ')
+              .replace(/<[^>]*>/g, ' ')
+              .replace(/&nbsp;/gi, ' ')
+              .replace(/\s+/g, ' ')
+              .trim()
+        : message;
+
 const Toast = () => {
     const { toasts, removeToast } = useToast();
 
@@ -123,6 +134,7 @@ const Toast = () => {
                     {toasts.map((toast) => {
                         const config = getToastConfig(toast.type);
                         const Icon = config.icon;
+                        const message = stripHtmlTags(toast.message);
 
                         return (
                             <motion.div
@@ -139,7 +151,7 @@ const Toast = () => {
                                     <Icon className={`${config.iconColor} text-xl mt-0.5 flex-shrink-0`} />
                                     <div className="flex-grow">
                                         <p className={`font-bold ${config.textColor}`}>{config.title}</p>
-                                        <p className={`text-sm ${config.textColor} opacity-90`}>{toast.message}</p>
+                                        <p className={`text-sm ${config.textColor} opacity-90`}>{message}</p>
                                     </div>
                                     <button
                                         onClick={() => removeToast(toast.id)}
@@ -176,6 +188,7 @@ const Toast = () => {
                     {toasts.map((toast) => {
                         const config = getToastConfig(toast.type);
                         const Icon = config.icon;
+                        const message = stripHtmlTags(toast.message);
 
                         return (
                             <motion.div
@@ -192,7 +205,7 @@ const Toast = () => {
                                     <Icon className={`${config.iconColor} text-xl mt-0.5 flex-shrink-0`} />
                                     <div className="flex-grow">
                                         <p className={`font-bold ${config.textColor}`}>{config.title}</p>
-                                        <p className={`text-sm ${config.textColor} opacity-90`}>{toast.message}</p>
+                                        <p className={`text-sm ${config.textColor} opacity-90`}>{message}</p>
                                     </div>
                                     <button
                                         onClick={() => removeToast(toast.id)}

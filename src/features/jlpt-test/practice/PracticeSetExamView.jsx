@@ -27,11 +27,22 @@ import { Loader2, AlertCircle, Grid3x3, X, GripVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatTime } from '../constants';
 import SEO from '../../../hooks/useSEO';
-import { getPracticeSet, submitPracticeSet } from '../../../services/jlptPracticeService';
+import {
+    getPracticeSet,
+    getReadingPassage,
+    submitPracticeSet,
+    submitReadingPassage,
+} from '../../../services/jlptPracticeService';
 import {
     setStateKey,
     setResultKey,
+    passageStateKey,
+    passageResultKey,
     calcExamTime,
+    getPracticeDurationPreference,
+    MIN_PRACTICE_DURATION_MINUTES,
+    MAX_PRACTICE_DURATION_MINUTES,
+    PRACTICE_DURATION_PREFERENCE_KEY,
     getPracticeSetDisplayTitle,
 } from '../../../types/jlptPractice';
 import JlptContentRenderer from '../../../components/jlpt/JlptContentRenderer';
@@ -49,11 +60,13 @@ const CATEGORY_LABELS = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const PracticeSetExamView = () => {
-    const { setId } = useParams();
+    const { setId, passageId } = useParams();
     const navigate = useNavigate();
 
-    const stateKey = setStateKey(setId);
-    const resultKey = setResultKey(setId);
+    const examId = passageId ?? setId;
+    const isPassage = Boolean(passageId);
+    const stateKey = isPassage ? passageStateKey(examId) : setStateKey(examId);
+    const resultKey = isPassage ? passageResultKey(examId) : setResultKey(examId);
 
     // ── Fetch state ──────────────────────────────────────────────────────────
     const [setInfo, setSetInfo] = useState(null); // { id, level, category, title, questions[] }
@@ -78,7 +91,10 @@ const PracticeSetExamView = () => {
         }
     });
     const [timeLeft, setTimeLeft] = useState(null);
+    const [durationMinutes, setDurationMinutes] = useState('');
+    const [durationError, setDurationError] = useState('');
     const timeLeftRef = useRef(null);
+    const autoSubmitStartedRef = useRef(false);
 
     // ── UI state ─────────────────────────────────────────────────────────────
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -157,6 +173,7 @@ const PracticeSetExamView = () => {
                         selectedAnswers,
                         flagged: flaggedQuestions,
                         timeLeft: currentTime !== undefined ? currentTime : (timeLeftRef.current ?? 0),
+                        durationMinutes: Number(durationMinutes),
                         setInfo,
                         lastIndex: currentIndex,
                     }),
@@ -165,14 +182,18 @@ const PracticeSetExamView = () => {
                 // Ignore localStorage errors
             }
         },
-        [setInfo, selectedAnswers, flaggedQuestions, currentIndex, stateKey],
+        [setInfo, selectedAnswers, flaggedQuestions, currentIndex, durationMinutes, stateKey],
     );
+    const saveExamStateRef = useRef(saveExamState);
+    useEffect(() => {
+        saveExamStateRef.current = saveExamState;
+    }, [saveExamState]);
 
     // Lưu state khi chọn đáp án, đánh dấu câu hỏi hoặc chuyển câu
     useEffect(() => {
-        if (!setInfo || timeLeft === null) return;
+        if (!setInfo || timeLeftRef.current === null) return;
         saveExamState();
-    }, [selectedAnswers, flaggedQuestions, currentIndex, setInfo, saveExamState, timeLeft]);
+    }, [selectedAnswers, flaggedQuestions, currentIndex, setInfo, saveExamState]);
 
     // Lưu state khi người dùng đóng trình duyệt hoặc chuyển tab
     useEffect(() => {
@@ -189,8 +210,8 @@ const PracticeSetExamView = () => {
 
     // ── Fetch set on mount ───────────────────────────────────────────────────
     useEffect(() => {
-        if (!setId) {
-            setFetchError('Không tìm thấy bộ đề.');
+        if (!examId) {
+            setFetchError(isPassage ? 'Không tìm thấy bài đọc.' : 'Không tìm thấy bộ đề.');
             setFetchLoading(false);
             return;
         }
@@ -208,6 +229,8 @@ const PracticeSetExamView = () => {
         if (saved?.setInfo?.questions?.length) {
             setSetInfo(saved.setInfo);
             const initialTime = saved.timeLeft ?? calcExamTime(saved.setInfo.questions.length);
+            const suggestedDuration = Math.ceil(calcExamTime(saved.setInfo.questions.length) / 60);
+            setDurationMinutes(String(saved.durationMinutes ?? getPracticeDurationPreference() ?? suggestedDuration));
             setTimeLeft(initialTime);
             timeLeftRef.current = initialTime;
             if (typeof saved.lastIndex === 'number' && saved.lastIndex < saved.setInfo.questions.length) {
@@ -217,24 +240,30 @@ const PracticeSetExamView = () => {
             return;
         }
 
-        getPracticeSet(setId)
+        (isPassage ? getReadingPassage(examId) : getPracticeSet(examId))
             .then((data) => {
                 setSetInfo(data);
                 const t = calcExamTime(data.questions.length);
-                setTimeLeft(t);
-                timeLeftRef.current = t;
+                const suggestedDuration = Math.ceil(t / 60);
+                setDurationMinutes(String(getPracticeDurationPreference() ?? suggestedDuration));
+                setTimeLeft(null);
+                timeLeftRef.current = null;
             })
             .catch((err) => {
                 if (err?.response?.status === 401) {
                     setFetchError('Bạn cần đăng nhập để luyện tập.');
                 } else if (err?.response?.status === 404) {
-                    setFetchError('Bộ đề không tồn tại hoặc đã bị vô hiệu hóa.');
+                    setFetchError(
+                        isPassage
+                            ? 'Bài đọc không tồn tại hoặc đã bị vô hiệu hóa.'
+                            : 'Bộ đề không tồn tại hoặc đã bị vô hiệu hóa.',
+                    );
                 } else {
                     setFetchError('Không thể tải đề. Vui lòng thử lại.');
                 }
             })
             .finally(() => setFetchLoading(false));
-    }, [setId, stateKey]);
+    }, [examId, isPassage, stateKey]);
 
     // ── Timer (Tối ưu chu kỳ ghi đĩa để tránh giật lag) ────────────────────────
     useEffect(() => {
@@ -253,20 +282,20 @@ const PracticeSetExamView = () => {
                 if (prev === null) return null;
                 if (prev <= 1) {
                     clearInterval(id);
+                    timeLeftRef.current = 0;
                     return 0;
                 }
                 const next = prev - 1;
                 timeLeftRef.current = next;
-                // Lưu định kỳ mỗi 5s để tránh I/O nghẽn main thread
                 if (next % 5 === 0) {
-                    saveExamState(next);
+                    saveExamStateRef.current(next);
                 }
                 return next;
             });
         }, 1000);
 
         return () => clearInterval(id);
-    }, [isTimerActive, saveExamState]);
+    }, [isTimerActive]);
 
     // ── Scroll on question change (Chỉ cuộn mượt khi đã cuộn trang) ───────────
     useEffect(() => {
@@ -285,47 +314,89 @@ const PracticeSetExamView = () => {
     );
 
     // ── Submit entire set to backend ──────────────────────────────────────────
-    const handleSubmit = useCallback(async () => {
-        if (!setInfo || isSubmitting) return;
+    const handleSubmit = useCallback(
+        async (isTimedOut = false) => {
+            if (!setInfo || isSubmitting) return;
 
-        const answers = Object.entries(selectedAnswers).map(([questionId, optionId]) => ({
-            questionId,
-            optionId,
-        }));
+            const answers = Object.entries(selectedAnswers).map(([questionId, optionId]) => ({
+                questionId,
+                optionId,
+            }));
 
-        if (answers.length === 0) {
-            setSubmitError('Bạn chưa trả lời câu nào. Hãy chọn ít nhất một đáp án trước khi nộp bài.');
-            setShowSubmitModal(false);
+            if (answers.length === 0 && !isTimedOut) {
+                setSubmitError('Bạn chưa trả lời câu nào. Hãy chọn ít nhất một đáp án trước khi nộp bài.');
+                setShowSubmitModal(false);
+                return;
+            }
+
+            setIsSubmitting(true);
+            setSubmitError(null);
+            try {
+                const result = isPassage
+                    ? await submitReadingPassage(examId, answers, isTimedOut)
+                    : await submitPracticeSet(examId, answers, isTimedOut);
+
+                const resultWithSnapshot = {
+                    ...result,
+                    set: {
+                        ...result.set,
+                        setNumber: setInfo.setNumber,
+                    },
+                    questions: setInfo.questions,
+                };
+
+                localStorage.setItem(resultKey, JSON.stringify(resultWithSnapshot));
+                localStorage.removeItem(stateKey);
+
+                navigate(
+                    isPassage
+                        ? `/thi-thu-JLPT/practice/result/passage/${examId}`
+                        : `/thi-thu-JLPT/practice/result/set/${examId}`,
+                    { replace: true },
+                );
+            } catch (err) {
+                setIsSubmitting(false);
+                setSubmitError(
+                    err?.response?.status === 401
+                        ? 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.'
+                        : 'Không thể nộp bài. Vui lòng thử lại.',
+                );
+            }
+        },
+        [setInfo, isSubmitting, selectedAnswers, examId, isPassage, resultKey, stateKey, navigate],
+    );
+
+    useEffect(() => {
+        if (timeLeft !== 0 || !setInfo || autoSubmitStartedRef.current) return;
+        autoSubmitStartedRef.current = true;
+        setShowSubmitModal(false);
+        handleSubmit(true);
+    }, [timeLeft, setInfo, handleSubmit]);
+
+    const handleStartExam = () => {
+        const minutes = Number(durationMinutes);
+        if (
+            !Number.isInteger(minutes) ||
+            minutes < MIN_PRACTICE_DURATION_MINUTES ||
+            minutes > MAX_PRACTICE_DURATION_MINUTES
+        ) {
+            setDurationError(
+                `Thời gian phải là số nguyên từ ${MIN_PRACTICE_DURATION_MINUTES} đến ${MAX_PRACTICE_DURATION_MINUTES} phút.`,
+            );
             return;
         }
 
-        setIsSubmitting(true);
+        setDurationError('');
         setSubmitError(null);
         try {
-            const result = await submitPracticeSet(setId, answers);
-
-            const resultWithSnapshot = {
-                ...result,
-                set: {
-                    ...result.set,
-                    setNumber: setInfo.setNumber,
-                },
-                questions: setInfo.questions,
-            };
-
-            localStorage.setItem(resultKey, JSON.stringify(resultWithSnapshot));
-            localStorage.removeItem(stateKey);
-
-            navigate(`/thi-thu-JLPT/practice/result/set/${setId}`, { replace: true });
-        } catch (err) {
-            setIsSubmitting(false);
-            setSubmitError(
-                err?.response?.status === 401
-                    ? 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.'
-                    : 'Không thể nộp bài. Vui lòng thử lại.',
-            );
+            localStorage.setItem(PRACTICE_DURATION_PREFERENCE_KEY, String(minutes));
+        } catch {
+            setDurationError('Không lưu được thời lượng mặc định; thời lượng của bài này vẫn được áp dụng.');
         }
-    }, [setInfo, isSubmitting, selectedAnswers, setId, resultKey, stateKey, navigate]);
+        timeLeftRef.current = minutes * 60;
+        setTimeLeft(minutes * 60);
+        saveExamState(minutes * 60);
+    };
 
     const goToQuestion = useCallback(
         (idx) => {
@@ -345,6 +416,7 @@ const PracticeSetExamView = () => {
     const totalQuestions = questions.length;
     const unansweredCount = Math.max(0, totalQuestions - answeredCount);
     const progressPercent = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+    const suggestedDurationMinutes = setInfo ? Math.ceil(calcExamTime(setInfo.questions.length) / 60) : null;
 
     // ── Early returns ─────────────────────────────────────────────────────────
     if (fetchLoading) {
@@ -397,6 +469,64 @@ const PracticeSetExamView = () => {
 
     const examTitle = getPracticeSetDisplayTitle(setInfo);
 
+    if (timeLeft === null) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-10">
+                <SEO page="practicejlptTest" />
+                <div className="w-full max-w-lg rounded-3xl bg-white p-6 sm:p-8 shadow-xl border border-gray-100">
+                    <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+                        <FaClock size={30} />
+                    </div>
+                    <p className="mb-2 text-center text-sm font-black uppercase tracking-widest text-red-600">
+                        {setInfo.level} · {CATEGORY_LABELS[setInfo.category] || setInfo.category}
+                    </p>
+                    <h1 className="mb-2 text-center text-2xl font-black text-gray-900">{examTitle}</h1>
+                    <p className="mb-6 text-center text-sm text-gray-500">
+                        Chọn thời lượng làm bài trước khi bắt đầu. Thời lượng được lưu làm mặc định cá nhân cho các đề
+                        tiếp theo.
+                    </p>
+                    <label htmlFor="practice-duration" className="mb-2 block text-sm font-bold text-gray-700">
+                        Thời gian làm bài (phút)
+                    </label>
+                    <input
+                        id="practice-duration"
+                        type="number"
+                        min={MIN_PRACTICE_DURATION_MINUTES}
+                        max={MAX_PRACTICE_DURATION_MINUTES}
+                        step="1"
+                        value={durationMinutes}
+                        onChange={(event) => {
+                            setDurationMinutes(event.target.value);
+                            setDurationError('');
+                        }}
+                        aria-invalid={Boolean(durationError)}
+                        className={`w-full rounded-xl border px-3 py-2 text-lg font-bold text-gray-900 outline-none focus:ring-2 ${
+                            durationError
+                                ? 'border-red-400 focus:ring-red-200'
+                                : 'border-gray-200 focus:border-red-400 focus:ring-red-100'
+                        }`}
+                    />
+                    <p className="mt-2 text-xs text-gray-400">
+                        Nhập số nguyên từ {MIN_PRACTICE_DURATION_MINUTES} đến {MAX_PRACTICE_DURATION_MINUTES} phút. Mặc
+                        định hệ thống: {suggestedDurationMinutes} phút.
+                    </p>
+                    {durationError && (
+                        <p className="mt-2 text-sm font-semibold text-red-600" role="alert">
+                            {durationError}
+                        </p>
+                    )}
+                    <button
+                        type="button"
+                        onClick={handleStartExam}
+                        className="mt-6 w-full rounded-xl bg-red-600 py-2.5 cursor-pointer font-black text-white transition hover:bg-red-700 active:scale-[0.99]"
+                    >
+                        Bắt đầu làm bài
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="bg-gray-50/80 min-h-screen">
             <SEO page="practicejlptTest" />
@@ -426,11 +556,7 @@ const PracticeSetExamView = () => {
                         <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
                             {timeLeft !== null && (
                                 <div
-                                    className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl font-mono font-bold text-xs sm:text-sm transition-colors ${
-                                        timeLeft < 300
-                                            ? 'bg-red-50 text-red-600 ring-1 ring-red-200 animate-pulse'
-                                            : 'bg-gray-100 text-gray-800'
-                                    }`}
+                                    className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl font-mono font-bold text-xs sm:text-[15px] transition-colors bg-red-50 text-red-600 ring-1 ring-red-200 `}
                                     title="Thời gian làm bài còn lại"
                                 >
                                     <FaClock className="text-xs sm:text-sm shrink-0" />
@@ -536,7 +662,7 @@ const PracticeSetExamView = () => {
                                     {setInfo.level}
                                 </span>
                             </div>
-                            <div className="p-5 sm:p-6 overflow-y-auto flex-1 custom-scrollbar">
+                            <div className="p-4 sm:p-6 overflow-y-auto flex-1 custom-scrollbar">
                                 {currentQuestion.readingPassage.imageUrl && (
                                     <div className="mb-4 rounded-xl border border-blue-100 overflow-hidden bg-slate-50 flex items-center justify-center p-2">
                                         <ReadingImage
@@ -583,13 +709,10 @@ const PracticeSetExamView = () => {
                             className="w-full flex flex-col lg:overflow-y-auto custom-scrollbar lg:pr-1"
                         >
                             {/* Question Card */}
-                            <div className="bg-white rounded-xl p-5 sm:p-6 shadow-xs border border-gray-200/80 mb-4 transition-all">
+                            <div className="bg-white rounded-xl p-4 sm:p-6 shadow-xs border border-gray-200/80 mb-4 transition-all">
                                 <div className="flex justify-between items-center mb-3">
                                     <span className="text-lg sm:text-xl font-black text-gray-800 flex items-center gap-2">
                                         <span>Câu {currentIndex + 1}</span>
-                                        <span className="text-xs sm:text-sm font-bold text-gray-400">
-                                            / {totalQuestions}
-                                        </span>
                                     </span>
                                     <button
                                         onClick={() =>
@@ -630,7 +753,7 @@ const PracticeSetExamView = () => {
                                                 } disabled:cursor-not-allowed`}
                                             >
                                                 <div
-                                                    className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm sm:text-base transition-all shrink-0 ${
+                                                    className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-[15px] sm:text-base transition-all shrink-0 ${
                                                         isSelected
                                                             ? 'bg-blue-600 text-white shadow-xs'
                                                             : 'bg-white text-gray-500 border border-gray-200'
@@ -639,7 +762,7 @@ const PracticeSetExamView = () => {
                                                     {String.fromCharCode(64 + opt.order)}
                                                 </div>
                                                 <span
-                                                    className={`text-sm sm:text-base leading-snug transition-colors ${
+                                                    className={`text-[15px] sm:text-base leading-snug transition-colors ${
                                                         isSelected
                                                             ? 'text-gray-900 font-bold'
                                                             : 'text-gray-700 font-medium'
@@ -691,9 +814,6 @@ const PracticeSetExamView = () => {
                             <div className="flex justify-between items-center mb-3">
                                 <span className="text-lg sm:text-xl font-black text-gray-800 flex items-center gap-2">
                                     <span>Câu {currentIndex + 1}</span>
-                                    <span className="text-xs sm:text-sm font-bold text-gray-400">
-                                        / {totalQuestions}
-                                    </span>
                                 </span>
                                 <button
                                     onClick={() =>
@@ -741,7 +861,7 @@ const PracticeSetExamView = () => {
                                                 {String.fromCharCode(64 + opt.order)}
                                             </div>
                                             <span
-                                                className={`text-sm sm:text-base leading-snug transition-colors ${
+                                                className={`text-[15px] sm:text-base leading-snug transition-colors ${
                                                     isSelected ? 'text-gray-900 font-bold' : 'text-gray-700 font-medium'
                                                 }`}
                                             >
@@ -1003,14 +1123,16 @@ const PracticeSetExamView = () => {
                             </div>
                             <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mb-3">Hết giờ làm bài!</h2>
                             <p className="text-gray-500 mb-6 text-sm sm:text-base leading-relaxed">
-                                Thời gian thi đã kết thúc. Hệ thống sẽ tự động nộp bài và tính điểm cho bạn.
+                                Đã hết thời gian làm bài. Hệ thống đang tự động nộp bài và tính điểm.
                             </p>
+                            {submitError && (
+                                <p className="mb-4 text-sm font-semibold text-red-600" role="alert">
+                                    {submitError}
+                                </p>
+                            )}
                             <button
-                                onClick={() => {
-                                    setShowTimeoutModal(false);
-                                    handleSubmit();
-                                }}
-                                disabled={isSubmitting}
+                                onClick={() => handleSubmit(true)}
+                                disabled={isSubmitting || !submitError}
                                 className="w-full py-3 bg-red-600 hover:bg-red-700 cursor-pointer text-white font-black rounded-xl transition-all active:scale-95 disabled:opacity-60 flex items-center justify-center gap-2 shadow-xs"
                             >
                                 {isSubmitting ? (
@@ -1018,8 +1140,10 @@ const PracticeSetExamView = () => {
                                         <Loader2 size={18} className="animate-spin" />
                                         <span>Đang nộp bài...</span>
                                     </>
+                                ) : submitError ? (
+                                    'Thử nộp lại'
                                 ) : (
-                                    'Xem kết quả'
+                                    'Đang tự nộp bài...'
                                 )}
                             </button>
                         </motion.div>

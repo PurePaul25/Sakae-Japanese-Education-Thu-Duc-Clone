@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaShieldAlt, FaEnvelope, FaClock, FaRedo } from 'react-icons/fa';
 import { verifyEmailAPI, resendCodeAPI, cancelRegistrationAPI } from '../../utils/authAPI';
@@ -14,6 +15,7 @@ const VerificationModal = ({ isOpen, email, onClose, onSuccess }) => {
     const [isResending, setIsResending] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+    const [registrationExpired, setRegistrationExpired] = useState(false);
     const inputRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
     const { addToast } = useToast();
     const { login } = useUser();
@@ -22,6 +24,9 @@ const VerificationModal = ({ isOpen, email, onClose, onSuccess }) => {
     // Prevent body scroll when modal is open
     useEffect(() => {
         if (isOpen) {
+            setRegistrationExpired(false);
+            setError('');
+            setCode(['', '', '', '', '', '']);
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = 'unset';
@@ -83,6 +88,10 @@ const VerificationModal = ({ isOpen, email, onClose, onSuccess }) => {
             navigate('/');
         } catch (err) {
             setError(err.message || 'Mã xác thực không chính xác');
+            if (err.code === 'REGISTRATION_OTP_ATTEMPTS_EXCEEDED') {
+                setRegistrationExpired(true);
+                setCode(['', '', '', '', '', '']);
+            }
         } finally {
             setIsLoading(false);
         }
@@ -213,14 +222,24 @@ const VerificationModal = ({ isOpen, email, onClose, onSuccess }) => {
                                 {isLoading ? 'Đang xác thực...' : 'Xác Nhận'}
                             </button>
 
-                            <button
-                                type="button"
-                                onClick={handleCancel}
-                                disabled={isLoading}
-                                className="w-full mt-3 py-2.5 cursor-pointer rounded-xl font-bold text-slate-500 hover:text-red-600 hover:bg-slate-50 transition-all border border-slate-200"
-                            >
-                                {isLoading ? 'Đang hủy...' : 'Hủy & Đổi email khác'}
-                            </button>
+                            {registrationExpired ? (
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="w-full mt-3 py-2.5 cursor-pointer rounded-xl font-bold text-red-600 hover:bg-red-50 transition-all border border-red-200"
+                                >
+                                    Quay lại đăng ký
+                                </button>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={handleCancel}
+                                    disabled={isLoading}
+                                    className="w-full mt-3 py-2.5 cursor-pointer rounded-xl font-bold text-slate-500 hover:text-red-600 hover:bg-slate-50 transition-all border border-slate-200"
+                                >
+                                    {isLoading ? 'Đang hủy...' : 'Hủy & Đổi email khác'}
+                                </button>
+                            )}
 
                             <div className="mt-6 text-center">
                                 <p className="text-gray-500 text-sm">

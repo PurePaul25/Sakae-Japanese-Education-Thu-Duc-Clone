@@ -34,6 +34,8 @@ import SEO from '../../../hooks/useSEO';
 import {
     setResultKey,
     setStateKey,
+    passageResultKey,
+    passageStateKey,
     CATEGORY_TO_TYPE_SLUG,
     getPracticeSetDisplayTitle,
 } from '../../../types/jlptPractice';
@@ -52,8 +54,12 @@ const CATEGORY_LABELS = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const PracticeSetResultView = () => {
-    const { setId } = useParams();
+    const { setId, passageId } = useParams();
     const navigate = useNavigate();
+    const examId = passageId ?? setId;
+    const isPassage = Boolean(passageId);
+    const resultKey = isPassage ? passageResultKey(examId) : setResultKey(examId);
+    const stateKey = isPassage ? passageStateKey(examId) : setStateKey(examId);
 
     // ── Responsive detection cho Tablet & Điện thoại ─────────────────────────
     const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 640);
@@ -67,12 +73,12 @@ const PracticeSetResultView = () => {
     // ── Load result from localStorage ─────────────────────────────────────────
     const resultData = useMemo(() => {
         try {
-            const saved = localStorage.getItem(setResultKey(setId));
+            const saved = localStorage.getItem(resultKey);
             return saved ? JSON.parse(saved) : null;
         } catch {
             return null;
         }
-    }, [setId]);
+    }, [resultKey]);
 
     // Destructure backend result shape
     const set = resultData?.set ?? {};
@@ -120,22 +126,16 @@ const PracticeSetResultView = () => {
     const examTitle = getPracticeSetDisplayTitle(set);
     const reviewQuestion = questions[reviewIndex];
 
-    // ── Redo: reopen exam popup ───────────────────────────────────────────────
+    // ── Redo: return to the exam in this window ───────────────────────────────
     const handleRedo = () => {
-        const popupWidth = 1400;
-        const popupHeight = 900;
-        const left = (window.screen.width - popupWidth) / 2;
-        const top = (window.screen.height - popupHeight) / 2;
+        localStorage.removeItem(stateKey);
+        localStorage.removeItem(resultKey);
 
-        localStorage.removeItem(setStateKey(setId));
-        localStorage.removeItem(setResultKey(setId));
-
-        window.open(
-            `/thi-thu-JLPT/practice/exam/set/${setId}`,
-            `PracticeSetWindow_${setId}`,
-            `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes,status=no,location=no,toolbar=no,menubar=no`,
+        navigate(
+            isPassage
+                ? `/thi-thu-JLPT/practice/exam/passage/${examId}`
+                : `/thi-thu-JLPT/practice/exam/set/${examId}`,
         );
-        window.close();
     };
 
     // ── Back to list navigation ───────────────────────────────────────────────

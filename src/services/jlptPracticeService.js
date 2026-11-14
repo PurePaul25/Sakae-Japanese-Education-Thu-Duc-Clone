@@ -39,8 +39,26 @@ export const getPracticeSet = async (setId) => {
  * @param {{ questionId: string, optionId: string }[]} answers
  * @returns {Promise<Object>} { set, total, answered, unanswered, correct, wrong, score, results[] }
  */
-export const submitPracticeSet = async (setId, answers) => {
-  const response = await api.post(`/jlpt/practice/sets/${setId}/submit`, { answers });
+export const submitPracticeSet = async (setId, answers, isAutoSubmit = false) => {
+  const response = await api.post(`/jlpt/practice/sets/${setId}/submit`, { answers, isAutoSubmit });
+  return response.data.data;
+};
+
+export const getReadingPassages = async (level) => {
+  const response = await api.get('/jlpt/practice/reading-passages', { params: { level } });
+  return response.data.data;
+};
+
+export const getReadingPassage = async (passageId) => {
+  const response = await api.get(`/jlpt/practice/reading-passages/${passageId}`);
+  return response.data.data;
+};
+
+export const submitReadingPassage = async (passageId, answers, isAutoSubmit = false) => {
+  const response = await api.post(`/jlpt/practice/reading-passages/${passageId}/submit`, {
+    answers,
+    isAutoSubmit,
+  });
   return response.data.data;
 };
 
@@ -312,7 +330,7 @@ export const adminUploadReadingImage = async (file, level, practiceSetId) => {
   const body = new FormData();
   body.append('file', file);
   body.append('level', level);
-  body.append('practiceSetId', practiceSetId);
+  if (practiceSetId) body.append('practiceSetId', practiceSetId);
   const response = await api.post('/admin/jlpt/practice/reading/upload-image', body);
   return response.data.data;
 };
@@ -331,6 +349,7 @@ export const adminUploadReadingImage = async (file, level, practiceSetId) => {
  *   passageTranslation?: string,
  *   imageUrl?: string,
  *   order?: number,
+ *   isActive?: boolean,
  *   questions: Array<{
  *     content: string,
  *     options: Array<{ content: string, isCorrect: boolean, order: number }>,
@@ -360,6 +379,7 @@ export const adminCreatePassage = async (data) => {
  *   passageTranslation?: string,
  *   imageUrl?: string | null,
  *   order?: number,
+ *   isActive?: boolean,
  * }} data
  * @returns {Promise<Object>} passage đã cập nhật kèm questions hiện tại
  */

@@ -68,6 +68,11 @@ const extractError = (err) => {
     return 'Có lỗi xảy ra. Vui lòng thử lại.';
 };
 
+const isValidOrder = (value) => {
+    const order = Number(value);
+    return String(value).trim() !== '' && Number.isInteger(order) && order >= 1;
+};
+
 const useBodyScrollLock = (enabled) => {
     useEffect(() => {
         if (!enabled) return;
@@ -185,7 +190,8 @@ const EMPTY_PASSAGE = {
     passage: '',
     passageTranslation: '',
     imageUrl: '',
-    order: 0,
+    order: 1,
+    isActive: true,
     // For create: must include at least 1 question
     questionContent: '',
     questionExplanation: '',
@@ -204,22 +210,27 @@ const PassageFormModal = ({ editPassage, practiceSets, onClose, onSaved, show })
     const isEdit = !!editPassage;
     const { addToast } = useToast();
     const passageRef = useRef(null);
-
     const [form, setForm] = useState(EMPTY_PASSAGE);
     const [errors, setErrors] = useState({});
     const [saving, setSaving] = useState(false);
+    const availableReadingSets = (practiceSets ?? []).filter(
+        (set) => set.level === form.level && set.category === 'READING' && set.isActive !== false,
+    );
 
     useEffect(() => {
         if (show) {
             if (editPassage) {
-                const linkedSetIds = [...new Set((editPassage.questions ?? []).map((question) => question.practiceSetId).filter(Boolean))];
+                const linkedSetIds = [
+                    ...new Set((editPassage.questions ?? []).map((question) => question.practiceSetId).filter(Boolean)),
+                ];
                 setForm({
                     level: editPassage.level ?? '',
                     title: editPassage.title ?? '',
                     passage: editPassage.passage ?? '',
                     passageTranslation: editPassage.passageTranslation ?? '',
                     imageUrl: editPassage.imageUrl ?? '',
-                    order: editPassage.order ?? 0,
+                    order: editPassage.order ?? 1,
+                    isActive: editPassage.isActive ?? true,
                     questionPracticeSetId: linkedSetIds.length === 1 ? linkedSetIds[0] : '',
                     // Not used in edit mode
                     questionContent: '',
@@ -259,9 +270,16 @@ const PassageFormModal = ({ editPassage, practiceSets, onClose, onSaved, show })
         const next = {};
         if (!form.level) next.level = 'Vui lòng chọn cấp độ JLPT.';
         if (!form.passage.trim()) next.passage = 'Vui lòng nhập nội dung bài đọc.';
+        if (!isValidOrder(form.order)) next.order = 'Thứ tự phải là số nguyên từ 1 trở lên.';
 
         // For create: validate the embedded question
         if (!isEdit) {
+            if (
+                form.questionPracticeSetId &&
+                !availableReadingSets.some((set) => set.id === form.questionPracticeSetId)
+            ) {
+                next.questionPracticeSetId = 'Bộ đề đã chọn không còn hoạt động hoặc không khớp cấp độ.';
+            }
             if (!normalizeJlptWhitespace(form.questionContent)) {
                 next.questionContent = 'Vui lòng nhập nội dung câu hỏi đầu tiên.';
             }
@@ -289,7 +307,8 @@ const PassageFormModal = ({ editPassage, practiceSets, onClose, onSaved, show })
                     passage: form.passage.trim(),
                     passageTranslation: form.passageTranslation.trim() || undefined,
                     imageUrl: form.imageUrl.trim() || form.imageUrl === '' ? form.imageUrl.trim() || null : undefined,
-                    order: parseInt(form.order, 10) || 0,
+                    order: Number(form.order),
+                    isActive: form.isActive,
                 };
                 // Only send imageUrl if it changed
                 const origImage = editPassage.imageUrl ?? '';
@@ -307,18 +326,19 @@ const PassageFormModal = ({ editPassage, practiceSets, onClose, onSaved, show })
                     passage: form.passage.trim(),
                     passageTranslation: form.passageTranslation.trim() || undefined,
                     imageUrl: form.imageUrl.trim() || undefined,
-                    order: parseInt(form.order, 10) || 0,
+                    order: Number(form.order),
+                    isActive: form.isActive,
                     questions: [
                         {
                             content: normalizeJlptWhitespace(form.questionContent),
                             explanation: normalizeJlptWhitespace(form.questionExplanation),
                             isActive: true,
-                            order: 0,
+                            order: 1,
                             ...(form.questionPracticeSetId ? { practiceSetId: form.questionPracticeSetId } : {}),
-                            options: form.questionOptions.map((o) => ({
+                            options: form.questionOptions.map((o, index) => ({
                                 content: o.content.trim(),
                                 isCorrect: o.isCorrect,
-                                order: o.order,
+                                order: index + 1,
                             })),
                         },
                     ],
@@ -349,7 +369,7 @@ const PassageFormModal = ({ editPassage, practiceSets, onClose, onSaved, show })
                 onClick={onClose}
             />
             <div
-                className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto transform transition-all duration-${MODAL_DURATION} ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}
+                className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-y-auto transform transition-all duration-${MODAL_DURATION} ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
@@ -437,7 +457,7 @@ const PassageFormModal = ({ editPassage, practiceSets, onClose, onSaved, show })
                     {/* Translation */}
                     <div>
                         <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                            Bản dịch tiếng Việt{' '}
+                            Bản dịch tiếng Việt của bài đọc{' '}
                             <span className="text-xs font-normal text-slate-400">(không bắt buộc)</span>
                         </label>
                         <textarea
@@ -454,8 +474,7 @@ const PassageFormModal = ({ editPassage, practiceSets, onClose, onSaved, show })
                     {/* Reading image */}
                     <div>
                         <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                            Ảnh minh họa{' '}
-                            <span className="text-xs font-normal text-slate-400">(không bắt buộc)</span>
+                            Ảnh minh họa <span className="text-xs font-normal text-slate-400">(không bắt buộc)</span>
                         </label>
                         <ReadingImageField
                             key={editPassage?.id ?? 'new-reading'}
@@ -464,25 +483,63 @@ const PassageFormModal = ({ editPassage, practiceSets, onClose, onSaved, show })
                             practiceSets={practiceSets}
                             imageUrl={form.imageUrl}
                             initialPreviewUrl={editPassage?.imageUrl}
-                            onPracticeSetChange={(value) => setForm((current) => ({ ...current, questionPracticeSetId: value }))}
+                            onPracticeSetChange={(value) =>
+                                setForm((current) => ({ ...current, questionPracticeSetId: value }))
+                            }
                             onImageUrlChange={(value) => setForm((current) => ({ ...current, imageUrl: value }))}
                         />
                     </div>
 
-                    {/* Order */}
-                    <div>
-                        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                            Thứ tự hiển thị
-                        </label>
-                        <input
-                            name="order"
-                            type="number"
-                            min={0}
-                            value={form.order}
-                            onChange={(e) => setForm((f) => ({ ...f, order: e.target.value }))}
-                            className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-400 transition duration-200"
-                            placeholder="0"
-                        />
+                    <div className="grid grid-cols-2 gap-4 items-start">
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                Thứ tự hiển thị
+                            </label>
+                            <input
+                                name="order"
+                                type="number"
+                                min={1}
+                                step={1}
+                                value={form.order}
+                                onChange={(e) => {
+                                    const { value } = e.target;
+                                    setForm((f) => ({ ...f, order: value }));
+                                    setErrors((previous) => ({
+                                        ...previous,
+                                        order: isValidOrder(value) ? '' : 'Thứ tự phải là số nguyên từ 1 trở lên.',
+                                    }));
+                                }}
+                                className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-400 transition duration-200"
+                                placeholder="1"
+                            />
+                            {errors.order && <p className="text-xs text-red-500 mt-1">{errors.order}</p>}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                Kích hoạt
+                            </label>
+                            <div className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200/60 dark:border-slate-700/60 h-[42px]">
+                                <span className="text-xs text-slate-500 dark:text-slate-400">
+                                    {form.isActive ? 'Đang hiển thị' : 'Đang ẩn'}
+                                </span>
+                                <button
+                                    type="button"
+                                    role="switch"
+                                    aria-checked={form.isActive}
+                                    aria-label="Trạng thái bài đọc"
+                                    onClick={() => setForm((current) => ({ ...current, isActive: !current.isActive }))}
+                                    className={`relative h-6 w-11 shrink-0 cursor-pointer overflow-hidden rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 ${
+                                        form.isActive ? 'bg-red-600' : 'bg-slate-300 dark:bg-slate-700'
+                                    }`}
+                                >
+                                    <span
+                                        className={`absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ease-out ${
+                                            form.isActive ? 'translate-x-5' : 'translate-x-0'
+                                        }`}
+                                    />
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Embedded question (CREATE only) */}
@@ -498,6 +555,34 @@ const PassageFormModal = ({ editPassage, practiceSets, onClose, onSaved, show })
                             </div>
 
                             <div className="space-y-3">
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                        Liên kết bộ đề Reading (không bắt buộc)
+                                    </label>
+                                    <DropdownSelect
+                                        value={form.questionPracticeSetId}
+                                        onChange={(value) => {
+                                            setForm((current) => ({ ...current, questionPracticeSetId: value }));
+                                            if (errors.questionPracticeSetId) {
+                                                setErrors((previous) => ({ ...previous, questionPracticeSetId: '' }));
+                                            }
+                                        }}
+                                        options={availableReadingSets.map((set) => ({
+                                            label: `#${set.setNumber} ${set.title || 'Đề Reading'}`,
+                                            value: set.id,
+                                        }))}
+                                        placeholder="Không gắn bộ đề — hiển thị độc lập"
+                                        buttonClassName={
+                                            errors.questionPracticeSetId ? 'border-red-400 ring-1 ring-red-400' : ''
+                                        }
+                                    />
+                                    <p className="mt-1 text-xs text-slate-400">
+                                        Có thể bỏ trống để bài đọc hiển thị như một đề riêng.
+                                    </p>
+                                    {errors.questionPracticeSetId && (
+                                        <p className="text-xs text-red-500 mt-1">{errors.questionPracticeSetId}</p>
+                                    )}
+                                </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                                         Nội dung câu hỏi <span className="text-red-500">*</span>
@@ -516,54 +601,6 @@ const PassageFormModal = ({ editPassage, practiceSets, onClose, onSaved, show })
                                     {errors.questionContent && (
                                         <p className="text-xs text-red-500 mt-1">{errors.questionContent}</p>
                                     )}
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                                        Giải thích{' '}
-                                        <span className="text-xs font-normal text-slate-400">(không bắt buộc)</span>
-                                    </label>
-                                    <JlptRichTextEditor
-                                        value={form.questionExplanation}
-                                        onChange={(html) =>
-                                            setForm((f) => ({ ...f, questionExplanation: html }))
-                                        }
-                                        placeholder="Giải thích đáp án"
-                                        minHeight="90px"
-                                        maxLength={1000}
-                                    />
-                                </div>
-
-                                {/* Practice Set for embedded question */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                                        Bộ đề Reading{' '}
-                                        <span className="text-xs font-normal text-slate-400">(không bắt buộc)</span>
-                                    </label>
-                                    {!form.level ? (
-                                        <p className="text-xs text-slate-400 py-2">Chọn cấp độ trước.</p>
-                                    ) : (practiceSets ?? []).filter(
-                                          (s) => s.level === form.level && s.category === 'READING',
-                                      ).length === 0 ? (
-                                        <p className="text-xs text-slate-400 py-2">
-                                            Chưa có bộ đề Reading cho {form.level}.
-                                        </p>
-                                    ) : (
-                                        <DropdownSelect
-                                            value={form.questionPracticeSetId}
-                                            onChange={(v) => setForm((f) => ({ ...f, questionPracticeSetId: v }))}
-                                            options={[
-                                                { label: '— Không thuộc bộ đề —', value: '' },
-                                                ...(practiceSets ?? [])
-                                                    .filter((s) => s.level === form.level && s.category === 'READING')
-                                                    .map((s) => ({ label: `#${s.setNumber} ${s.title}`, value: s.id })),
-                                            ]}
-                                            placeholder="Chọn bộ đề Reading"
-                                        />
-                                    )}
-                                    <p className="text-xs text-slate-400 mt-1">
-                                        Gán câu hỏi này vào bộ đề Reading cùng cấp độ.
-                                    </p>
                                 </div>
 
                                 <div>
@@ -587,6 +624,20 @@ const PassageFormModal = ({ editPassage, practiceSets, onClose, onSaved, show })
                                             <AlertTriangle size={12} /> {errors.qCorrect}
                                         </p>
                                     )}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                        Giải thích{' '}
+                                        <span className="text-xs font-normal text-slate-400">(không bắt buộc)</span>
+                                    </label>
+                                    <JlptRichTextEditor
+                                        value={form.questionExplanation}
+                                        onChange={(html) => setForm((f) => ({ ...f, questionExplanation: html }))}
+                                        placeholder="Giải thích đáp án"
+                                        minHeight="90px"
+                                        maxLength={1000}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -689,7 +740,7 @@ const EMPTY_RQ = {
     practiceSetId: '',
     readingPassageId: '',
     isActive: true,
-    order: 0,
+    order: 1,
     options: [
         { content: '', isCorrect: false, order: 1 },
         { content: '', isCorrect: false, order: 2 },
@@ -721,11 +772,11 @@ const ReadingQuestionFormModal = ({ editQuestion, practiceSets, passages, onClos
                     practiceSetId: editQuestion.practiceSetId ?? '',
                     readingPassageId: editQuestion.readingPassageId ?? '',
                     isActive: editQuestion.isActive ?? true,
-                    order: editQuestion.order ?? 0,
+                    order: editQuestion.order ?? 1,
                     options: opts.map((o, i) => ({
                         content: o.content ?? '',
                         isCorrect: o.isCorrect ?? false,
-                        order: o.order ?? i + 1,
+                        order: i + 1,
                     })),
                 });
             } else {
@@ -756,6 +807,7 @@ const ReadingQuestionFormModal = ({ editQuestion, practiceSets, passages, onClos
         if (!normalizeJlptWhitespace(form.content)) {
             next.content = 'Vui lòng nhập nội dung câu hỏi.';
         }
+        if (!isValidOrder(form.order)) next.order = 'Thứ tự phải là số nguyên từ 1 trở lên.';
         form.options.forEach((o, i) => {
             if (!o.content.trim()) next[`option${i}`] = `Vui lòng nhập nội dung lựa chọn ${OPTION_LABELS[i]}.`;
         });
@@ -785,11 +837,11 @@ const ReadingQuestionFormModal = ({ editQuestion, practiceSets, passages, onClos
                 content: normalizeJlptWhitespace(form.content),
                 explanation: normalizeJlptWhitespace(form.explanation),
                 isActive: form.isActive,
-                order: parseInt(form.order, 10) || 0,
-                options: form.options.map((o) => ({
+                order: Number(form.order),
+                options: form.options.map((o, index) => ({
                     content: o.content.trim(),
                     isCorrect: o.isCorrect,
-                    order: o.order,
+                    order: index + 1,
                 })),
                 ...(form.practiceSetId ? { practiceSetId: form.practiceSetId } : {}),
                 ...(form.readingPassageId ? { readingPassageId: form.readingPassageId } : {}),
@@ -1009,12 +1061,21 @@ const ReadingQuestionFormModal = ({ editQuestion, practiceSets, passages, onClos
                             </label>
                             <input
                                 type="number"
-                                min={0}
+                                min={1}
+                                step={1}
                                 value={form.order}
-                                onChange={(e) => setForm((f) => ({ ...f, order: e.target.value }))}
-                                className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-400 transition duration-200"
-                                placeholder="0"
+                                onChange={(e) => {
+                                    const { value } = e.target;
+                                    setForm((f) => ({ ...f, order: value }));
+                                    setErrors((previous) => ({
+                                        ...previous,
+                                        order: isValidOrder(value) ? '' : 'Thứ tự phải là số nguyên từ 1 trở lên.',
+                                    }));
+                                }}
+                                className={inputCls('order')}
+                                placeholder="1"
                             />
+                            {errors.order && <p className="text-xs text-red-500 mt-1">{errors.order}</p>}
                         </div>
                         <div className="flex items-end pb-1">
                             <div className="flex items-center justify-between w-full p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
@@ -1075,8 +1136,12 @@ const BulkDeletePassageModal = ({ count, onConfirm, onCancel, loading, show }) =
     useBodyScrollLock(show);
     return (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-5">
-            <div className={`absolute inset-0 bg-black/70 transition-opacity duration-${MODAL_DURATION} ${show ? 'opacity-100' : 'opacity-0'}`} />
-            <div className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg p-6 transform transition-all duration-${MODAL_DURATION} ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}>
+            <div
+                className={`absolute inset-0 bg-black/70 transition-opacity duration-${MODAL_DURATION} ${show ? 'opacity-100' : 'opacity-0'}`}
+            />
+            <div
+                className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg p-6 transform transition-all duration-${MODAL_DURATION} ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}
+            >
                 <div className="flex flex-col items-center text-center gap-4">
                     <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                         <Trash2 size={32} className="text-red-600" />
@@ -1086,21 +1151,40 @@ const BulkDeletePassageModal = ({ count, onConfirm, onCancel, loading, show }) =
                             Xóa {count} bài đọc đã chọn?
                         </h3>
                         <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-                            Bạn đang chuẩn bị xóa vĩnh viễn <strong className="text-red-600">{count}</strong> bài đọc khỏi hệ thống.
+                            Bạn đang chuẩn bị xóa vĩnh viễn <strong className="text-red-600">{count}</strong> bài đọc
+                            khỏi hệ thống.
                         </p>
                         <div className="mt-3 p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900/30 text-left">
                             <p className="text-xs text-red-700 dark:text-red-300 font-semibold mb-1">
                                 Quy tắc an toàn:
                             </p>
                             <p className="text-xs text-red-600 dark:text-red-400 leading-normal">
-                                Hệ thống chỉ xóa những bài đọc không có câu hỏi đang hoạt động. Các bài đọc còn câu hỏi active sẽ được giữ nguyên và báo cáo lại chi tiết.
+                                Hệ thống chỉ xóa những bài đọc không có câu hỏi đang hoạt động. Các bài đọc còn câu hỏi
+                                active sẽ được giữ nguyên và báo cáo lại chi tiết.
                             </p>
                         </div>
                     </div>
                     <div className="flex gap-3 w-full">
-                        <button onClick={onCancel} disabled={loading} className="flex-1 px-4 py-2.5 cursor-pointer border border-slate-200 dark:border-slate-700 rounded-xl font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Huỷ</button>
-                        <button onClick={onConfirm} disabled={loading} className="flex-1 px-4 py-2.5 cursor-pointer bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors disabled:opacity-60">
-                            {loading ? <span className="flex items-center justify-center gap-2"><Loader2 size={14} className="animate-spin" />Đang xử lý...</span> : `Xác nhận xóa (${count})`}
+                        <button
+                            onClick={onCancel}
+                            disabled={loading}
+                            className="flex-1 px-4 py-2.5 cursor-pointer border border-slate-200 dark:border-slate-700 rounded-xl font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                            Huỷ
+                        </button>
+                        <button
+                            onClick={onConfirm}
+                            disabled={loading}
+                            className="flex-1 px-4 py-2.5 cursor-pointer bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors disabled:opacity-60"
+                        >
+                            {loading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <Loader2 size={14} className="animate-spin" />
+                                    Đang xử lý...
+                                </span>
+                            ) : (
+                                `Xác nhận xóa (${count})`
+                            )}
                         </button>
                     </div>
                 </div>
@@ -1117,21 +1201,48 @@ const DeleteQuestionModal = ({ question, onConfirm, onCancel, loading, show }) =
     useBodyScrollLock(show);
     return (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-5">
-            <div className={`absolute inset-0 bg-black/70 transition-opacity duration-${MODAL_DURATION} ${show ? 'opacity-100' : 'opacity-0'}`} />
-            <div className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg p-6 transform transition-all duration-${MODAL_DURATION} ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}>
+            <div
+                className={`absolute inset-0 bg-black/70 transition-opacity duration-${MODAL_DURATION} ${show ? 'opacity-100' : 'opacity-0'}`}
+            />
+            <div
+                className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg p-6 transform transition-all duration-${MODAL_DURATION} ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}
+            >
                 <div className="flex flex-col items-center text-center gap-4">
                     <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                         <Trash2 size={32} className="text-red-600" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-1">Xóa vĩnh viễn câu hỏi?</h3>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed line-clamp-3">"{question?.content}"</p>
-                        <p className="text-xs text-red-600 dark:text-red-400 mt-2">Hành động này sẽ xóa câu hỏi cùng toàn bộ đáp án liên quan và không thể hoàn tác.</p>
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-1">
+                            Xóa vĩnh viễn câu hỏi?
+                        </h3>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed line-clamp-3">
+                            "{question?.content}"
+                        </p>
+                        <p className="text-xs text-red-600 dark:text-red-400 mt-2">
+                            Hành động này sẽ xóa câu hỏi cùng toàn bộ đáp án liên quan và không thể hoàn tác.
+                        </p>
                     </div>
                     <div className="flex gap-3 w-full">
-                        <button onClick={onCancel} disabled={loading} className="flex-1 px-4 py-2.5 cursor-pointer border border-slate-200 dark:border-slate-700 rounded-xl font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Huỷ</button>
-                        <button onClick={onConfirm} disabled={loading} className="flex-1 px-4 py-2.5 cursor-pointer bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors disabled:opacity-60">
-                            {loading ? <span className="flex items-center justify-center gap-2"><Loader2 size={14} className="animate-spin" />Đang xóa...</span> : 'Xóa vĩnh viễn'}
+                        <button
+                            onClick={onCancel}
+                            disabled={loading}
+                            className="flex-1 px-4 py-2.5 cursor-pointer border border-slate-200 dark:border-slate-700 rounded-xl font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                            Huỷ
+                        </button>
+                        <button
+                            onClick={onConfirm}
+                            disabled={loading}
+                            className="flex-1 px-4 py-2.5 cursor-pointer bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors disabled:opacity-60"
+                        >
+                            {loading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <Loader2 size={14} className="animate-spin" />
+                                    Đang xóa...
+                                </span>
+                            ) : (
+                                'Xóa vĩnh viễn'
+                            )}
                         </button>
                     </div>
                 </div>
@@ -1148,20 +1259,46 @@ const BulkDeleteQuestionModal = ({ count, onConfirm, onCancel, loading, show }) 
     useBodyScrollLock(show);
     return (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-5">
-            <div className={`absolute inset-0 bg-black/70 transition-opacity duration-${MODAL_DURATION} ${show ? 'opacity-100' : 'opacity-0'}`} />
-            <div className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg p-6 transform transition-all duration-${MODAL_DURATION} ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}>
+            <div
+                className={`absolute inset-0 bg-black/70 transition-opacity duration-${MODAL_DURATION} ${show ? 'opacity-100' : 'opacity-0'}`}
+            />
+            <div
+                className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg p-6 transform transition-all duration-${MODAL_DURATION} ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}
+            >
                 <div className="flex flex-col items-center text-center gap-4">
                     <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                         <Trash2 size={32} className="text-red-600" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-1">Xóa {count} câu hỏi đã chọn?</h3>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">Bạn đang chuẩn bị xóa vĩnh viễn <strong className="text-red-600">{count}</strong> câu hỏi cùng toàn bộ đáp án liên quan.</p>
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-1">
+                            Xóa {count} câu hỏi đã chọn?
+                        </h3>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                            Bạn đang chuẩn bị xóa vĩnh viễn <strong className="text-red-600">{count}</strong> câu hỏi
+                            cùng toàn bộ đáp án liên quan.
+                        </p>
                     </div>
                     <div className="flex gap-3 w-full">
-                        <button onClick={onCancel} disabled={loading} className="flex-1 px-4 py-2.5 cursor-pointer border border-slate-200 dark:border-slate-700 rounded-xl font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Huỷ</button>
-                        <button onClick={onConfirm} disabled={loading} className="flex-1 px-4 py-2.5 cursor-pointer bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors disabled:opacity-60">
-                            {loading ? <span className="flex items-center justify-center gap-2"><Loader2 size={14} className="animate-spin" />Đang xử lý...</span> : `Xác nhận xóa (${count})`}
+                        <button
+                            onClick={onCancel}
+                            disabled={loading}
+                            className="flex-1 px-4 py-2.5 cursor-pointer border border-slate-200 dark:border-slate-700 rounded-xl font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                            Huỷ
+                        </button>
+                        <button
+                            onClick={onConfirm}
+                            disabled={loading}
+                            className="flex-1 px-4 py-2.5 cursor-pointer bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors disabled:opacity-60"
+                        >
+                            {loading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <Loader2 size={14} className="animate-spin" />
+                                    Đang xử lý...
+                                </span>
+                            ) : (
+                                `Xác nhận xóa (${count})`
+                            )}
                         </button>
                     </div>
                 </div>
@@ -1312,7 +1449,10 @@ const AdminJlptReading = ({ passageId }) => {
         }
     }, [passageLevelFilter, passageId]);
 
-    useEffect(() => { setSelectedPassageIds([]); fetchPassages(); }, [fetchPassages]);
+    useEffect(() => {
+        setSelectedPassageIds([]);
+        fetchPassages();
+    }, [fetchPassages]);
 
     // ── Fetch practice sets ────────────────────────────────────────────────────
     useEffect(() => {
@@ -1467,7 +1607,7 @@ const AdminJlptReading = ({ passageId }) => {
 
     // ── Bulk delete passages handlers ──────────────────────────────────────────
     const handleToggleSelectPassage = (id) => {
-        setSelectedPassageIds((prev) => prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]);
+        setSelectedPassageIds((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
     };
     const handleSelectAllPassages = () => {
         if (selectedPassageIds.length === passages.length && passages.length > 0) {
@@ -1483,7 +1623,9 @@ const AdminJlptReading = ({ passageId }) => {
     };
     const closeBulkDeletePassages = () => {
         setBulkPassageDeleteVisible(false);
-        setTimeout(() => { setBulkPassageDeleteOpen(false); }, MODAL_DURATION);
+        setTimeout(() => {
+            setBulkPassageDeleteOpen(false);
+        }, MODAL_DURATION);
     };
     const handleBulkDeletePassagesConfirm = async () => {
         if (selectedPassageIds.length === 0) return;
@@ -1508,8 +1650,18 @@ const AdminJlptReading = ({ passageId }) => {
     };
 
     // ── Single Question delete handlers ───────────────────────────────────────
-    const openDeleteQuestion = (q) => { setDeleteQTarget(q); setDeleteQOpen(true); setTimeout(() => setDeleteQVisible(true), 10); };
-    const closeDeleteQuestion = () => { setDeleteQVisible(false); setTimeout(() => { setDeleteQOpen(false); setDeleteQTarget(null); }, MODAL_DURATION); };
+    const openDeleteQuestion = (q) => {
+        setDeleteQTarget(q);
+        setDeleteQOpen(true);
+        setTimeout(() => setDeleteQVisible(true), 10);
+    };
+    const closeDeleteQuestion = () => {
+        setDeleteQVisible(false);
+        setTimeout(() => {
+            setDeleteQOpen(false);
+            setDeleteQTarget(null);
+        }, MODAL_DURATION);
+    };
     const handleDeleteQuestionConfirm = async () => {
         if (!deleteQTarget) return;
         setDeletingQ(true);
@@ -1528,7 +1680,7 @@ const AdminJlptReading = ({ passageId }) => {
 
     // ── Bulk delete questions handlers ────────────────────────────────────────
     const handleToggleSelectQ = (id) => {
-        setSelectedQIds((prev) => prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]);
+        setSelectedQIds((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
     };
     const handleSelectAllQ = () => {
         if (selectedQIds.length === questions.length && questions.length > 0) {
@@ -1542,7 +1694,12 @@ const AdminJlptReading = ({ passageId }) => {
         setBulkQDeleteOpen(true);
         setTimeout(() => setBulkQDeleteVisible(true), 10);
     };
-    const closeBulkDeleteQ = () => { setBulkQDeleteVisible(false); setTimeout(() => { setBulkQDeleteOpen(false); }, MODAL_DURATION); };
+    const closeBulkDeleteQ = () => {
+        setBulkQDeleteVisible(false);
+        setTimeout(() => {
+            setBulkQDeleteOpen(false);
+        }, MODAL_DURATION);
+    };
     const handleBulkDeleteQConfirm = async () => {
         if (selectedQIds.length === 0) return;
         setBulkQDeleting(true);
@@ -1683,7 +1840,11 @@ const AdminJlptReading = ({ passageId }) => {
                                     <div className="flex items-center gap-2 text-sm font-semibold text-red-800 dark:text-red-300">
                                         <CheckSquare size={16} className="text-red-600 shrink-0" />
                                         <span>
-                                            Đã chọn <strong className="font-bold text-red-700 dark:text-red-200">{selectedPassageIds.length}</strong> / {passages.length} bài đọc
+                                            Đã chọn{' '}
+                                            <strong className="font-bold text-red-700 dark:text-red-200">
+                                                {selectedPassageIds.length}
+                                            </strong>{' '}
+                                            / {passages.length} bài đọc
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -1709,7 +1870,9 @@ const AdminJlptReading = ({ passageId }) => {
                                     <label className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 cursor-pointer">
                                         <input
                                             type="checkbox"
-                                            checked={selectedPassageIds.length === passages.length && passages.length > 0}
+                                            checked={
+                                                selectedPassageIds.length === passages.length && passages.length > 0
+                                            }
                                             onChange={handleSelectAllPassages}
                                             className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer"
                                         />
@@ -1752,65 +1915,66 @@ const AdminJlptReading = ({ passageId }) => {
                                                     <div className="min-w-0 flex-1">
                                                         <p className="font-semibold text-slate-800 dark:text-white text-sm">
                                                             {p.title || '(Không tiêu đề)'}
-                                                    </p>
-                                                    {p.imageUrl && (
-                                                        <ReadingImage
-                                                            src={p.imageUrl}
-                                                            alt={`Ảnh minh họa ${p.title || 'bài đọc'}`}
-                                                            className="mt-2 max-h-24 rounded-lg"
-                                                        />
-                                                    )}
-                                                    <JlptContentRenderer
-                                                        content={p.passage}
-                                                        className="mt-1 line-clamp-2 text-xs font-mono leading-5 text-slate-500 dark:text-slate-400"
-                                                    />
-                                                    {p.passageTranslation && (
-                                                        <p className="text-xs text-slate-400 mt-1 line-clamp-2 italic">
-                                                            {p.passageTranslation}
                                                         </p>
-                                                    )}
-                                                    <div className="flex items-center gap-3 mt-2">
-                                                        <span className="text-xs text-slate-400">
-                                                            {activeQuestions} câu hỏi active
-                                                        </span>
+                                                        <StatusBadge isActive={p.isActive} />
                                                         {p.imageUrl && (
-                                                            <span className="text-xs text-red-600 flex items-center gap-1">
-                                                                <ImageIcon size={11} /> có ảnh
-                                                            </span>
+                                                            <ReadingImage
+                                                                src={p.imageUrl}
+                                                                alt={`Ảnh minh họa ${p.title || 'bài đọc'}`}
+                                                                className="mt-2 max-h-24 rounded-lg"
+                                                            />
                                                         )}
-                                                        <span className="text-xs text-slate-400">
-                                                            Thứ tự: {p.order}
-                                                        </span>
+                                                        <JlptContentRenderer
+                                                            content={p.passage}
+                                                            className="mt-1 line-clamp-2 text-xs font-mono leading-5 text-slate-500 dark:text-slate-400"
+                                                        />
+                                                        {p.passageTranslation && (
+                                                            <p className="text-xs text-slate-400 mt-1 line-clamp-2 italic">
+                                                                {p.passageTranslation}
+                                                            </p>
+                                                        )}
+                                                        <div className="flex items-center gap-3 mt-2">
+                                                            <span className="text-xs text-slate-400">
+                                                                {activeQuestions} câu hỏi active
+                                                            </span>
+                                                            {p.imageUrl && (
+                                                                <span className="text-xs text-red-600 flex items-center gap-1">
+                                                                    <ImageIcon size={11} /> có ảnh
+                                                                </span>
+                                                            )}
+                                                            <span className="text-xs text-slate-400">
+                                                                Thứ tự: {p.order}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            {/* Actions */}
-                                            <div className="flex items-center gap-1.5 shrink-0">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        openPassageForm(p);
-                                                    }}
-                                                    className="p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors cursor-pointer"
-                                                    title="Chỉnh sửa"
-                                                >
-                                                    <Pencil size={15} />
-                                                </button>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        openDelete(p);
-                                                    }}
-                                                    className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors cursor-pointer"
-                                                    title="Xóa"
-                                                >
-                                                    <Trash2 size={15} />
-                                                </button>
+                                                {/* Actions */}
+                                                <div className="flex items-center gap-1.5 shrink-0">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            openPassageForm(p);
+                                                        }}
+                                                        className="p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors cursor-pointer"
+                                                        title="Chỉnh sửa"
+                                                    >
+                                                        <Pencil size={15} />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            openDelete(p);
+                                                        }}
+                                                        className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors cursor-pointer"
+                                                        title="Xóa"
+                                                    >
+                                                        <Trash2 size={15} />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
                             </div>
                         </div>
                     )}
@@ -1898,47 +2062,53 @@ const AdminJlptReading = ({ passageId }) => {
 
                     {/* Questions table */}
                     {/* Bulk Action Bar Questions */}
-            {selectedQIds.length > 0 && (
-                <div className="mb-3 p-3 px-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 rounded-xl flex items-center justify-between gap-3 animate-in fade-in duration-150">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-red-800 dark:text-red-300">
-                        <CheckSquare size={16} className="text-red-600 shrink-0" />
-                        <span>
-                            Đã chọn <strong className="font-bold text-red-700 dark:text-red-200">{selectedQIds.length}</strong> / {questions.length} câu hỏi Reading trên trang này
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => setSelectedQIds([])}
-                            className="px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-                        >
-                            Bỏ chọn
-                        </button>
-                        <button
-                            onClick={openBulkDeleteQ}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs hover:shadow-md cursor-pointer active:scale-95"
-                        >
-                            <Trash2 size={13} />
-                            <span>Xóa {selectedQIds.length} câu hỏi</span>
-                        </button>
-                    </div>
-                </div>
-            )}
+                    {selectedQIds.length > 0 && (
+                        <div className="mb-3 p-3 px-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 rounded-xl flex items-center justify-between gap-3 animate-in fade-in duration-150">
+                            <div className="flex items-center gap-2 text-sm font-semibold text-red-800 dark:text-red-300">
+                                <CheckSquare size={16} className="text-red-600 shrink-0" />
+                                <span>
+                                    Đã chọn{' '}
+                                    <strong className="font-bold text-red-700 dark:text-red-200">
+                                        {selectedQIds.length}
+                                    </strong>{' '}
+                                    / {questions.length} câu hỏi Reading trên trang này
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setSelectedQIds([])}
+                                    className="px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                                >
+                                    Bỏ chọn
+                                </button>
+                                <button
+                                    onClick={openBulkDeleteQ}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs hover:shadow-md cursor-pointer active:scale-95"
+                                >
+                                    <Trash2 size={13} />
+                                    <span>Xóa {selectedQIds.length} câu hỏi</span>
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse text-sm">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse text-sm">
                                 <thead>
                                     <tr className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
-                                <th className="px-4 py-3.5 w-10">
-                                    <input
-                                        type="checkbox"
-                                        checked={questions.length > 0 && selectedQIds.length === questions.length}
-                                        onChange={handleSelectAllQ}
-                                        className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer"
-                                        aria-label="Chọn tất cả câu hỏi trên trang này"
-                                    />
-                                </th>
-                                {['Câu hỏi', 'Cấp độ', 'Bài đọc', 'Bộ đề', 'Đáp án', 'Trạng thái'].map((h) => (
+                                        <th className="px-4 py-3.5 w-10">
+                                            <input
+                                                type="checkbox"
+                                                checked={
+                                                    questions.length > 0 && selectedQIds.length === questions.length
+                                                }
+                                                onChange={handleSelectAllQ}
+                                                className="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer"
+                                                aria-label="Chọn tất cả câu hỏi trên trang này"
+                                            />
+                                        </th>
+                                        {['Câu hỏi', 'Cấp độ', 'Bài đọc', 'Bộ đề', 'Đáp án', 'Trạng thái'].map((h) => (
                                             <th
                                                 key={h}
                                                 className="px-4 py-3.5 text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap"
@@ -2014,7 +2184,9 @@ const AdminJlptReading = ({ passageId }) => {
                                                 <tr
                                                     key={q.id}
                                                     className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors ${
-                                                        selectedQIds.includes(q.id) ? 'bg-red-50/40 dark:bg-red-950/20' : ''
+                                                        selectedQIds.includes(q.id)
+                                                            ? 'bg-red-50/40 dark:bg-red-950/20'
+                                                            : ''
                                                     }`}
                                                 >
                                                     <td className="px-4 py-3.5 w-10">
@@ -2031,7 +2203,10 @@ const AdminJlptReading = ({ passageId }) => {
                                                             <JlptContentRenderer content={q.content} />
                                                         </div>
                                                         {q.explanation && (
-                                                            <JlptContentRenderer content={q.explanation} className="text-xs text-slate-400 truncate mt-0.5" />
+                                                            <JlptContentRenderer
+                                                                content={q.explanation}
+                                                                className="text-xs text-slate-400 truncate mt-0.5"
+                                                            />
                                                         )}
                                                     </td>
                                                     <td className="px-4 py-3.5">
@@ -2085,27 +2260,27 @@ const AdminJlptReading = ({ passageId }) => {
                                                                 <Pencil size={15} />
                                                             </button>
                                                             {q.isActive && (
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                openDisable(q);
-                                                            }}
-                                                            className="p-1.5 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors cursor-pointer"
-                                                            title="Vô hiệu hóa"
-                                                        >
-                                                            <ToggleRight size={15} />
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            openDeleteQuestion(q);
-                                                        }}
-                                                        className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors cursor-pointer"
-                                                        title="Xóa vĩnh viễn"
-                                                    >
-                                                        <Trash2 size={15} />
-                                                    </button>
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        openDisable(q);
+                                                                    }}
+                                                                    className="p-1.5 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors cursor-pointer"
+                                                                    title="Vô hiệu hóa"
+                                                                >
+                                                                    <ToggleRight size={15} />
+                                                                </button>
+                                                            )}
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    openDeleteQuestion(q);
+                                                                }}
+                                                                className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors cursor-pointer"
+                                                                title="Xóa vĩnh viễn"
+                                                            >
+                                                                <Trash2 size={15} />
+                                                            </button>
                                                         </div>
                                                     </td>
                                                 </tr>

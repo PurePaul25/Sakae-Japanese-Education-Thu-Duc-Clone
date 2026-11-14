@@ -2,6 +2,19 @@ import api from './api';
 
 const normalizeResponse = (response) => response?.data?.data ?? response?.data;
 
+const createAuthError = (error, fallbackMessage) => {
+    const data = error.response?.data;
+    const responseMessage = data?.message;
+    const message = Array.isArray(responseMessage)
+        ? responseMessage.join(', ')
+        : responseMessage || error.message || fallbackMessage;
+    const authError = new Error(message);
+    authError.code = data?.code;
+    authError.retryAfterSeconds = data?.retryAfterSeconds;
+    authError.status = error.response?.status;
+    return authError;
+};
+
 const normalizeLoginError = (error, fallbackMessage) => {
     const responseMessage = error.response?.data?.message;
     if (
@@ -40,7 +53,7 @@ export const signupAPI = async (username, email, password, fullName, gender = 'O
         });
         return normalizeResponse(response);
     } catch (error) {
-        throw new Error(error.response?.data?.message || 'Đăng ký thất bại, vui lòng thử lại');
+        throw createAuthError(error, 'Đăng ký thất bại, vui lòng thử lại');
     }
 };
 
@@ -50,7 +63,7 @@ export const forgotPasswordAPI = async (email) => {
         const response = await api.post('/auth/forgot-password', { email });
         return normalizeResponse(response);
     } catch (error) {
-        throw new Error(error.response?.data?.message || 'Email không tồn tại trong hệ thống');
+        throw createAuthError(error, 'Email không tồn tại trong hệ thống');
     }
 };
 
@@ -60,7 +73,7 @@ export const verifyEmailAPI = async (email, code) => {
         const response = await api.post('/auth/verify-email', { email, code });
         return normalizeResponse(response);
     } catch (error) {
-        throw new Error(error.response?.data?.message || 'Xác thực thất bại');
+        throw createAuthError(error, 'Xác thực thất bại');
     }
 };
 
@@ -90,7 +103,7 @@ export const resetPasswordAPI = async (email, token, password) => {
         const response = await api.post('/auth/reset-password', { email, token, password });
         return normalizeResponse(response);
     } catch (error) {
-        throw new Error(error.response?.data?.message || 'Mã xác thực không chính xác hoặc đã hết hạn');
+        throw createAuthError(error, 'Mã xác thực không chính xác hoặc đã hết hạn');
     }
 };
 

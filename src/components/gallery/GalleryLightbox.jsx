@@ -855,7 +855,7 @@ const GalleryLightbox = ({
                                 placeholder="Viết bình luận công khai..."
                                 disabled={isSubmitting}
                                 rows={1}
-                                className={`flex-1 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 text-[15px] resize-none min-h-[38px] max-h-[106px] overflow-y-auto leading-relaxed ${isSubmitting ? 'cursor-not-allowed opacity-60' : ''}`}
+                                className={`flex-1 px-2.5 py-1.5 bg-slate-50 border-1 transition duration-200 border-slate-200 rounded-xl focus:outline-none focus:border-red-500 text-[15px] resize-none min-h-[38px] max-h-[106px] overflow-y-auto leading-relaxed ${isSubmitting ? 'cursor-not-allowed opacity-60' : ''}`}
                             />
                             <button
                                 type="submit"

@@ -116,7 +116,7 @@ export const UserProvider = ({ children }) => {
             window.dispatchEvent(
                 new CustomEvent('sakae-auth-expired', {
                     detail: {
-                        message: 'Bạn đã tự động đăng xuất vì không hoạt động trong 45 phút.',
+                        message: 'Hệ thống đã tự động đăng xuất vì bạn đã không hoạt động trong thời gian dài!',
                     },
                 }),
             );
@@ -131,10 +131,7 @@ export const UserProvider = ({ children }) => {
         };
 
         const sendActivityHeartbeat = async (now) => {
-            if (
-                heartbeatInFlight ||
-                now - lastServerActivityAt < ACTIVITY_HEARTBEAT_INTERVAL_MS
-            ) {
+            if (heartbeatInFlight || now - lastServerActivityAt < ACTIVITY_HEARTBEAT_INTERVAL_MS) {
                 return;
             }
 
@@ -183,9 +180,7 @@ export const UserProvider = ({ children }) => {
         return () => {
             window.clearInterval(idleCheckTimer);
             window.clearTimeout(initialCheckTimer);
-            activityEvents.forEach((eventName) =>
-                window.removeEventListener(eventName, recordUserActivity),
-            );
+            activityEvents.forEach((eventName) => window.removeEventListener(eventName, recordUserActivity));
             window.removeEventListener('storage', handleStorageChange);
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };

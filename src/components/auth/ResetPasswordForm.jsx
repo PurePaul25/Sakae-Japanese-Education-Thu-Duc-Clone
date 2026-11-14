@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { FaLock, FaEye, FaEyeSlash, FaArrowLeft, FaShieldAlt, FaEnvelope, FaCheck, FaTimes } from 'react-icons/fa';
 import { calculatePasswordStrength, checkPasswordRequirements, isPasswordValid } from '../../utils/authUtils';
@@ -20,6 +21,7 @@ const ResetPasswordForm = ({ onSwitchMode, direction }) => {
     const [timeLeft, setTimeLeft] = useState(90); // 90 seconds (1m30s)
     const [canResend, setCanResend] = useState(false);
     const [isResending, setIsResending] = useState(false);
+    const [otpLockSeconds, setOtpLockSeconds] = useState(0);
 
     // Countdown Timer Effect
     useEffect(() => {
@@ -41,6 +43,12 @@ const ResetPasswordForm = ({ onSwitchMode, direction }) => {
         return () => clearInterval(timer);
     }, [timeLeft]);
 
+    useEffect(() => {
+        if (otpLockSeconds <= 0) return undefined;
+        const timer = setTimeout(() => setOtpLockSeconds((seconds) => Math.max(0, seconds - 1)), 1000);
+        return () => clearTimeout(timer);
+    }, [otpLockSeconds]);
+
     const formatTime = (seconds) => {
         const m = Math.floor(seconds / 60);
         const s = seconds % 60;
@@ -57,8 +65,13 @@ const ResetPasswordForm = ({ onSwitchMode, direction }) => {
             await forgotPasswordAPI(email);
             setTimeLeft(90);
             setCanResend(false);
+            setOtpLockSeconds(0);
+            setToken('');
             addToast('Mã xác nhận mới đã được gửi tới email của bạn!', 'success');
         } catch (error) {
+            if (error.retryAfterSeconds > 0) {
+                setOtpLockSeconds(error.retryAfterSeconds);
+            }
             addToast(error.message, 'error');
         } finally {
             setIsResending(false);
@@ -123,6 +136,9 @@ const ResetPasswordForm = ({ onSwitchMode, direction }) => {
                 }
             }, 3000);
         } catch (error) {
+            if (error.retryAfterSeconds > 0) {
+                setOtpLockSeconds(error.retryAfterSeconds);
+            }
             addToast(error.message, 'error');
         } finally {
             setIsLoading(false);
@@ -226,25 +242,35 @@ const ResetPasswordForm = ({ onSwitchMode, direction }) => {
                             <input
                                 type="text"
                                 value={token}
-                                onChange={(e) => setToken(e.target.value)}
+                                onChange={(e) => setToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
                                 placeholder="Mã 6 chữ số"
-                                className="w-full pl-10 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:border-red-500 transition-all font-mono text-center tracking-[0.2em] font-bold text-lg"
+                                disabled={otpLockSeconds > 0}
+                                className="w-full pl-10 pr-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:border-red-500 transition-all font-mono text-center font-bold text-lg disabled:cursor-not-allowed disabled:opacity-60"
                                 maxLength={6}
                             />
                         </div>
                         <button
                             type="button"
-                            disabled={!canResend || isResending}
+                            disabled={!canResend || isResending || otpLockSeconds > 0}
                             onClick={handleResendToken}
                             className={`px-4 py-3.5 cursor-pointer rounded-xl text-xs font-bold transition-all border ${
-                                canResend
+                                canResend && otpLockSeconds === 0
                                     ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
                                     : 'bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed'
                             }`}
                         >
-                            {isResending ? 'Đang gửi...' : 'Gửi lại mã'}
+                            {otpLockSeconds > 0
+                                ? `Thử lại sau ${formatTime(otpLockSeconds)}`
+                                : isResending
+                                  ? 'Đang gửi...'
+                                  : 'Gửi lại mã'}
                         </button>
                     </div>
+                    {otpLockSeconds > 0 && (
+                        <p className="mt-2 text-xs font-semibold text-red-600" role="status">
+                            Tạm khóa nhập OTP. Bạn có thể thử lại sau {formatTime(otpLockSeconds)}.
+                        </p>
+                    )}
                 </div>
 
                 {/* New Password */}
@@ -354,12 +380,18 @@ const ResetPasswordForm = ({ onSwitchMode, direction }) => {
 
                 <button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={isLoading || otpLockSeconds > 0}
                     className={`w-full py-3 cursor-pointer rounded-xl font-bold text-white transition-all shadow-lg ${
-                        isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-500 shadow-red-200'
+                        isLoading || otpLockSeconds > 0
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-red-600 hover:bg-red-500 shadow-red-200'
                     }`}
                 >
-                    {isLoading ? 'Đang cập nhật...' : 'Đổi Mật Khẩu'}
+                    {otpLockSeconds > 0
+                        ? `Tạm khóa ${formatTime(otpLockSeconds)}`
+                        : isLoading
+                          ? 'Đang cập nhật...'
+                          : 'Đổi Mật Khẩu'}
                 </button>
             </form>
 

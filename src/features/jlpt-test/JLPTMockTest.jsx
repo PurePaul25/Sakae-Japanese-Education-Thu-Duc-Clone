@@ -48,6 +48,7 @@ const JLPTMockTest = () => {
               No /answer call on option click.
             */}
             <Route path="practice/exam/set/:setId" element={<PracticeSetExamView />} />
+            <Route path="practice/exam/passage/:passageId" element={<PracticeSetExamView />} />
 
             {/*
               Practice — result page (set-based).
@@ -55,6 +56,7 @@ const JLPTMockTest = () => {
               Reads backend result from localStorage (setResultKey).
             */}
             <Route path="practice/result/set/:setId" element={<PracticeSetResultView />} />
+            <Route path="practice/result/passage/:passageId" element={<PracticeSetResultView />} />
         </Routes>
     );
 };
