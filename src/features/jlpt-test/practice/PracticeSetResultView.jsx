@@ -27,7 +27,7 @@ import {
     FaBookOpen,
     FaLightbulb,
 } from 'react-icons/fa';
-import { Grid3x3, X, CheckCircle2, XCircle } from 'lucide-react';
+import { Grid3x3, X, CheckCircle2, XCircle, Languages } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import SEO from '../../../hooks/useSEO';
@@ -102,6 +102,7 @@ const PracticeSetResultView = () => {
     const [reviewIndex, setReviewIndex] = useState(0);
     const [showAll, setShowAll] = useState(false);
     const [showPaletteModal, setShowPaletteModal] = useState(false);
+    const [translatedPassages, setTranslatedPassages] = useState({});
 
     // ── No result ─────────────────────────────────────────────────────────────
     if (!resultData || !questions.length) {
@@ -132,9 +133,7 @@ const PracticeSetResultView = () => {
         localStorage.removeItem(resultKey);
 
         navigate(
-            isPassage
-                ? `/thi-thu-JLPT/practice/exam/passage/${examId}`
-                : `/thi-thu-JLPT/practice/exam/set/${examId}`,
+            isPassage ? `/thi-thu-JLPT/practice/exam/passage/${examId}` : `/thi-thu-JLPT/practice/exam/set/${examId}`,
         );
     };
 
@@ -157,6 +156,15 @@ const PracticeSetResultView = () => {
         const rec = resultMap[q.id]; // { selectedOptionId, correct, correctOptionId, explanation }
         const isCorrect = rec?.correct === true;
         const isWrong = rec?.correct === false;
+        const passage = {
+            ...(resultData.readingPassage ?? {}),
+            ...(rec?.readingPassage ?? {}),
+            ...(q.readingPassage ?? {}),
+        };
+        const passageKey = passage.id || q.id;
+        const showTranslation = translatedPassages[passageKey] === true;
+        const hasPassage = Boolean(passage.passage);
+        const hasTranslation = Boolean(passage.passageTranslation);
 
         return (
             <div
@@ -165,7 +173,7 @@ const PracticeSetResultView = () => {
             >
                 {/* Header câu hỏi */}
                 <div className="flex items-center justify-between gap-3 mb-4">
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2.5 min-w-0">
                         <span
                             className={`px-3.5 py-1.5 rounded-xl font-black text-sm flex items-center gap-1.5 shadow-2xs ${
                                 isCorrect
@@ -186,6 +194,30 @@ const PracticeSetResultView = () => {
                         >
                             {isCorrect ? 'Trả lời đúng' : isWrong ? 'Trả lời sai' : 'Chưa chọn đáp án'}
                         </span>
+                        {hasTranslation && (
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setTranslatedPassages((prev) => ({
+                                        ...prev,
+                                        [passageKey]: !prev[passageKey],
+                                    }))
+                                }
+                                aria-label={showTranslation ? 'Hiển thị đoạn tiếng Nhật' : 'Dịch đoạn văn'}
+                                aria-pressed={showTranslation}
+                                title={showTranslation ? 'Hiển thị đoạn tiếng Nhật' : 'Dịch đoạn văn'}
+                                className={`inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-xl border px-2.5 text-xs font-bold transition-colors sm:px-3 ${
+                                    showTranslation
+                                        ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
+                                        : 'border-gray-200 bg-white text-gray-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700'
+                                }`}
+                            >
+                                <Languages size={16} />
+                                <span className="hidden sm:inline">
+                                    {showTranslation ? 'Xem bản gốc' : 'Dịch đoạn'}
+                                </span>
+                            </button>
+                        )}
                     </div>
 
                     <span className="text-xs font-bold text-gray-400">
@@ -194,21 +226,21 @@ const PracticeSetResultView = () => {
                 </div>
 
                 {/* Đoạn văn đọc hiểu (Reading Passage) nếu có */}
-                {(q.readingPassage || rec?.readingPassage) && (
-                    <div className="bg-blue-50/70 border border-blue-100 rounded-2xl p-4 sm:p-5 mb-4 shadow-2xs">
+                {hasPassage && (
+                    <div className="bg-blue-50/70 border border-blue-100 rounded-2xl p-4 mb-4 shadow-2xs">
                         <div className="flex items-center gap-2 text-blue-700 font-black mb-2 text-sm">
                             <FaBookOpen size={15} />
-                            <span>{(q.readingPassage || rec.readingPassage)?.title || 'Đoạn văn đọc hiểu'}</span>
+                            <span>{passage.title || 'Đoạn văn đọc hiểu'}</span>
                         </div>
-                        {(q.readingPassage || rec?.readingPassage)?.imageUrl && (
+                        {passage.imageUrl && (
                             <ReadingImage
-                                src={(q.readingPassage || rec.readingPassage).imageUrl}
+                                src={passage.imageUrl}
                                 alt="Ảnh minh họa bài đọc"
                                 className="mb-3 max-h-60 w-full rounded-xl border border-blue-100 bg-white p-2"
                             />
                         )}
                         <JlptContentRenderer
-                            content={(q.readingPassage || rec.readingPassage)?.passage}
+                            content={showTranslation ? passage.passageTranslation : passage.passage}
                             className="text-gray-800 text-sm sm:text-base leading-relaxed"
                         />
                     </div>

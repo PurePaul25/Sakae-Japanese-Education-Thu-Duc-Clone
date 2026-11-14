@@ -162,7 +162,7 @@ function Navbar() {
                             setIsMenuOpen(false);
                             setMobileSubmenuOpen(false);
                         }}
-                        className="fixed inset-0 z-40 border-0 bg-black/30 p-0 lg:hidden"
+                        className="fixed inset-0 z-40 border-0 bg-black/60 p-0 lg:hidden"
                     />
                 )}
             </AnimatePresence>
@@ -171,385 +171,385 @@ function Navbar() {
                     isScrolled ? 'bg-white shadow-md' : 'bg-white/70'
                 }`}
             >
-            <div className="max-w-7xl mx-auto flex items-center justify-between px-3">
-                {/* Logo */}
-                <div className="flex items-center gap-2">
-                    <Link to="/">
-                        <img src={ASSETS.LOGO} alt="Sakae Logo" className="h-[70px]" />
-                    </Link>
-                </div>
+                <div className="max-w-7xl mx-auto flex items-center justify-between px-3">
+                    {/* Logo */}
+                    <div className="flex items-center gap-2">
+                        <Link to="/">
+                            <img src={ASSETS.LOGO} alt="Sakae Logo" className="h-[70px]" />
+                        </Link>
+                    </div>
 
-                {/* Menu */}
-                <nav className="hidden lg:flex relative text-gray-700 font-medium h-[70px]">
-                    {menuItems.map((item, index) =>
-                        item.children ? (
-                            <div
-                                key={item.label}
-                                ref={(el) => (navItemsRef.current[index] = el)}
-                                className="relative h-full flex items-center group cursor-pointer px-5"
-                            >
-                                <span
-                                    className={`flex items-center gap-1 transition-colors duration-300 ease-in-out group-hover:text-red-600 ${
-                                        item.children.some((child) => child.href === location.pathname)
-                                            ? 'text-red-600'
-                                            : ''
+                    {/* Menu */}
+                    <nav className="hidden lg:flex relative text-gray-700 font-medium h-[70px]">
+                        {menuItems.map((item, index) =>
+                            item.children ? (
+                                <div
+                                    key={item.label}
+                                    ref={(el) => (navItemsRef.current[index] = el)}
+                                    className="relative h-full flex items-center group cursor-pointer px-5"
+                                >
+                                    <span
+                                        className={`flex items-center gap-1 transition-colors duration-300 ease-in-out group-hover:text-red-600 ${
+                                            item.children.some((child) => child.href === location.pathname)
+                                                ? 'text-red-600'
+                                                : ''
+                                        }`}
+                                    >
+                                        {item.label}
+                                        <FiChevronDown className="transition-transform duration-300 group-hover:rotate-180" />
+                                    </span>
+                                    {/* Dropdown */}
+                                    <div className="absolute top-full left-0 w-48 bg-white shadow-lg rounded-md overflow-hidden transition-all duration-300 opacity-0 invisible group-hover:opacity-100 group-hover:visible transform origin-top scale-75 -translate-y-2 group-hover:translate-y-0 group-hover:scale-100 border-1 border-gray-200">
+                                        {item.children.map((child) => (
+                                            <Link
+                                                key={child.label}
+                                                to={child.href}
+                                                className="block px-4 py-3 hover:bg-red-50 hover:text-red-700 hover:font-semibold transition-all text-gray-700 text-sm"
+                                            >
+                                                {child.label}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            ) : (
+                                <Link
+                                    key={item.label}
+                                    to={item.href}
+                                    ref={(el) => (navItemsRef.current[index] = el)}
+                                    className={`h-full px-5 flex items-center justify-center transition-colors duration-300 ease-in-out ${
+                                        location.pathname === item.href ? 'text-red-600' : 'hover:bg-gray-100'
                                     }`}
                                 >
                                     {item.label}
-                                    <FiChevronDown className="transition-transform duration-300 group-hover:rotate-180" />
-                                </span>
-                                {/* Dropdown */}
-                                <div className="absolute top-full left-0 w-48 bg-white shadow-lg rounded-md overflow-hidden transition-all duration-300 opacity-0 invisible group-hover:opacity-100 group-hover:visible transform origin-top scale-75 -translate-y-2 group-hover:translate-y-0 group-hover:scale-100 border-1 border-gray-200">
-                                    {item.children.map((child) => (
-                                        <Link
-                                            key={child.label}
-                                            to={child.href}
-                                            className="block px-4 py-3 hover:bg-red-50 hover:text-red-700 hover:font-semibold transition-all text-gray-700 text-sm"
-                                        >
-                                            {child.label}
-                                        </Link>
-                                    ))}
-                                </div>
-                            </div>
-                        ) : (
-                            <Link
-                                key={item.label}
-                                to={item.href}
-                                ref={(el) => (navItemsRef.current[index] = el)}
-                                className={`h-full px-5 flex items-center justify-center transition-colors duration-300 ease-in-out ${
-                                    location.pathname === item.href ? 'text-red-600' : 'hover:bg-gray-100'
-                                }`}
-                            >
-                                {item.label}
-                            </Link>
-                        ),
-                    )}
-                    {/* Gạch chân di chuyển */}
-                    <span
-                        className="absolute bottom-0 h-1 bg-red-600 rounded-full transition-all duration-300 ease-in-out"
-                        style={{
-                            ...underlineStyle,
-                        }}
-                    />
-                </nav>
+                                </Link>
+                            ),
+                        )}
+                        {/* Gạch chân di chuyển */}
+                        <span
+                            className="absolute bottom-0 h-1 bg-red-600 rounded-full transition-all duration-300 ease-in-out"
+                            style={{
+                                ...underlineStyle,
+                            }}
+                        />
+                    </nav>
 
-                {/* Tìm kiếm */}
-                <div className="hidden sm:block">
-                    <SearchBar />
-                </div>
-
-                {/* Nút đăng ký + ngôn ngữ + user + hamburger */}
-                <div className="flex items-center gap-3 md:gap-4">
-                    {/* Nút đăng ký học (luôn hiển thị) */}
-                    <Link
-                        to="/khoa-hoc-tieng-nhat"
-                        className="hidden md:flex items-center gap-1 cursor-pointer bg-red-600 text-white py-2 px-3 rounded-md hover:bg-red-700 transition duration-200 ease-out"
-                    >
-                        Đăng ký học
-                    </Link>
-
-                    {/* Nút đăng nhập (desktop) */}
-                    {!user && (
-                        <button
-                            onClick={handleLoginClick}
-                            disabled={isLoggingIn}
-                            className="hidden md:flex items-center gap-2 cursor-pointer text-gray-700 hover:text-red-600 transition duration-200 ease-out disabled:opacity-70"
-                        >
-                            {isLoggingIn ? (
-                                <motion.div
-                                    animate={{ rotate: 360 }}
-                                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                                >
-                                    <AiOutlineLoading3Quarters size={18} />
-                                </motion.div>
-                            ) : (
-                                'Đăng nhập'
-                            )}
-                        </button>
-                    )}
-
-                    {/* Nút đăng nhập (mobile) */}
-                    {!user && (
-                        <button
-                            onClick={handleLoginClick}
-                            disabled={isLoggingIn}
-                            className="md:hidden flex items-center gap-1 cursor-pointer text-gray-700 hover:text-red-600 transition duration-200 ease-out text-sm disabled:opacity-70"
-                        >
-                            {isLoggingIn ? (
-                                <motion.div
-                                    animate={{ rotate: 360 }}
-                                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                                >
-                                    <AiOutlineLoading3Quarters size={16} />
-                                </motion.div>
-                            ) : (
-                                'Đăng nhập'
-                            )}
-                        </button>
-                    )}
-
-                    {/* Chọn ngôn ngữ */}
-                    <div ref={dropdownRef} className="relative text-sm z-10">
-                        <button
-                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                            className="flex items-center gap-2 cursor-pointer rounded border border-gray-300 py-2 pl-3 pr-3 bg-white focus:outline-none focus:ring-1 focus:ring-red-500 transition duration-200 ease-out"
-                        >
-                            <img src={selectedLang.icon} alt={selectedLang.label} className="w-5 h-5" />
-                            <svg
-                                className={`w-4 h-4 transition-transform duration-200 ease-out ${
-                                    isDropdownOpen ? 'rotate-180' : ''
-                                }`}
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M19 9l-7 7-7-7"
-                                ></path>
-                            </svg>
-                        </button>
-
-                        <motion.div
-                            initial={{ opacity: 0, y: -8 }}
-                            animate={isDropdownOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: -8 }}
-                            transition={{ duration: 0.15, ease: 'easeOut' }}
-                            className={`absolute right-0 mt-2 w-40 origin-top-right bg-white rounded-md shadow-lg border border-gray-200 ${
-                                isDropdownOpen ? 'visible' : 'invisible'
-                            }`}
-                        >
-                            <ul className="py-1">
-                                {languages.map((lang) => (
-                                    <li
-                                        key={lang.code}
-                                        onClick={() => handleLangSelect(lang)}
-                                        className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                    >
-                                        <img src={lang.icon} alt={lang.label} className="w-5 h-5" />
-                                        <span>{lang.label}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </motion.div>
+                    {/* Tìm kiếm */}
+                    <div className="hidden sm:block">
+                        <SearchBar />
                     </div>
 
-                    {/* User Dropdown (khi đã login) */}
-                    {user && (
-                        <div ref={userDropdownRef} className="relative text-sm z-20">
-                            {/* Desktop version - avatar + arrow only */}
+                    {/* Nút đăng ký + ngôn ngữ + user + hamburger */}
+                    <div className="flex items-center gap-3 md:gap-4">
+                        {/* Nút đăng ký học (luôn hiển thị) */}
+                        <Link
+                            to="/khoa-hoc-tieng-nhat"
+                            className="hidden md:flex items-center gap-1 cursor-pointer bg-red-600 text-white py-2 px-3 rounded-md hover:bg-red-700 transition duration-200 ease-out"
+                        >
+                            Đăng ký học
+                        </Link>
+
+                        {/* Nút đăng nhập (desktop) */}
+                        {!user && (
                             <button
-                                onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                                className="hidden md:flex items-center gap-2 cursor-pointer rounded-full border border-gray-300 py-1 pl-1 pr-2 bg-white hover:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition duration-200 ease-out"
+                                onClick={handleLoginClick}
+                                disabled={isLoggingIn}
+                                className="hidden md:flex items-center gap-2 cursor-pointer text-gray-700 hover:text-red-600 transition duration-200 ease-out disabled:opacity-70"
                             >
-                                <img
-                                    src={user.avatar}
-                                    alt={user.fullName}
-                                    className="w-8 h-8 rounded-full border-1 border-gray-200 object-cover"
-                                />
+                                {isLoggingIn ? (
+                                    <motion.div
+                                        animate={{ rotate: 360 }}
+                                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                                    >
+                                        <AiOutlineLoading3Quarters size={18} />
+                                    </motion.div>
+                                ) : (
+                                    'Đăng nhập'
+                                )}
+                            </button>
+                        )}
+
+                        {/* Nút đăng nhập (mobile) */}
+                        {!user && (
+                            <button
+                                onClick={handleLoginClick}
+                                disabled={isLoggingIn}
+                                className="md:hidden flex items-center gap-1 cursor-pointer text-gray-700 hover:text-red-600 transition duration-200 ease-out text-sm disabled:opacity-70"
+                            >
+                                {isLoggingIn ? (
+                                    <motion.div
+                                        animate={{ rotate: 360 }}
+                                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                                    >
+                                        <AiOutlineLoading3Quarters size={16} />
+                                    </motion.div>
+                                ) : (
+                                    'Đăng nhập'
+                                )}
+                            </button>
+                        )}
+
+                        {/* Chọn ngôn ngữ */}
+                        <div ref={dropdownRef} className="relative text-sm z-10">
+                            <button
+                                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                className="flex items-center gap-2 cursor-pointer rounded border border-gray-300 py-2 pl-3 pr-3 bg-white focus:outline-none focus:ring-1 focus:ring-red-500 transition duration-200 ease-out"
+                            >
+                                <img src={selectedLang.icon} alt={selectedLang.label} className="w-5 h-5" />
                                 <svg
-                                    className={`w-4 h-4 text-gray-500 transition-transform duration-200 ease-out ${
-                                        isUserDropdownOpen ? 'rotate-180' : ''
+                                    className={`w-4 h-4 transition-transform duration-200 ease-out ${
+                                        isDropdownOpen ? 'rotate-180' : ''
                                     }`}
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
                                 >
                                     <path
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
                                         strokeWidth="2"
                                         d="M19 9l-7 7-7-7"
-                                    />
+                                    ></path>
                                 </svg>
                             </button>
 
-                            {/* Mobile version - icon only button */}
-                            <button
-                                onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                                className="md:hidden flex items-center gap-1 cursor-pointer rounded-full border border-gray-300 py-1 px-1.5 bg-white hover:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition duration-200 ease-out"
-                            >
-                                <img
-                                    src={user.avatar}
-                                    alt={user.fullName}
-                                    className="w-8 h-8 rounded-full border-1 border-gray-200 object-cover"
-                                />
-                                <svg
-                                    className={`w-3 h-3 text-gray-500 transition-transform duration-200 ease-out ${
-                                        isUserDropdownOpen ? 'rotate-180' : ''
-                                    }`}
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M19 9l-7 7-7-7"
-                                    />
-                                </svg>
-                            </button>
-
-                            {/* User Dropdown Menu */}
                             <motion.div
                                 initial={{ opacity: 0, y: -8 }}
-                                animate={isUserDropdownOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: -8 }}
+                                animate={isDropdownOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: -8 }}
                                 transition={{ duration: 0.15, ease: 'easeOut' }}
-                                className={`absolute right-0 mt-2 w-56 origin-top-right bg-white rounded-lg shadow-xl border border-gray-200 ${
-                                    isUserDropdownOpen ? 'visible' : 'invisible'
+                                className={`absolute right-0 mt-2 w-40 origin-top-right bg-white rounded-md shadow-lg border border-gray-200 ${
+                                    isDropdownOpen ? 'visible' : 'invisible'
                                 }`}
                             >
-                                {/* User Info Header */}
-                                <div className="p-3 border-b border-gray-100">
-                                    <p className="font-semibold text-gray-800">
-                                        {user.fullName || user.username || user.email || 'Người dùng'}
-                                    </p>
-                                    <p className="text-xs text-gray-500">{user.email}</p>
-                                </div>
-
-                                {/* Menu Items */}
-                                <ul>
-                                    <li>
-                                        <Link
-                                            to="/profile"
-                                            onClick={() => setIsUserDropdownOpen(false)}
-                                            className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
+                                <ul className="py-1">
+                                    {languages.map((lang) => (
+                                        <li
+                                            key={lang.code}
+                                            onClick={() => handleLangSelect(lang)}
+                                            className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                         >
-                                            <FaUser className="inline mr-1 mb-1" size={16} /> Hồ sơ cá nhân
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            to="/thong-bao-cua-toi"
-                                            onClick={() => setIsUserDropdownOpen(false)}
-                                            className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
-                                        >
-                                            <FaBell className="inline mr-1 mb-1" size={16} /> Thông báo của tôi
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            to="/da-luu"
-                                            onClick={() => setIsUserDropdownOpen(false)}
-                                            className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
-                                        >
-                                            <FaBookmark className="inline mr-1 mb-1" size={16} /> Đã lưu
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            to="/cai-dat"
-                                            onClick={() => setIsUserDropdownOpen(false)}
-                                            className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
-                                        >
-                                            <FaCog className="inline mr-1 mb-1" size={16} /> Cài đặt
-                                        </Link>
-                                    </li>
-                                    <li className="border-t border-gray-100">
-                                        <button
-                                            onClick={handleLogout}
-                                            className="block cursor-pointer w-full text-left px-3 py-2.5 text-gray-700 hover:bg-red-50 rounded-b-lg hover:text-red-600 transition duration-200"
-                                        >
-                                            <FaSignOutAlt className="inline mr-1 mb-1" size={16} /> Đăng xuất
-                                        </button>
-                                    </li>
+                                            <img src={lang.icon} alt={lang.label} className="w-5 h-5" />
+                                            <span>{lang.label}</span>
+                                        </li>
+                                    ))}
                                 </ul>
                             </motion.div>
                         </div>
-                    )}
 
-                    {/* Icon menu mobile */}
-                    <button
-                        onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className="lg:hidden text-gray-700 transition duration-300 cursor-pointer ease-in-out focus:outline-none"
-                    >
-                        <div
-                            className={`transition-all duration-300 transform ${isMenuOpen ? 'rotate-90' : 'rotate-0'}`}
-                        >
-                            {isMenuOpen ? <FiX size={28} /> : <FiMenu size={28} />}
-                        </div>
-                    </button>
-                </div>
-            </div>
-
-            {/* Menu Mobile */}
-            <div
-                className={`lg:hidden transition-all duration-500 overflow-hidden ${
-                    isMenuOpen ? 'max-h-[1000px]' : 'max-h-0'
-                }`}
-            >
-                <div className="flex flex-col items-center pb-4 bg-white shadow-md border-t-2 border-b-1 border-gray-800/20">
-                    {menuItems.map((item) =>
-                        item.children ? (
-                            <div key={item.label} className="w-full flex flex-col items-center">
+                        {/* User Dropdown (khi đã login) */}
+                        {user && (
+                            <div ref={userDropdownRef} className="relative text-sm z-20">
+                                {/* Desktop version - avatar + arrow only */}
                                 <button
-                                    onClick={() => setMobileSubmenuOpen(!mobileSubmenuOpen)}
-                                    className={`w-full py-3 flex items-center justify-center gap-2 transition-colors duration-200 ease-in-out ${
-                                        item.children.some((c) => c.href === location.pathname)
-                                            ? 'bg-red-50 text-red-700 font-semibold'
+                                    onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                                    className="hidden md:flex items-center gap-2 cursor-pointer rounded-full border border-gray-300 py-1 pl-1 pr-2 bg-white hover:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition duration-200 ease-out"
+                                >
+                                    <img
+                                        src={user.avatar}
+                                        alt={user.fullName}
+                                        className="w-8 h-8 rounded-full border-1 border-gray-200 object-cover"
+                                    />
+                                    <svg
+                                        className={`w-4 h-4 text-gray-500 transition-transform duration-200 ease-out ${
+                                            isUserDropdownOpen ? 'rotate-180' : ''
+                                        }`}
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                </button>
+
+                                {/* Mobile version - icon only button */}
+                                <button
+                                    onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                                    className="md:hidden flex items-center gap-1 cursor-pointer rounded-full border border-gray-300 py-1 px-1.5 bg-white hover:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition duration-200 ease-out"
+                                >
+                                    <img
+                                        src={user.avatar}
+                                        alt={user.fullName}
+                                        className="w-8 h-8 rounded-full border-1 border-gray-200 object-cover"
+                                    />
+                                    <svg
+                                        className={`w-3 h-3 text-gray-500 transition-transform duration-200 ease-out ${
+                                            isUserDropdownOpen ? 'rotate-180' : ''
+                                        }`}
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                </button>
+
+                                {/* User Dropdown Menu */}
+                                <motion.div
+                                    initial={{ opacity: 0, y: -8 }}
+                                    animate={isUserDropdownOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: -8 }}
+                                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                                    className={`absolute right-0 mt-2 w-56 origin-top-right bg-white rounded-lg shadow-xl border border-gray-200 ${
+                                        isUserDropdownOpen ? 'visible' : 'invisible'
+                                    }`}
+                                >
+                                    {/* User Info Header */}
+                                    <div className="p-3 border-b border-gray-100">
+                                        <p className="font-semibold text-gray-800">
+                                            {user.fullName || user.username || user.email || 'Người dùng'}
+                                        </p>
+                                        <p className="text-xs text-gray-500">{user.email}</p>
+                                    </div>
+
+                                    {/* Menu Items */}
+                                    <ul>
+                                        <li>
+                                            <Link
+                                                to="/profile"
+                                                onClick={() => setIsUserDropdownOpen(false)}
+                                                className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
+                                            >
+                                                <FaUser className="inline mr-1 mb-1" size={16} /> Hồ sơ cá nhân
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link
+                                                to="/thong-bao-cua-toi"
+                                                onClick={() => setIsUserDropdownOpen(false)}
+                                                className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
+                                            >
+                                                <FaBell className="inline mr-1 mb-1" size={16} /> Thông báo của tôi
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link
+                                                to="/da-luu"
+                                                onClick={() => setIsUserDropdownOpen(false)}
+                                                className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
+                                            >
+                                                <FaBookmark className="inline mr-1 mb-1" size={16} /> Đã lưu
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link
+                                                to="/cai-dat"
+                                                onClick={() => setIsUserDropdownOpen(false)}
+                                                className="block px-3 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200"
+                                            >
+                                                <FaCog className="inline mr-1 mb-1" size={16} /> Cài đặt
+                                            </Link>
+                                        </li>
+                                        <li className="border-t border-gray-100">
+                                            <button
+                                                onClick={handleLogout}
+                                                className="block cursor-pointer w-full text-left px-3 py-2.5 text-gray-700 hover:bg-red-50 rounded-b-lg hover:text-red-600 transition duration-200"
+                                            >
+                                                <FaSignOutAlt className="inline mr-1 mb-1" size={16} /> Đăng xuất
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </motion.div>
+                            </div>
+                        )}
+
+                        {/* Icon menu mobile */}
+                        <button
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            className="lg:hidden text-gray-700 transition duration-300 cursor-pointer ease-in-out focus:outline-none"
+                        >
+                            <div
+                                className={`transition-all duration-300 transform ${isMenuOpen ? 'rotate-90' : 'rotate-0'}`}
+                            >
+                                {isMenuOpen ? <FiX size={28} /> : <FiMenu size={28} />}
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                {/* Menu Mobile */}
+                <div
+                    className={`lg:hidden transition-all duration-500 overflow-hidden ${
+                        isMenuOpen ? 'max-h-[1000px]' : 'max-h-0'
+                    }`}
+                >
+                    <div className="flex flex-col items-center pb-4 bg-white shadow-md border-t-2 border-b-1 border-gray-800/20">
+                        {menuItems.map((item) =>
+                            item.children ? (
+                                <div key={item.label} className="w-full flex flex-col items-center">
+                                    <button
+                                        onClick={() => setMobileSubmenuOpen(!mobileSubmenuOpen)}
+                                        className={`w-full py-3 flex items-center justify-center gap-2 transition-colors duration-200 ease-in-out ${
+                                            item.children.some((c) => c.href === location.pathname)
+                                                ? 'bg-red-50 text-red-700 font-semibold'
+                                                : 'hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        {item.label}
+                                        <FiChevronDown
+                                            className={`transition-transform duration-300 ${
+                                                mobileSubmenuOpen ? 'rotate-180' : ''
+                                            }`}
+                                        />
+                                    </button>
+                                    <div
+                                        className={`w-full bg-gray-100 overflow-hidden transition-all duration-300 ease-in-out ${
+                                            mobileSubmenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                                        }`}
+                                    >
+                                        {item.children.map((child) => (
+                                            <Link
+                                                key={child.label}
+                                                to={child.href}
+                                                onClick={() => setIsMenuOpen(false)}
+                                                className={`block w-full py-3 text-center text-sm text-gray-600 hover:text-red-600 ${
+                                                    location.pathname === child.href ? 'text-red-600 font-medium' : ''
+                                                }`}
+                                            >
+                                                {child.label}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            ) : (
+                                <Link
+                                    key={item.label}
+                                    to={item.href}
+                                    onClick={() => setIsMenuOpen(false)} // Đóng menu khi chọn
+                                    className={`h-full w-full py-3 flex items-center justify-center transition-colors duration-200 ease-in-out ${
+                                        location.pathname === item.href
+                                            ? 'bg-red-100 text-red-700 font-semibold'
                                             : 'hover:bg-gray-100'
                                     }`}
                                 >
                                     {item.label}
-                                    <FiChevronDown
-                                        className={`transition-transform duration-300 ${
-                                            mobileSubmenuOpen ? 'rotate-180' : ''
-                                        }`}
-                                    />
-                                </button>
-                                <div
-                                    className={`w-full bg-gray-100 overflow-hidden transition-all duration-300 ease-in-out ${
-                                        mobileSubmenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-                                    }`}
-                                >
-                                    {item.children.map((child) => (
-                                        <Link
-                                            key={child.label}
-                                            to={child.href}
-                                            onClick={() => setIsMenuOpen(false)}
-                                            className={`block w-full py-3 text-center text-sm text-gray-600 hover:text-red-600 ${
-                                                location.pathname === child.href ? 'text-red-600 font-medium' : ''
-                                            }`}
-                                        >
-                                            {child.label}
-                                        </Link>
-                                    ))}
-                                </div>
+                                </Link>
+                            ),
+                        )}
+                        <div className="flex flex-col items-center w-full pt-4 border-t-2 border-gray-800/20  md:hidden">
+                            <div className="block sm:hidden mb-4">
+                                <SearchBar setIsMenuOpen={setIsMenuOpen} />
                             </div>
-                        ) : (
-                            <Link
-                                key={item.label}
-                                to={item.href}
-                                onClick={() => setIsMenuOpen(false)} // Đóng menu khi chọn
-                                className={`h-full w-full py-3 flex items-center justify-center transition-colors duration-200 ease-in-out ${
-                                    location.pathname === item.href
-                                        ? 'bg-red-100 text-red-700 font-semibold'
-                                        : 'hover:bg-gray-100'
-                                }`}
-                            >
-                                {item.label}
-                            </Link>
-                        ),
-                    )}
-                    <div className="flex flex-col items-center w-full pt-4 border-t-2 border-gray-800/20  md:hidden">
-                        <div className="block sm:hidden mb-4">
-                            <SearchBar setIsMenuOpen={setIsMenuOpen} />
-                        </div>
-                        <div className="my-1">
-                            <Link
-                                to="/khoa-hoc-tieng-nhat"
-                                className=" bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200 cursor-pointer"
-                                onClick={() => setIsMenuOpen(false)}
-                            >
-                                Đăng ký học
-                            </Link>
+                            <div className="my-1">
+                                <Link
+                                    to="/khoa-hoc-tieng-nhat"
+                                    className=" bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200 cursor-pointer"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    Đăng ký học
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
             </header>
         </>
     );

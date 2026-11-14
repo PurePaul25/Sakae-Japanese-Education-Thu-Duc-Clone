@@ -210,10 +210,14 @@ const PracticeSetExamView = () => {
 
     // ── Fetch set on mount ───────────────────────────────────────────────────
     useEffect(() => {
+        let isActive = true;
+
         if (!examId) {
             setFetchError(isPassage ? 'Không tìm thấy bài đọc.' : 'Không tìm thấy bộ đề.');
             setFetchLoading(false);
-            return;
+            return () => {
+                isActive = false;
+            };
         }
 
         // Restore saved state (mid-session reload)
@@ -237,11 +241,14 @@ const PracticeSetExamView = () => {
                 setCurrentIndex(saved.lastIndex);
             }
             setFetchLoading(false);
-            return;
+            return () => {
+                isActive = false;
+            };
         }
 
         (isPassage ? getReadingPassage(examId) : getPracticeSet(examId))
             .then((data) => {
+                if (!isActive) return;
                 setSetInfo(data);
                 const t = calcExamTime(data.questions.length);
                 const suggestedDuration = Math.ceil(t / 60);
@@ -250,6 +257,7 @@ const PracticeSetExamView = () => {
                 timeLeftRef.current = null;
             })
             .catch((err) => {
+                if (!isActive) return;
                 if (err?.response?.status === 401) {
                     setFetchError('Bạn cần đăng nhập để luyện tập.');
                 } else if (err?.response?.status === 404) {
@@ -262,7 +270,13 @@ const PracticeSetExamView = () => {
                     setFetchError('Không thể tải đề. Vui lòng thử lại.');
                 }
             })
-            .finally(() => setFetchLoading(false));
+            .finally(() => {
+                if (isActive) setFetchLoading(false);
+            });
+
+        return () => {
+            isActive = false;
+        };
     }, [examId, isPassage, stateKey]);
 
     // ── Timer (Tối ưu chu kỳ ghi đĩa để tránh giật lag) ────────────────────────
@@ -630,7 +644,7 @@ const PracticeSetExamView = () => {
             {/* ── Main Layout Container ── */}
             <main
                 className={`mx-auto px-4 sm:px-6 pt-[140px] sm:pt-[120px] pb-10 w-full transition-all ${
-                    currentQuestion.readingPassage ? 'max-w-[1600px]' : 'max-w-6xl'
+                    currentQuestion.readingPassage ? 'max-w-[1500px]' : 'max-w-6xl'
                 }`}
             >
                 {/* Khi có bài đọc hiểu (Reading Passage): Chia 2 cột ngang có divider kéo chiều rộng trên máy tính */}
