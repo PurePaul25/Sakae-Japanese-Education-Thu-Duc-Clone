@@ -534,8 +534,8 @@ const SetFormModal = ({ editSet, onClose, onSaved, show }) => {
                             role="switch"
                             aria-checked={form.isActive}
                             onClick={() => setForm((f) => ({ ...f, isActive: !f.isActive }))}
-                            className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 ${
-                                form.isActive ? 'bg-emerald-500 dark:bg-emerald-600' : 'bg-slate-300 dark:bg-slate-600'
+                            className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 ${
+                                form.isActive ? 'bg-red-500 dark:bg-red-600' : 'bg-slate-300 dark:bg-slate-600'
                             }`}
                             aria-label={form.isActive ? 'Đang kích hoạt' : 'Đang vô hiệu hóa'}
                         >

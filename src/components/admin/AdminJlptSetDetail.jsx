@@ -15,8 +15,7 @@ import {
     Check,
     Circle,
     X,
-    ToggleLeft,
-    ToggleRight,
+    EyeOff,
     RefreshCw,
     Trash2,
     CheckSquare,
@@ -40,6 +39,10 @@ import { normalizeJlptWhitespace } from '../../utils/jlptContentUtil';
 // ─── Constants ────────────────────────────────────────────────────────────────
 const OPTION_LABELS = ['A', 'B', 'C', 'D'];
 const MODAL_DURATION = 300;
+const isValidOrder = (value) => {
+    const order = Number(value);
+    return String(value).trim() !== '' && Number.isInteger(order) && order >= 1;
+};
 
 const LEVEL_COLORS = {
     N5: 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800',
@@ -152,7 +155,7 @@ const QuestionFormModal = ({ editQuestion, set, onClose, onSaved, show }) => {
         content: '',
         explanation: '',
         isActive: true,
-        order: 0,
+        order: 1,
         options: EMPTY_OPTIONS,
     });
     const [errors, setErrors] = useState({});
@@ -167,7 +170,7 @@ const QuestionFormModal = ({ editQuestion, set, onClose, onSaved, show }) => {
                     content: editQuestion.content ?? '',
                     explanation: editQuestion.explanation ?? '',
                     isActive: editQuestion.isActive ?? true,
-                    order: editQuestion.order ?? 0,
+                    order: editQuestion.order ?? 1,
                     options: opts.map((o, i) => ({
                         content: o.content ?? '',
                         isCorrect: o.isCorrect ?? false,
@@ -179,7 +182,7 @@ const QuestionFormModal = ({ editQuestion, set, onClose, onSaved, show }) => {
                     content: '',
                     explanation: '',
                     isActive: true,
-                    order: 0,
+                    order: 1,
                     options: [...EMPTY_OPTIONS.map((o) => ({ ...o }))],
                 });
             }
@@ -200,6 +203,9 @@ const QuestionFormModal = ({ editQuestion, set, onClose, onSaved, show }) => {
         if (!normalizeJlptWhitespace(form.content)) {
             next.content = 'Vui lòng nhập nội dung câu hỏi.';
         }
+        if (!isValidOrder(form.order)) {
+            next.order = 'Thứ tự phải là số nguyên từ 1 trở lên.';
+        }
         form.options.forEach((o, i) => {
             if (!o.content.trim()) next[`opt${i}`] = `Nhập nội dung lựa chọn ${OPTION_LABELS[i]}.`;
         });
@@ -219,7 +225,7 @@ const QuestionFormModal = ({ editQuestion, set, onClose, onSaved, show }) => {
                 content: normalizeJlptWhitespace(form.content),
                 explanation: normalizeJlptWhitespace(form.explanation),
                 isActive: form.isActive,
-                order: parseInt(form.order, 10) || 0,
+                order: Number(form.order),
                 options: form.options.map((o) => ({
                     content: o.content.trim(),
                     isCorrect: o.isCorrect,
@@ -340,26 +346,45 @@ const QuestionFormModal = ({ editQuestion, set, onClose, onSaved, show }) => {
                             </label>
                             <input
                                 type="number"
-                                min={0}
+                                min={1}
+                                step={1}
                                 value={form.order}
-                                onChange={(e) => setForm((f) => ({ ...f, order: e.target.value }))}
-                                className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-400 transition"
-                                placeholder="0"
+                                onChange={(e) => {
+                                    const { value } = e.target;
+                                    setForm((f) => ({ ...f, order: value }));
+                                    setErrors((previous) => ({
+                                        ...previous,
+                                        order: isValidOrder(value) ? '' : 'Thứ tự phải là số nguyên từ 1 trở lên.',
+                                    }));
+                                }}
+                                aria-invalid={Boolean(errors.order)}
+                                className={`w-full px-3 py-2 text-sm border rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 transition ${
+                                    errors.order
+                                        ? 'border-red-400 focus:ring-red-400'
+                                        : 'border-slate-200 dark:border-slate-700 focus:ring-red-400'
+                                }`}
+                                placeholder="1"
                             />
+                            {errors.order && <p className="text-xs text-red-500 mt-1">{errors.order}</p>}
                         </div>
                         <div className="flex items-end pb-1">
                             <div className="flex items-center justify-between w-full p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
                                 <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Kích hoạt</p>
                                 <button
                                     type="button"
+                                    role="switch"
+                                    aria-checked={form.isActive}
+                                    aria-label="Kích hoạt"
                                     onClick={() => setForm((f) => ({ ...f, isActive: !f.isActive }))}
-                                    className="cursor-pointer"
+                                    className={`relative h-6 w-11 shrink-0 cursor-pointer overflow-hidden rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 ${
+                                        form.isActive ? 'bg-red-600' : 'bg-slate-300 dark:bg-slate-700'
+                                    }`}
                                 >
-                                    {form.isActive ? (
-                                        <ToggleRight size={32} className="text-green-500" />
-                                    ) : (
-                                        <ToggleLeft size={32} className="text-slate-400" />
-                                    )}
+                                    <span
+                                        className={`absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ease-out ${
+                                            form.isActive ? 'translate-x-5' : 'translate-x-0'
+                                        }`}
+                                    />
                                 </button>
                             </div>
                         </div>
@@ -405,18 +430,18 @@ const DeleteQuestionModal = ({ question, onConfirm, onCancel, loading, show }) =
                 className={`absolute inset-0 bg-black/70 transition-opacity duration-${MODAL_DURATION} ${show ? 'opacity-100' : 'opacity-0'}`}
             />
             <div
-                className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md p-6 transform transition-all duration-${MODAL_DURATION} ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}
+                className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl p-6 transform transition-all duration-${MODAL_DURATION} ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}
             >
                 <div className="flex flex-col items-center text-center gap-4">
                     <div className="w-14 h-14 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                         <Trash2 size={28} className="text-red-600" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1">
+                        <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">
                             Xóa vĩnh viễn câu hỏi?
                         </h3>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm line-clamp-3">"{question?.content}"</p>
-                        <p className="text-xs text-red-600 dark:text-red-400 mt-2 font-medium">
+                        <p className="text-slate-500 dark:text-slate-400 line-clamp-3">"{question?.content}"</p>
+                        <p className="text-sm text-red-600 dark:text-red-400 mt-2 font-medium">
                             Hành động này sẽ xóa câu hỏi cùng 4 đáp án và không thể hoàn tác.
                         </p>
                     </div>
@@ -465,7 +490,7 @@ const BulkDeleteQuestionModal = ({ count, onConfirm, onCancel, loading, show }) 
                         <Trash2 size={28} className="text-red-600" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1">
+                        <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">
                             Xóa {count} câu hỏi đã chọn?
                         </h3>
                         <p className="text-slate-500 dark:text-slate-400 text-sm">
@@ -517,7 +542,7 @@ const DeleteSetModal = ({ set, onConfirm, onCancel, loading, show }) => {
                         <Trash2 size={32} className="text-red-600" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-1">
+                        <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">
                             Xóa vĩnh viễn bộ đề này?
                         </h3>
                         <p className="text-slate-500 dark:text-slate-400 text-sm">
@@ -572,14 +597,14 @@ const DisableConfirmModal = ({ onConfirm, onCancel, loading, show }) => {
                 className={`absolute inset-0 bg-black/70 transition-opacity duration-${MODAL_DURATION} ${show ? 'opacity-100' : 'opacity-0'}`}
             />
             <div
-                className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md p-6 transform transition-all duration-${MODAL_DURATION} ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}
+                className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl p-6 transform transition-all duration-${MODAL_DURATION} ${show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}
             >
                 <div className="flex flex-col items-center text-center gap-4">
                     <div className="w-14 h-14 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
                         <AlertTriangle size={28} className="text-amber-600" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1">Vô hiệu hóa câu hỏi?</h3>
+                        <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">Vô hiệu hóa câu hỏi?</h3>
                         <p className="text-slate-500 dark:text-slate-400 text-sm">
                             Câu hỏi sẽ bị ẩn khỏi học viên nhưng dữ liệu vẫn được lưu.
                         </p>
@@ -992,7 +1017,7 @@ const AdminJlptSetDetail = ({ setId, onBack }) => {
                                         aria-label="Chọn tất cả câu hỏi"
                                     />
                                 </th>
-                                {['#', 'Nội dung câu hỏi', 'Đáp án đúng', 'Trạng thái'].map((h) => (
+                                {['Thứ tự', 'Nội dung câu hỏi', 'Đáp án đúng', 'Trạng thái'].map((h) => (
                                     <th
                                         key={h}
                                         className="px-4 py-3.5 text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap"
@@ -1026,7 +1051,7 @@ const AdminJlptSetDetail = ({ setId, onBack }) => {
                                     </td>
                                 </tr>
                             ) : (
-                                questions.map((q, idx) => {
+                                questions.map((q) => {
                                     const correctOpt = (q.options ?? []).find((o) => o.isCorrect);
                                     return (
                                         <tr
@@ -1042,7 +1067,9 @@ const AdminJlptSetDetail = ({ setId, onBack }) => {
                                                     aria-label={`Chọn câu hỏi ${q.content}`}
                                                 />
                                             </td>
-                                            <td className="px-4 py-3.5 text-xs text-slate-400 font-mono">{idx + 1}</td>
+                                            <td className="px-4 py-3.5 text-xs text-slate-400 font-mono">
+                                                {q.order ?? '—'}
+                                            </td>
                                             <td className="px-4 py-3.5 max-w-[320px]">
                                                 <div className="font-semibold text-slate-800 dark:text-white truncate">
                                                     <JlptContentRenderer content={q.content} />
@@ -1080,7 +1107,7 @@ const AdminJlptSetDetail = ({ setId, onBack }) => {
                                                         className="p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors cursor-pointer"
                                                         title="Chỉnh sửa"
                                                     >
-                                                        <Pencil size={15} />
+                                                        <Pencil size={17} />
                                                     </button>
                                                     {q.isActive && (
                                                         <button
@@ -1091,7 +1118,7 @@ const AdminJlptSetDetail = ({ setId, onBack }) => {
                                                             className="p-1.5 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors cursor-pointer"
                                                             title="Vô hiệu hóa"
                                                         >
-                                                            <ToggleRight size={15} />
+                                                            <EyeOff size={17} />
                                                         </button>
                                                     )}
                                                     <button
@@ -1102,7 +1129,7 @@ const AdminJlptSetDetail = ({ setId, onBack }) => {
                                                         className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors cursor-pointer"
                                                         title="Xóa vĩnh viễn"
                                                     >
-                                                        <Trash2 size={15} />
+                                                        <Trash2 size={17} />
                                                     </button>
                                                 </div>
                                             </td>
